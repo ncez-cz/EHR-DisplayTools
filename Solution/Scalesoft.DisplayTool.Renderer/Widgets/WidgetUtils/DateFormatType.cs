@@ -10,4 +10,5 @@ public enum DateFormatType
     MinuteHourDayMonthYearTimezone,
     SecondMinuteHourDayMonthYear,
     SecondMinuteHourDayMonthYearTimezone,
+    Timezone, // special format not defined in FHIR for simplified mode
 }
