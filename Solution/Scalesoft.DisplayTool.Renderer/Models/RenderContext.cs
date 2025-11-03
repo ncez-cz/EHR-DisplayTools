@@ -80,7 +80,8 @@ public class RenderContext
     public bool AddRenderedResource(
         XmlDocumentNavigator nav,
         ResourceIdentifier id,
-        [NotNullWhen(false)] out RenderedResourceAddFailReason? failReason
+        [NotNullWhen(false)] out RenderedResourceAddFailReason? failReason,
+        bool isInHideableContext = false
     )
     {
         var resourceIdValuePair = m_resourcesWithIds.FirstOrDefault(x => x.Key.Equals(id));
@@ -99,7 +100,10 @@ public class RenderContext
                 return false;
             }
 
-            m_renderedResources.Add(id);
+            if (!isInHideableContext)
+            {
+                m_renderedResources.Add(id);
+            }
 
             failReason = null;
             return true;

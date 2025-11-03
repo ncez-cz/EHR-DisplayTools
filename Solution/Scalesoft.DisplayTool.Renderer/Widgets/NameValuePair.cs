@@ -14,6 +14,7 @@ public class NameValuePair : Widget
     private readonly NameValuePairSize m_size;
     private readonly NameValuePairStyle m_style;
     private readonly IdentifierSource? m_visualIdSource;
+    private readonly NameValuePairClasses? m_classes;
 
     public NameValuePair(
         IList<Widget> name,
@@ -23,7 +24,8 @@ public class NameValuePair : Widget
         FlexDirection direction = FlexDirection.Row,
         NameValuePairSize size = NameValuePairSize.Regular,
         NameValuePairStyle style =
-            NameValuePairStyle.Initial // ideally, a specific style should be specified as default
+            NameValuePairStyle.Initial, // ideally, a specific style should be specified as default
+        NameValuePairClasses? optionalClasses = null
     )
     {
         m_name = name;
@@ -33,6 +35,7 @@ public class NameValuePair : Widget
         m_size = size;
         m_style = style;
         m_visualIdSource = visualIdSource ?? idSource;
+        m_classes = optionalClasses;
     }
 
     public NameValuePair(
@@ -43,9 +46,10 @@ public class NameValuePair : Widget
         FlexDirection direction = FlexDirection.Row,
         NameValuePairSize size = NameValuePairSize.Regular,
         NameValuePairStyle style =
-            NameValuePairStyle.Initial // ideally, a specific style should be specified as default
+            NameValuePairStyle.Initial, // ideally, a specific style should be specified as default
+        NameValuePairClasses? optionalClasses = null
     )
-        : this([name], [value], idSource, visualIdSource, direction, size, style)
+        : this([name], [value], idSource, visualIdSource, direction, size, style, optionalClasses)
     {
     }
 
@@ -61,6 +65,7 @@ public class NameValuePair : Widget
             return renderResult.Errors;
         }
 
+
         var nameText = string.Join(string.Empty, m_name.Select(x => renderResult.GetContent(x) ?? string.Empty));
         var valueText = string.Join(string.Empty, m_value.Select(x => renderResult.GetContent(x) ?? string.Empty));
         var viewModel = new ViewModel
@@ -69,6 +74,9 @@ public class NameValuePair : Widget
             ValueContent = valueText,
             Direction = m_direction,
             Size = m_size,
+            CustomClass = m_classes?.OuterClass,
+            NameClass = m_classes?.NameClass,
+            ValueClass = m_classes?.ValueClass,
             Style = m_style,
         };
         HandleIds(context, navigator, viewModel, m_idSource, m_visualIdSource);
@@ -81,6 +89,8 @@ public class NameValuePair : Widget
         public required string NameContent { get; set; }
 
         public required string ValueContent { get; set; }
+        public string? NameClass { get; set; }
+        public string? ValueClass { get; set; }
 
         public required FlexDirection Direction { get; set; }
 
@@ -93,6 +103,13 @@ public class NameValuePair : Widget
     {
         Regular = 1,
         Small = 2,
+    }
+
+    public class NameValuePairClasses
+    {
+        public string? OuterClass { get; set; }
+        public string? NameClass { get; set; }
+        public string? ValueClass { get; set; }
     }
 
     public enum NameValuePairStyle

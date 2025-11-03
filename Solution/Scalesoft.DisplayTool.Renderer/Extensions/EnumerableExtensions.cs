@@ -26,6 +26,22 @@ public static class EnumerableExtensions
         return items.All(source.Contains);
     }
 
+    public static List<T> Flatten<T>(this List<List<T>> source, T? separator = null) where T : class
+    {
+        var result = new List<T>();
+        for (var index = 0; index < source.Count; index++)
+        {
+            var list = source[index];
+            result.AddRange(list);
+            if (separator != null && index < source.Count - 1)
+            {
+                result.Add(separator);
+            }
+        }
+
+        return result;
+    }
+
     public static bool HasAnyOfGroup<T>(this IEnumerable<T> source, string groupName) where T : Enum
     {
         return source

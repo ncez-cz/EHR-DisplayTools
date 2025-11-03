@@ -1,14 +1,17 @@
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Location(XmlDocumentNavigator navigator) : Widget
+public class Location : SequentialResourceBase<Location>, IResourceWidget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator _, IWidgetRenderer renderer, RenderContext context)
+    public static string ResourceType => "Location";
+
+    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
     {
         var headerInfo = new Container([
             new ConstantText("Lokace"),

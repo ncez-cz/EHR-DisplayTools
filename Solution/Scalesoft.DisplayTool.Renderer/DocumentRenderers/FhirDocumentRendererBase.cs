@@ -10,6 +10,7 @@ using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
 using Scalesoft.DisplayTool.Renderer.Validators;
+using Scalesoft.DisplayTool.Renderer.Validators.Signature;
 using Scalesoft.DisplayTool.Renderer.Widgets;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -33,8 +34,9 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
         HtmlToPdfConverter htmlToPdfConverter,
         ICodeTranslator translator,
         Language language,
+        IDocumentSignatureValidationManager documentSignatureValidationManager,
         ILoggerFactory loggerFactory
-    ) : base(documentValidatorProvider, htmlToPdfConverter)
+    ) : base(documentValidatorProvider, htmlToPdfConverter, documentSignatureValidationManager)
     {
         InputFormat = inputFormat;
         m_translator = translator;
@@ -186,12 +188,17 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
             await m_widgetRenderer.WrapWithLayout(renderResult.Content, validationRenderResult.Content, renderMode);
 
         var renderedDocumentContent = await CreateOutputDocumentAsync(fileContent, htmlContent, outputFormat);
+        var errors = renderResult.Errors.Where(x => x.Severity >= ErrorSeverity.Fatal)
+            .Select(x => x.Message ?? x.Kind.ToString()).ToList();
+        if (!string.IsNullOrEmpty(renderedDocumentContent.Error))
+        {
+            errors.Add(renderedDocumentContent.Error);
+        }
 
         var documentResult = new DocumentResult
         {
-            Content = renderedDocumentContent,
-            Errors = renderResult.Errors.Where(x => x.Severity >= ErrorSeverity.Fatal)
-                .Select(x => x.Message ?? x.Kind.ToString()).ToList(),
+            Content = renderedDocumentContent.Content,
+            Errors = errors,
             Warnings = renderResult.Errors.Where(x => x.Severity <= ErrorSeverity.Warning)
                 .Select(x => x.Message ?? x.Kind.ToString()).ToList(),
             IsRenderedSuccessfully = renderResult.MaxSeverity is null or < ErrorSeverity.Fatal,

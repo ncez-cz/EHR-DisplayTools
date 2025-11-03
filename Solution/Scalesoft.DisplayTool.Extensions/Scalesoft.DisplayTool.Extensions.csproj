@@ -15,9 +15,4 @@
         <ProjectReference Include="..\Scalesoft.DisplayTool.Shared\Scalesoft.DisplayTool.Shared.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Localization\CdaCodeLists\DastaCodeLists\" />
-      <Folder Include="Localization\CdaCodeLists\Epsos-Repository\" />
-    </ItemGroup>
-
 </Project>

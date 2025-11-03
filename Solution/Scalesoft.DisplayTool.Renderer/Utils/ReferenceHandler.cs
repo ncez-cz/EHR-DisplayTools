@@ -89,7 +89,8 @@ public static partial class ReferenceHandler
                 new CollapsibleDetail(
                     new ConstantText(referenceTitle),
                     new MultiReference(
-                        navs => contentBuilder(navs.Select(y => new ReferenceNavigatorOrDisplay(y)).ToList()),
+                        navs => contentBuilder(navs.Select(y => new ReferenceNavigatorOrDisplay(y))
+                            .ToList()),
                         $"{referencePath}/f:reference")
                 )
             );
@@ -696,7 +697,7 @@ public static partial class ReferenceHandler
 
             if (contentToDisplay != null)
             {
-                resultAltogether.Add(new TextContainer(TextStyle.Regular, [contentToDisplay]));
+                resultAltogether.Add(new Container([contentToDisplay], ContainerType.Span));
                 if (display != null && idType != null)
                 {
                     resultAltogether.Add(refTypeWidget);
@@ -718,7 +719,7 @@ public static partial class ReferenceHandler
             }
 
             resultSeparatedSemantically.Add(new Container(resultAltogether,
-                optionalClass: "d-inline-flex align-items-center"));
+                optionalClass: "d-inline-flex flex-wrap column-gap-1 align-items-center"));
         }
 
         return new Concat(resultSeparatedSemantically, ", ");

@@ -15,6 +15,18 @@ body {
         --#{$prefix}font-size: 0.75rem;
     }
 
+    // Big font
+    --#{$prefix}big-font-size: 1.75rem;
+    @include media-breakpoint-up(sm) {
+        --#{$prefix}big-font-size: 1.85rem;
+    }
+    @include media-breakpoint-up(md) {
+        --#{$prefix}big-font-size: 1.95rem;
+    }
+    @include media-breakpoint-up(lg) {
+        --#{$prefix}big-font-size: 2.05rem;
+    }
+
     // Font h1
     --#{$prefix}h1-font-size: 1.25rem;
     @include media-breakpoint-up(sm) {

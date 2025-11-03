@@ -2,13 +2,16 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class TaskResource : Widget
+public class TaskResource : ColumnResourceBase<TaskResource>, IResourceWidget
 {
+    public static string ResourceType => "Task";
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,

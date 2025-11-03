@@ -10,6 +10,8 @@ public class Optional : Widget
     private readonly string m_path;
     private readonly Func<XmlDocumentNavigator, IList<Widget>> m_builder;
 
+    private Widget[] m_elseChildren = [];
+
     public Optional(string path, params Widget[] children)
     {
         m_path = path;
@@ -28,6 +30,12 @@ public class Optional : Widget
         m_builder = nav => [builder(nav)];
     }
 
+    public Optional Else(params Widget[] children)
+    {
+        m_elseChildren = children;
+        return this;
+    }
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -40,8 +48,17 @@ public class Optional : Widget
         }
         
         var element = navigator.SelectSingleNode(m_path);
-        return element.Node == null
-            ? RenderResult.NullResult
-            : await m_builder(element).RenderConcatenatedResult(element, renderer, context);
+
+        if (element.Node != null)
+        {
+            return await m_builder(element).RenderConcatenatedResult(element, renderer, context);
+        }
+
+        if (m_elseChildren.Length == 0)
+        {
+            return RenderResult.NullResult;
+        }
+
+        return await m_elseChildren.RenderConcatenatedResult(navigator, renderer, context);
     }
 }

@@ -15,6 +15,7 @@ public class FlexList : Widget
     private readonly IdentifierSource? m_idSource;
     private readonly IdentifierSource? m_visualIdSource;
     private readonly ContainerType m_containerType;
+    private readonly bool m_flexWrap;
 
     public FlexList(
         IEnumerable<Widget> children,
@@ -24,7 +25,8 @@ public class FlexList : Widget
         bool? wrapChildren = false,
         IdentifierSource? idSource = null,
         IdentifierSource? visualIdSource = null,
-        ContainerType containerType = ContainerType.Div
+        ContainerType containerType = ContainerType.Div,
+        bool flexWrap = true
     )
     {
         m_children = children;
@@ -35,6 +37,7 @@ public class FlexList : Widget
         m_idSource = idSource;
         m_visualIdSource = visualIdSource ?? idSource;
         m_containerType = containerType;
+        m_flexWrap = flexWrap;
     }
 
     public override async Task<RenderResult> Render(
@@ -59,6 +62,7 @@ public class FlexList : Widget
             ChildContainerClasses = m_childContainerClasses,
             WrapChildren = m_wrapChildren,
             ContainerType = m_containerType,
+            FlexWrap = m_flexWrap
         };
         HandleIds(context, navigator, viewModel, m_idSource, m_visualIdSource);
         var result = await renderer.RenderList(viewModel);
@@ -73,5 +77,6 @@ public class FlexList : Widget
         public required IEnumerable<string> Children { get; init; }
 
         public ContainerType ContainerType { get; set; } = ContainerType.Div;
+        public bool FlexWrap { get; set; }
     }
 }

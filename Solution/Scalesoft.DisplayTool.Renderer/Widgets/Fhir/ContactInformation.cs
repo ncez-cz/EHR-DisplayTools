@@ -7,7 +7,10 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ContactInformation(string addressPath = "f:address", string telecomPath = "f:telecom") : Widget
+public class ContactInformation(
+    string addressPath = "f:address",
+    string telecomPath = "f:telecom"
+) : Widget
 {
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -15,18 +18,25 @@ public class ContactInformation(string addressPath = "f:address", string telecom
         RenderContext context
     )
     {
+        Widget[] addressContactWidgets =
+        [
+            new Address(addressPath),
+            new FlexList([
+                new ShowContactPoint(telecomPath)
+            ], FlexDirection.Column, flexContainerClasses: string.Empty)
+        ];
+
         List<Widget> contact =
         [
             new If(_ => navigator.EvaluateCondition(addressPath) ||
                         navigator.EvaluateCondition(telecomPath),
-                new PlainBadge(new DisplayLabel(LabelCodes.ContactInformation)), new Row(
-                    [
-                        new If(_ => navigator.EvaluateCondition(addressPath), new Address(addressPath)),
-                        new If(_ => navigator.EvaluateCondition(telecomPath),
-                            new NameValuePair([new DisplayLabel(LabelCodes.Telecom)],
-                                [new ShowContactPoint(telecomPath)], direction: FlexDirection.Column)),
-                    ],
-                    flexContainerClasses: "column-gap-8")),
+                new NameValuePair(
+                    new PlainBadge(new DisplayLabel(LabelCodes.ContactInformation)),
+                    new FlexList(addressContactWidgets, FlexDirection.Column,
+                        flexContainerClasses: "column-gap-6 row-gap-0"),
+                    direction: FlexDirection.Column
+                )
+            ),
         ];
 
         return await contact.RenderConcatenatedResult(navigator, renderer, context);

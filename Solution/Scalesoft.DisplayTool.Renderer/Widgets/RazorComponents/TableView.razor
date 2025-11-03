@@ -1,4 +1,4 @@
-﻿<table id="@Model.Id" data-id="@Model.VisualId" class="table table-bordered @(Model.Striped ? "striped" : string.Empty) @Model.CustomClass">
+﻿<table id="@Model.Id" data-id="@Model.VisualId" class="table dt-table table-bordered @(Model.Striped ? "striped" : string.Empty) @Model.CustomClass">
     @foreach (var row in Model.Rows)
     {
         @((MarkupString)row)

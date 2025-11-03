@@ -47,28 +47,32 @@ public class HumanName(
             new Choose([
                 new When(
                     "(f:given and f:family) or (not(f:text) and (f:family or f:given))",
-                    new If(_ => !unformattedName, new Row([
-                        new If(_ => !hideNominalLetters && navigator.EvaluateCondition("f:prefix"),
-                            new Container([
+                    new If(_ => !unformattedName,
+                        new If(_ => !hideNominalLetters && itemNavigator.EvaluateCondition("f:prefix"),
+                            new NameValuePair(
                                 new PlainBadge(new ConstantText("Titul")),
-                                CreateNamePartWidgetWithWrapper("f:prefix/@value", true)
-                            ])
+                                CreateNamePartWidgetWithWrapper("f:prefix/@value", true),
+                                direction: FlexDirection.Column
+                            )
                         ),
-                        new Container([
+                        new NameValuePair(
                             new PlainBadge(new DisplayLabel(LabelCodes.FamilyName)),
-                            CreateNamePartWidgetWithWrapper("f:family/@value", false)
-                        ]),
-                        new Container([
-                            new PlainBadge(new DisplayLabel(LabelCodes.GivenName)),
-                            CreateNamePartWidgetWithWrapper("f:given/@value", true)
-                        ]),
-                        new If(_ => !hideNominalLetters && navigator.EvaluateCondition("f:suffix"),
-                            new Container([
-                                new PlainBadge(new ConstantText("Titul")),
-                                CreateNamePartWidgetWithWrapper("f:suffix/@value", true)
-                            ])
+                            CreateNamePartWidgetWithWrapper("f:family/@value", false),
+                            direction: FlexDirection.Column
                         ),
-                    ])).Else(
+                        new NameValuePair(
+                            new PlainBadge(new DisplayLabel(LabelCodes.GivenName)),
+                            CreateNamePartWidgetWithWrapper("f:given/@value", true),
+                            direction: FlexDirection.Column
+                        ),
+                        new If(_ => !hideNominalLetters && itemNavigator.EvaluateCondition("f:suffix"),
+                            new NameValuePair(
+                                new PlainBadge(new ConstantText("Titul")),
+                                CreateNamePartWidgetWithWrapper("f:suffix/@value", true, ", "),
+                                direction: FlexDirection.Column
+                            )
+                        )
+                    ).Else(
                         new TextContainer(TextStyle.Bold, [
                             new ConcatBuilder("f:prefix/@value", _ =>
                             [
@@ -88,29 +92,30 @@ public class HumanName(
                             new ConcatBuilder("f:suffix/@value", _ =>
                             [
                                 new Text()
-                            ], " "),
+                            ], ", "),
                         ])
                     )),
             ], new If(_ => unformattedName,
                     new Text("f:text/@value"))
                 .Else(
-                    new Container([
+                    new NameValuePair(
                         new PlainBadge(new ConstantText("Celé jméno")),
-                        CreateNamePartWidgetWithWrapper("f:text/@value", false)
-                    ])
+                        CreateNamePartWidgetWithWrapper("f:text/@value", false),
+                        direction: FlexDirection.Column
+                    )
                 ))
         };
 
         return tree.RenderConcatenatedResult(itemNavigator, renderer, context);
     }
 
-    private Widget CreateNamePartWidgetWithWrapper(string path, bool allowsMultiple)
+    private Widget CreateNamePartWidgetWithWrapper(string path, bool allowsMultiple, string separator = " ")
     {
         var name = new If(_ => allowsMultiple,
             new ConcatBuilder(path, _ =>
             [
                 new Text()
-            ], " ")
+            ], separator)
         ).Else(new Text(path));
 
         return

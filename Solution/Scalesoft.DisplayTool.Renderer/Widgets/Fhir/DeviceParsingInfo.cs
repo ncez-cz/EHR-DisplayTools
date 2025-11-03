@@ -6,8 +6,7 @@ public static class DeviceParsingInfo
     [
         new Optional("f:manufacturer", new NameValuePair([new ConstantText("Výrobce")], [new Text("@value")])),
         new Condition("f:deviceName", new NameValuePair([new ConstantText("Název")],
-            [new CommaSeparatedBuilder("f:deviceName", _ => [new Optional("f:name/@value", new Text())]),],
-            idSource: new IdentifierSource())),
+            [new CommaSeparatedBuilder("f:deviceName", _ => [new Optional("f:name/@value", new Text())]),])),
         new Optional("f:modelNumber",
             new NameValuePair([new ConstantText("Číslo modelu")], [new Text("@value")])),
         new Optional("f:serialNumber",
@@ -16,7 +15,7 @@ public static class DeviceParsingInfo
             new NameValuePair([new ConstantText("Specializace")], [
                 new CommaSeparatedBuilder("f:specialization",
                     _ => [new Optional("f:systemType", new CodeableConcept())]),
-            ], idSource: new IdentifierSource())
+            ])
         ),
         new Optional("f:expirationDate",
             new NameValuePair([new ConstantText("Datum expirace")], [new ShowDateTime(),])),

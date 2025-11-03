@@ -3,6 +3,7 @@ using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Person;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -151,12 +152,7 @@ public class ImmunizationRow(
                 ),
                 new If(_ => infrequentOptions.Contains(Immunizations.InfrequentPropertiesPaths.Location),
                     new TableCell([
-                        new Optional("f:location",
-                            ShowSingleReference.WithDefaultDisplayHandler(x =>
-                            [
-                                new ChangeContext(x,
-                                    new Container([new LocationCompact()], ContainerType.Span, idSource: x))
-                            ]))
+                        new Optional("f:location", new AnyReferenceNamingWidget()),
                     ])
                 ),
                 new If(_ => infrequentOptions.Contains(Immunizations.InfrequentPropertiesPaths.Performer),

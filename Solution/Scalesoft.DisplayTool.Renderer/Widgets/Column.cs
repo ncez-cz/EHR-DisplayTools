@@ -7,6 +7,7 @@ public class Column(
     string? childContainerClasses = null,
     string? flexContainerClasses = null,
     bool? wrapChildren = false,
-    ContainerType containerType = ContainerType.Div
+    ContainerType containerType = ContainerType.Div,
+    bool flexWrap = true
 ) : FlexList(children, FlexDirection.Column, childContainerClasses, flexContainerClasses ?? "gap-0", wrapChildren,
-    containerType: containerType);
+    containerType: containerType, flexWrap: flexWrap);

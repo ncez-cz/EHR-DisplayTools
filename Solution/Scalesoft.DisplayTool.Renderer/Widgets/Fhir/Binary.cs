@@ -1,13 +1,29 @@
-﻿using Scalesoft.DisplayTool.Renderer.Models;
+﻿using JetBrains.Annotations;
+using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Binary(string? width = null, string? height = null, string? altText = null, string? mimeType = null, string? base64data = null, bool onlyContentOrUrl = false) : Widget
+public class Binary(
+    string? width = null,
+    string? height = null,
+    string? altText = null,
+    string? mimeType = null,
+    string? base64data = null,
+    bool onlyContentOrUrl = false
+) : ItemListResourceBase<Binary>, IResourceWidget
 {
+    public static string ResourceType => "Binary";
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+
+    public Binary() : this(null)
+    {
+    }
+    
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,

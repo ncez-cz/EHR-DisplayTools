@@ -247,6 +247,54 @@ public static class ResourceSummaryProvider
             //// Observation - Laboratory Order is skipped - no obvious way to detect it
         }
 
+        // Device
+        if (resource.Node?.Name == "Device" &&
+            resource.EvaluateCondition("f:manufacturer or f:deviceName or f:modelNumber or f:serialNumber"))
+        {
+            if (resource.EvaluateCondition("f:deviceName"))
+            {
+                var deviceNames = resource.SelectAllNodes("f:deviceName/@value")
+                    .Where(x => !string.IsNullOrEmpty(x.Node?.Value)).Select(x => x.Node!.Value).ToArray();
+                if (deviceNames.Length != 0)
+                {
+                    return new ResourceSummaryInfo(resource, new ConstantText(string.Join(", ", deviceNames)));
+                }
+            }
+
+            var display = string.Empty;
+            if (resource.EvaluateCondition("f:manufacturer"))
+            {
+                if (display != string.Empty)
+                {
+                    display += " ";
+                }
+
+                display += resource.SelectSingleNode("f:manufacturer/@value").Node?.Value;
+            }
+
+            if (resource.EvaluateCondition("f:modelNumber"))
+            {
+                if (display != string.Empty)
+                {
+                    display += " ";
+                }
+
+                display += resource.SelectSingleNode("f:modelNumber/@value").Node?.Value;
+            }
+
+            if (resource.EvaluateCondition("f:serialNumber"))
+            {
+                if (display != string.Empty)
+                {
+                    display += " ";
+                }
+
+                display += $"({resource.SelectSingleNode("f:serialNumber/@value").Node?.Value})";
+            }
+
+            return new ResourceSummaryInfo(resource, new ConstantText(display));
+        }
+
         return null;
     }
 

@@ -8,7 +8,11 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
 public class RequestReason(XmlDocumentNavigator nav) : Widget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         Widget result;
 
@@ -18,7 +22,7 @@ public class RequestReason(XmlDocumentNavigator nav) : Widget
                 result = new Conditions([nav], new ConstantText("Problém"), true);
                 break;
             case "Observation":
-                result = new ChangeContext(nav, new ObservationCard( true));
+                result = new ChangeContext(nav, new ObservationCard(true));
                 break;
             case "DiagnosticReport":
                 result = new ChangeContext(nav, new DiagnosticReportCard(true));

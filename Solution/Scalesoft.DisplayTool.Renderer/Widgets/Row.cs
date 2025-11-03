@@ -8,7 +8,8 @@ public class Row(
     string? flexContainerClasses = null,
     bool? wrapChildren = false,
     ContainerType containerType = ContainerType.Div,
-    IdentifierSource? idSource = null
+    IdentifierSource? idSource = null,
+    bool flexWrap = true
 ) : FlexList(
     children,
     FlexDirection.Row,
@@ -16,5 +17,6 @@ public class Row(
     flexContainerClasses,
     wrapChildren,
     containerType: containerType,
-    idSource: idSource
+    idSource: idSource,
+    flexWrap: flexWrap
 );

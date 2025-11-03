@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -55,8 +56,9 @@ public class ShowDateTime(string path = ".") : Widget
                 return Task.FromResult<RenderResult>(navigator.GetFullPath());
             }
 
-            var dateFormatTarget = DateTimeFormats.GetFormat(context.Language, format);
-            return Task.FromResult<RenderResult>(date.ToString(dateFormatTarget));
+            var timeWidgets = DateTimeFormats.GetTimeWidget(date, context.Language, format);
+
+            return timeWidgets.RenderConcatenatedResult(navigator, renderer, context);
         }
 
         return Task.FromResult(new RenderResult(

@@ -10,6 +10,7 @@ using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
 using Scalesoft.DisplayTool.Renderer.Validators;
+using Scalesoft.DisplayTool.Renderer.Validators.Signature;
 using Scalesoft.DisplayTool.Renderer.Widgets;
 using Scalesoft.DisplayTool.Renderer.Widgets.Dasta;
 using Scalesoft.DisplayTool.Shared.Configuration;
@@ -39,8 +40,9 @@ public class DastaDocumentRenderer : SpecificDocumentRendererBase
         ILoggerFactory loggerFactory,
         DastaFhirDocumentConverterClient converterClient,
         FhirXmlDocumentRenderer fhirRenderer,
-        ExternalServicesConfiguration configuration
-    ) : base(documentValidatorProvider, htmlToPdfConverter)
+        ExternalServicesConfiguration configuration,
+        IDocumentSignatureValidationManager documentSignatureValidationManager
+    ) : base(documentValidatorProvider, htmlToPdfConverter, documentSignatureValidationManager)
     {
         m_widgetRenderer = widgetRenderer;
         m_translator = translator;
@@ -133,6 +135,7 @@ public class DastaDocumentRenderer : SpecificDocumentRendererBase
             )
         ];
 
+        // TODO add validation
         var renderResult = await widgets.RenderConcatenatedResult(root, m_widgetRenderer, renderContext);
 
         var validationWidget = new ValidationResult(validationResult);
@@ -141,12 +144,17 @@ public class DastaDocumentRenderer : SpecificDocumentRendererBase
         var htmlContent =
             await m_widgetRenderer.WrapWithLayout(renderResult.Content, validationRenderResult.Content, renderMode);
         var renderedDocumentContent = await CreateOutputDocumentAsync(fileContent, htmlContent, outputFormat);
+        var errors = renderResult.Errors.Where(x => x.Severity >= ErrorSeverity.Fatal)
+            .Select(x => x.Message ?? x.Kind.ToString()).ToList();
+        if (!string.IsNullOrEmpty(renderedDocumentContent.Error))
+        {
+            errors.Add(renderedDocumentContent.Error);
+        }
 
         var documentResult = new DocumentResult
         {
-            Content = renderedDocumentContent,
-            Errors = renderResult.Errors.Where(x => x.Severity >= ErrorSeverity.Fatal)
-                .Select(x => x.Message ?? x.Kind.ToString()).ToList(),
+            Content = renderedDocumentContent.Content,
+            Errors = errors,
             Warnings = renderResult.Errors.Where(x => x.Severity <= ErrorSeverity.Warning)
                 .Select(x => x.Message ?? x.Kind.ToString()).ToList(),
             IsRenderedSuccessfully = renderResult.MaxSeverity is null or < ErrorSeverity.Fatal,

@@ -1,15 +1,21 @@
+using JetBrains.Annotations;
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.MedicationResources.MedicationAdministrationSection;
 
-public class MedicationAdministrationCard : Widget
+public class MedicationAdministrationCard : AlternatingBackgroundColumnResourceBase<MedicationAdministrationCard>,
+    IResourceWidget
 {
+    public static string ResourceType => "MedicationAdministration";
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+    
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -26,9 +32,9 @@ public class MedicationAdministrationCard : Widget
                                 new Container([
                                     new TextContainer(TextStyle.Bold,
                                         [new ChangeContext("f:medicationCodeableConcept", new CodeableConcept())]),
-                                    new ChangeContext(navigator, new EnumIconTooltip("f:status",
+                                    new HideableDetails(new ChangeContext(navigator, new EnumIconTooltip("f:status",
                                         "http://terminology.hl7.org/CodeSystem/medication-admin-status",
-                                        new DisplayLabel(LabelCodes.Status))),
+                                        new DisplayLabel(LabelCodes.Status)))),
                                 ], optionalClass: "d-flex align-items-center"),
                                 navigator
                             )
@@ -46,9 +52,10 @@ public class MedicationAdministrationCard : Widget
                                                         new AnyReferenceNamingWidget(
                                                             customFallbackName: new ConstantText("Lék")),
                                                         optionalClass: "fw-bold"),
-                                                    new ChangeContext(navigator, new EnumIconTooltip("f:status",
-                                                        "http://terminology.hl7.org/CodeSystem/medication-admin-status",
-                                                        new DisplayLabel(LabelCodes.Status))),
+                                                    new HideableDetails(new ChangeContext(navigator,
+                                                        new EnumIconTooltip("f:status",
+                                                            "http://terminology.hl7.org/CodeSystem/medication-admin-status",
+                                                            new DisplayLabel(LabelCodes.Status)))),
                                                 ], optionalClass: "d-flex align-items-center"),
                                                 navigator,
                                                 x.Navigator
@@ -64,9 +71,10 @@ public class MedicationAdministrationCard : Widget
                                                 [
                                                     new ConstantText(x.ReferenceDisplay),
                                                 ]),
-                                                new ChangeContext(navigator, new EnumIconTooltip("f:status",
-                                                    "http://terminology.hl7.org/CodeSystem/medication-admin-status",
-                                                    new DisplayLabel(LabelCodes.Status))),
+                                                new HideableDetails(new ChangeContext(navigator,
+                                                    new EnumIconTooltip("f:status",
+                                                        "http://terminology.hl7.org/CodeSystem/medication-admin-status",
+                                                        new DisplayLabel(LabelCodes.Status)))),
                                             ], optionalClass: "d-flex align-items-center"),
                                             navigator
                                         )
@@ -110,11 +118,11 @@ public class MedicationAdministrationCard : Widget
                     ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary),
                 new If(
                     _ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Request),
-                    new NameValuePair([new ConstantText("Na základě žádosti")],
+                    new HideableDetails(new NameValuePair([new ConstantText("Na základě žádosti")],
                     [
                         ReferenceHandler.BuildAnyReferencesNaming(medicationAdministrationNav, "f:request", context,
                             renderer),
-                    ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary)),
+                    ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary))),
                 new If(_ => infrequentProperties.ContainsAnyOf(MedicationAdministrationInfrequentProperties.Performer,
                         MedicationAdministrationInfrequentProperties.Subject,
                         MedicationAdministrationInfrequentProperties.Device),
@@ -131,12 +139,12 @@ public class MedicationAdministrationCard : Widget
                                     ])
                             ], style: NameValuePair.NameValuePairStyle.Secondary)),
                         new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Subject),
-                            new NameValuePair([new ConstantText("Příjemce")],
+                            new HideableDetails(new NameValuePair([new ConstantText("Příjemce")],
                             [
                                 ReferenceHandler.BuildAnyReferencesNaming(medicationAdministrationNav, "f:subject",
                                     context,
                                     renderer)
-                            ], style: NameValuePair.NameValuePairStyle.Secondary)),
+                            ], style: NameValuePair.NameValuePairStyle.Secondary))),
                         new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Device),
                             new NameValuePair([new ConstantText("Zařízení")],
                             [
@@ -144,30 +152,32 @@ public class MedicationAdministrationCard : Widget
                             ], style: NameValuePair.NameValuePairStyle.Secondary)),
                     ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary)),
                 new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.PartOf),
-                    new NameValuePair([new ConstantText("Související úkony")],
+                    new HideableDetails(new NameValuePair([new ConstantText("Související úkony")],
                     [
                         new CommaSeparatedBuilder("f:partOf", _ => [new AnyReferenceNamingWidget()]),
-                    ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary)),
+                    ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary))),
                 new If(
                     _ => infrequentProperties.HasAnyOfGroup("InfoCell"),
                     new HideableDetails(new NameValuePair([new ConstantText("Doplňujíci informace")], [
-                        infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Identifier)
-                            ? new NameValuePair([new ConstantText("Identifikátor podání")],
-                            [
-                                new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()])
-                            ], style: NameValuePair.NameValuePairStyle.Secondary)
-                            : infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Id)
-                                ? new NameValuePair([new ConstantText("Technický identifikátor podání")],
+                        new HideableDetails(
+                            infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Identifier)
+                                ? new NameValuePair([new ConstantText("Identifikátor podání")],
                                 [
-                                    new TextContainer(TextStyle.Regular, [new Optional("f:id", new Text("@value"))]),
+                                    new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()])
                                 ], style: NameValuePair.NameValuePairStyle.Secondary)
-                                : new NullWidget(),
-                        infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.StatusReason)
+                                : infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Id)
+                                    ? new NameValuePair([new ConstantText("Technický identifikátor podání")],
+                                    [
+                                        new TextContainer(TextStyle.Regular,
+                                            [new Optional("f:id", new Text("@value"))]),
+                                    ], style: NameValuePair.NameValuePairStyle.Secondary)
+                                    : new NullWidget()),
+                        new HideableDetails(infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.StatusReason)
                             ? new NameValuePair([new ConstantText("Důvody stavu")],
                             [
                                 new CommaSeparatedBuilder("f:statusReason", _ => [new CodeableConcept()])
                             ], style: NameValuePair.NameValuePairStyle.Secondary)
-                            : new NullWidget(),
+                            : new NullWidget()),
                         infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.ReasonCode)
                             ? new NameValuePair([new ConstantText("Důvod podání")],
                             [
@@ -182,12 +192,12 @@ public class MedicationAdministrationCard : Widget
                                         _ => [new AnyReferenceNamingWidget()])),
                             ], style: NameValuePair.NameValuePairStyle.Secondary)
                             : new NullWidget(),
-                        infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Category)
+                        new HideableDetails(infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Category)
                             ? new NameValuePair([new ConstantText("Kategorie")],
                             [
                                 new Optional("f:category", new CodeableConcept()),
                             ], style: NameValuePair.NameValuePairStyle.Secondary)
-                            : new NullWidget(),
+                            : new NullWidget()),
                         infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Note)
                             ? new NameValuePair([new ConstantText("Poznámka")],
                             [

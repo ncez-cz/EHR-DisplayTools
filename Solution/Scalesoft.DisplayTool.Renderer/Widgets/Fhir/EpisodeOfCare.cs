@@ -1,13 +1,16 @@
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class EpisodeOfCare : Widget
+public class EpisodeOfCare : SequentialResourceBase<EpisodeOfCare>, IResourceWidget
 {
+    public static string ResourceType => "EpisodeOfCare";
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -41,7 +44,10 @@ public class EpisodeOfCare : Widget
                     new Collapser([new ConstantText("Potíž / Událost")], [],
                     [
                         ShowSingleReference.WithDefaultDisplayHandler(
-                            nav => [new Container([new Conditions([nav], new ConstantText("Problém"))], idSource: nav)],
+                            nav =>
+                            [
+                                new Container([new Conditions([nav], new ConstantText("Problém"))], idSource: nav)
+                            ],
                             "f:condition")
                     ], true),
                 ], separator: new LineBreak(), flexContainerClasses: ""),
@@ -49,18 +55,27 @@ public class EpisodeOfCare : Widget
             // ignore patient
             new Optional("f:managingOrganization",
                 new Collapser([new ConstantText("Organizace - správce")], [],
-                    [ShowSingleReference.WithDefaultDisplayHandler(nav => [new AnyResource(nav, displayResourceType: false)])], true)),
+                [
+                    ShowSingleReference.WithDefaultDisplayHandler(nav =>
+                        [new AnyResource(nav, displayResourceType: false)])
+                ], true)),
             new Condition("f:referralRequest",
-                new Collapser([new ConstantText("Zdrojové žádosti")], [], [new ShowMultiReference("f:referralRequest", displayResourceType: false)],
+                new Collapser([new ConstantText("Zdrojové žádosti")], [],
+                    [new ShowMultiReference("f:referralRequest", displayResourceType: false)],
                     true)),
             new Condition("f:careManager",
                 new Collapser([new ConstantText("Správce péče")], [],
-                    [ShowSingleReference.WithDefaultDisplayHandler(nav => [new AnyResource(nav, displayResourceType: false)], "f:careManager")],
+                    [
+                        ShowSingleReference.WithDefaultDisplayHandler(
+                            nav => [new AnyResource(nav, displayResourceType: false)], "f:careManager")
+                    ],
                     true)),
             new Condition("f:team",
-                new Collapser([new ConstantText("Pečovatelský tým")], [], [new ShowMultiReference("f:team", displayResourceType: false)])),
+                new Collapser([new ConstantText("Pečovatelský tým")], [],
+                    [new ShowMultiReference("f:team", displayResourceType: false)])),
             new Condition("f:account",
-                new Collapser([new ConstantText("Účet")], [], [new ShowMultiReference("f:account", displayResourceType: false)])),
+                new Collapser([new ConstantText("Účet")], [],
+                    [new ShowMultiReference("f:account", displayResourceType: false)])),
         ];
 
         var widgetCollapser = new Collapser([

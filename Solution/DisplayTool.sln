@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scalesoft.DisplayTool.Exten
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scalesoft.DisplayTool.TermxTranslator", "Scalesoft.DisplayTool.TermxTranslator\Scalesoft.DisplayTool.TermxTranslator.csproj", "{D5285318-7030-4901-8003-A2CADC032016}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scalesoft.EZCAII.Client", "Scalesoft.EZCAII.Client\Scalesoft.EZCAII.Client.csproj", "{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{D5285318-7030-4901-8003-A2CADC032016}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5285318-7030-4901-8003-A2CADC032016}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5285318-7030-4901-8003-A2CADC032016}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

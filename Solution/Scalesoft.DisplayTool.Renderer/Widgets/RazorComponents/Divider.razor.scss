@@ -3,46 +3,55 @@
 .section-default .divider {
     --color: var(--#{$prefix}primary-800);
     --background-color: var(--#{$prefix}primary-200);
+    --icons-color: var(--#{$prefix}primary-400);
 }
 
 .section .section-default .divider {
     --color: var(--#{$prefix}gray-700);
     --background-color: var(--#{$prefix}gray-400);
+    --icons-color: var(--#{$prefix}gray-700);
 }
 
 .section-primary .divider {
     --color: var(--#{$prefix}primary-800);
     --background-color: var(--#{$prefix}primary-200);
+    --icons-color: var(--#{$prefix}primary-400);
 }
 
 .section-info .divider {
     --color: var(--#{$prefix}info-800);
     --background-color: var(--#{$prefix}info-200);
+    --icons-color: var(--#{$prefix}info-400);
 }
 
 .section-secondary .divider {
     --color: var(--#{$prefix}secondary-900);
     --background-color: var(--#{$prefix}secondary-300);
+    --icons-color: var(--#{$prefix}secondary-600);
 }
 
 .section-success .divider {
     --color: var(--#{$prefix}success-800);
     --background-color: var(--#{$prefix}success-300);
+    --icons-color: var(--#{$prefix}success-500);
 }
 
 .section-warning .divider {
     --color: black;
     --background-color: var(--#{$prefix}warning-500);
+    --icons-color: var(--#{$prefix}warning-800);
 }
 
 .section-error .divider {
     --color: black;
     --background-color: var(--#{$prefix}danger-500);
+    --icons-color:var(--#{$prefix}danger-700);
 }
 
 .section-gray .divider {
     --color: var(--#{$prefix}gray-700);
     --background-color: var(--#{$prefix}gray-400);
+    --icons-color:var(--#{$prefix}gray-600);
 }
 
 .section .section .divider {
@@ -69,15 +78,17 @@
     justify-content: space-between;
     gap: $spacing03;
     padding-left: $spacing01;
-    padding-right: $spacing03;
-
+    padding-right: $spacing01;
+    border-radius: var(--dt-border-radius-sm);
+    
     .divider-label {
         display: flex;
         align-items: center;
         gap: $spacing02;
         margin-top: 0.2rem;
         margin-bottom: 0.2rem;
-        font-weight: 400;
+        font-weight: 500;
+        text-transform: uppercase;
 
         .divider-label-subtitle {
             font-size: var(--#{$prefix}h6-font-size);
@@ -88,6 +99,26 @@
     .divider-collapse-wrapper {
         display: flex;
         align-items: center;
-        gap: $spacing02;
+        gap: $spacing01;
+    }
+}
+
+.collapser-icon-wrapper {
+    display: flex;
+    padding-left: $spacing01;
+    padding-right: $spacing01;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    height: 1.25rem;
+    width: 1.25rem;
+    border: 1px solid var(--icons-color);
+    border-radius: var(--#{$prefix}border-radius-sm);
+    color: var(--icons-color);
+}
+
+.section .section {
+    .collapser-icon-wrapper {
+        scale: 0.7;
     }
 }

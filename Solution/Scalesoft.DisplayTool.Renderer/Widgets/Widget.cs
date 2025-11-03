@@ -6,14 +6,14 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets;
 
-public abstract class Widget
+public abstract class Widget : IEquatable<Widget>
 {
     protected uint Id { get; } = GenerateId();
 
     private static uint m_idCounter;
     private static uint GenerateId() => Interlocked.Increment(ref m_idCounter);
 
-    protected bool IsNullWidget { get; init; }
+    public bool IsNullWidget { get; protected init; }
 
     public abstract Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -90,7 +90,13 @@ public abstract class Widget
         }
         else
         {
-            ParseAndRegisterId(context, idSource?.UseContextNav == true ? navigator : idSource?.IdNav, viewModel);
+            var usedNavigator = idSource?.UseContextNav == true ? navigator : idSource?.IdNav;
+            if (navigator.IsInHideableContext)
+            {
+                usedNavigator = usedNavigator?.WithHideableContext();
+            }
+
+            ParseAndRegisterId(context, usedNavigator, viewModel);
         }
 
         if (visualIdSource?.ConstantVal != null)
@@ -120,7 +126,7 @@ public abstract class Widget
         RenderedResourceAddFailReason? failReason = null;
         if (ResourceIdentifier.TryFromNavigator(navigator, out var id))
         {
-            if (context.AddRenderedResource(navigator, id, out var resourceAddFailReason))
+            if (context.AddRenderedResource(navigator, id, out var resourceAddFailReason, navigator.IsInHideableContext))
             {
                 viewModel.Id = id.BuildId();
             }
@@ -234,5 +240,25 @@ public abstract class Widget
             Errors.Count > 0 && Errors.Max(e => e.Severity) >= ErrorSeverity.Fatal;
 
         public bool IsNull => Contents.All(x => x.Value == null) && Errors.Count == 0;
+    }
+
+    public bool Equals(Widget? other)
+    {
+        if (other is null) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Id == other.Id;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != GetType()) return false;
+        return Equals((Widget)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return (int)Id;
     }
 }

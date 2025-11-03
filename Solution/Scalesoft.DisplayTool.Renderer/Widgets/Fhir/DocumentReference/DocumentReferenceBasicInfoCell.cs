@@ -7,49 +7,50 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.DocumentReference;
 
 public class DocumentReferenceBasicInfoCell(XmlDocumentNavigator item) : Widget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         var infrequentOptions =
             InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
 
         var participantTableCell = new TableCell(
         [
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Description), 
-                [new NameValuePair(
-                    new ConstantText("Popis"), 
-                    new Text("f:description/@value"))]
-                ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Status), 
-                [new NameValuePair(
-                    new ConstantText("Stav záznamu"), 
-                    new EnumLabel("f:status", "http://hl7.org/fhir/ValueSet/document-reference-status"))]
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Description),
+                new HideableDetails(new NameValuePair(
+                    new ConstantText("Popis"),
+                    new Text("f:description/@value")))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.DocStatus), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
+                new HideableDetails(new NameValuePair(
+                    new ConstantText("Stav záznamu"),
+                    new EnumLabel("f:status", "http://hl7.org/fhir/ValueSet/document-reference-status")))
+            ),
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.DocStatus),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Stav dokumentu"),
-                    new EnumLabel("f:docStatus", "http://hl7.org/fhir/ValueSet/composition-status"))]
+                    new EnumLabel("f:docStatus", "http://hl7.org/fhir/ValueSet/composition-status")))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Type), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Type),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Typ dokumentu"),
-                    new Optional("f:type", new CodeableConcept()))]
+                    new Optional("f:type", new CodeableConcept())))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Category), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Category),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Kategorie dokumentu"),
-                    new Optional("f:category", new CodeableConcept()))]
+                    new Optional("f:category", new CodeableConcept())))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.SecurityLabel), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.SecurityLabel),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Citlivost dokumentu"),
-                    new Optional("f:securityLabel", new CodeableConcept()))]
+                    new Optional("f:securityLabel", new CodeableConcept())))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Date), 
-                [new NameValuePair(
-                    new ConstantText("Datum vytvoření záznamu"),
-                    new Optional("f:date", new ShowDateTime()))]
-            )
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Date), new NameValuePair(
+                new ConstantText("Datum vytvoření záznamu"),
+                new Optional("f:date", new ShowDateTime())))
         ]);
 
         if (infrequentOptions.Count == 0)

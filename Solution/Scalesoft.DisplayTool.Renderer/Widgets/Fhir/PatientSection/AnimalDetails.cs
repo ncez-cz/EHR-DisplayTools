@@ -17,16 +17,16 @@ public class AnimalDetails : Widget
         Widget[] tree =
         [
             new ChangeContext("f:extension[@url='species']/f:valueCodeableConcept",
-                new Container([
+                new NameValuePair(
                     new PlainBadge(new ConstantText("Druh zvířete")),
-                    new Heading([new CodeableConcept()], HeadingSize.H3)
-                ])
+                    new Heading([new CodeableConcept()], HeadingSize.H6)
+                )
             ),
             new Optional("f:extension[@url='breed']/f:valueCodeableConcept",
-                new Container([
+                new NameValuePair(
                     new PlainBadge(new ConstantText("Plemeno")),
-                    new Heading([new CodeableConcept()], HeadingSize.H3)
-                ])
+                    new Heading([new CodeableConcept()], HeadingSize.H6)
+                )
             ),
         ];
 

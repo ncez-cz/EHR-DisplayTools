@@ -5,12 +5,12 @@ using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Allergy;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Consent;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Immunization;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.MedicalDevice;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.PatientSection;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.PlanOfCare;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Pregnancy;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -28,31 +28,6 @@ public class CompositionIps : Widget
         [
             new Container([
                 new FhirHeader(),
-                new ModifierExtensionCheck(),
-                new Row([
-                    new Button(onClick: "expandOrCollapseAllSections();", variant: ButtonVariant.CollapseSection,
-                        style: ButtonStyle.Outline),
-                    new Button(variant: ButtonVariant.ToggleDetails, style: ButtonStyle.Outline),
-                    new NarrativeModal(),
-                ], flexContainerClasses: ""),
-                new Condition("f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
-                    new Collapser([new ConstantText("Jiné formy dokumentu")], [], [
-                        new CommaSeparatedBuilder(
-                            "f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
-                            _ => [new OpenTypeElement(null)])
-                    ], customClass: "no-print")
-                ),
-                new Optional("f:encounter",
-                    // multireference widget is used only for customising broken references builder, semantically the reference is x..1 
-                    new ShowMultiReference(".",
-                        (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
-                        x =>
-                        [
-                            new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                                isCollapsed: true)
-                        ]
-                    )
-                ),
                 new NarrativeCollapser(),
                 new ShowSingleReference(x =>
                 {
@@ -65,39 +40,43 @@ public class CompositionIps : Widget
                 }, "f:subject"),
 
                 new FhirSection(
-                    LoincSectionCodes.Allergies,
-                    (x, _) => new AllergiesAndIntolerances(x),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.Allergies),
+                    (x, _, _) => new AllergiesAndIntolerances(x),
                     titleAbbreviations: SectionTitleAbbreviations.Allergies,
                     severity: Severity.Secondary
                 ),
                 new FhirSection(
-                    LoincSectionCodes.Problems,
-                    (x, _) => new Conditions(x, new DisplayLabel(LabelCodes.ActiveProblem)),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.Problems),
+                    (x, _, _) =>
+                        new Conditions(x,
+                            new DisplayLabel(LabelCodes.ActiveProblem)),
                     titleAbbreviations: SectionTitleAbbreviations.ActiveProblems
                 ),
                 new FhirSection(
-                    LoincSectionCodes.HistoryOfMedicalDevices,
-                    (x, _) => new DeviceUseStatement(x),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.HistoryOfMedicalDevices),
+                    (x, _, _) => new DeviceUseStatement(x),
                     titleAbbreviations: SectionTitleAbbreviations.HistoryOfMedicalDeviceUse
                 ),
                 new FhirSection(
-                    LoincSectionCodes.ProceduresHx,
-                    (x, _) => new Procedures(x),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.ProceduresHx),
+                    (x, _, _) => new Procedures(x),
                     titleAbbreviations: SectionTitleAbbreviations.HistoryOfProcedures
                 ),
                 new FhirSection(
-                    LoincSectionCodes.Medications,
-                    (x, type) => new AnyResource(x, type),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.Medications),
                     titleAbbreviations: SectionTitleAbbreviations.HistoryOfMedicationUse
                 ),
                 new FhirSection(
-                    LoincSectionCodes.FunctionalStatus,
-                    (x, type) => new AnyResource(x, type),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.FunctionalStatus),
                     titleAbbreviations: SectionTitleAbbreviations.FunctionalStatus
                 ),
                 new FhirSection(
-                    LoincSectionCodes.VitalSigns,
-                    (x, type) => new AnyResource(x, type, LoincSectionCodes.VitalSigns),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.VitalSigns),
+                    (items, type, hasMultipleResourceTypes) => new AnyResource(
+                        items,
+                        type,
+                        displayResourceType: hasMultipleResourceTypes
+                    ),
                     titleAbbreviations: SectionTitleAbbreviations.VitalSigns
                 ),
                 new ParentSection(
@@ -105,21 +84,23 @@ public class CompositionIps : Widget
                     titleAbbreviations: SectionTitleAbbreviations.PersonalHistory,
                     [
                         new FhirSection(
-                            LoincSectionCodes.PastIllnessHx,
-                            (x, _) => new Conditions(x, new DisplayLabel(LabelCodes.InactiveProblem)),
+                            CodedValueDefinition.LoincValue(LoincSectionCodes.PastIllnessHx),
+                            (x, _, _) =>
+                                new Conditions(x,
+                                    new DisplayLabel(LabelCodes.InactiveProblem)),
                             titleAbbreviations: SectionTitleAbbreviations.HistoryOfPastIllness,
                             severity: Severity.Secondary
                         ),
                         new FhirSection(
-                            LoincSectionCodes.Immunizations,
-                            (x, _) => new Immunizations(x),
+                            CodedValueDefinition.LoincValue(LoincSectionCodes.Immunizations),
+                            (x, _, _) =>
+                                new Immunizations(x),
                             titleAbbreviations: SectionTitleAbbreviations.Immunizations
                         ),
                     ]
                 ),
                 new FhirSection(
-                    LoincSectionCodes.SocialHistory,
-                    (x, type) => new AnyResource(x, type),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.SocialHistory),
                     titleAbbreviations: SectionTitleAbbreviations.SocialHistory
                 ),
                 new ParentSection(
@@ -127,8 +108,8 @@ public class CompositionIps : Widget
                     titleAbbreviations: SectionTitleAbbreviations.GynecologicalHistory,
                     [
                         new FhirSection(
-                            LoincSectionCodes.PregnancyHx,
-                            (x, _) => new FhirIpsPregnancy(x),
+                            CodedValueDefinition.LoincValue(LoincSectionCodes.PregnancyHx),
+                            (x, _, _) => new FhirIpsPregnancy(x),
                             titleAbbreviations: SectionTitleAbbreviations.HistoryOfPregnancies
                         ),
                     ]
@@ -138,20 +119,19 @@ public class CompositionIps : Widget
                     titleAbbreviations: SectionTitleAbbreviations.PatientProvidedData,
                     [
                         new FhirSection(
-                            LoincSectionCodes.AdvanceDirectives,
-                            (x, _) => new Consents(x),
+                            CodedValueDefinition.LoincValue(LoincSectionCodes.AdvanceDirectives),
+                            (x, _, _) => new Consents(x),
                             titleAbbreviations: SectionTitleAbbreviations.AdvanceDirectives
                         ),
                     ]
                 ),
                 new FhirSection(
-                    LoincSectionCodes.SignificantResults,
-                    (x, type) => new AnyResource(x, type),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.SignificantResults),
                     titleAbbreviations: SectionTitleAbbreviations.RelevantDiagnosticTests
                 ),
                 new FhirSection(
-                    LoincSectionCodes.PlanOfCare,
-                    (x, _) => new FhirCarePlan(x),
+                    CodedValueDefinition.LoincValue(LoincSectionCodes.PlanOfCare),
+                    (x, _, _) => new FhirCarePlan(x),
                     titleAbbreviations: SectionTitleAbbreviations.HealthMaintenanceCarePlan
                 ),
                 new FhirFooter(),

@@ -5,7 +5,7 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Coding(string? text = null, bool hideSystem = false) : Widget
+public class Coding(string? text = null, bool hideSystem = false, string? preferredCodeSystemOverride = null) : Widget
 {
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -46,7 +46,8 @@ public class Coding(string? text = null, bool hideSystem = false) : Widget
                 codeSystem,
                 fallback ?? code,
                 displayCodeSystem: !hideSystem && fallback == null,
-                displayCodeSystemOnFallbackOnly: true
+                displayCodeSystemOnFallbackOnly: true,
+                preferredCodeSystemOverride: preferredCodeSystemOverride
             );
 
             return await widget.Render(navigator, renderer, context);

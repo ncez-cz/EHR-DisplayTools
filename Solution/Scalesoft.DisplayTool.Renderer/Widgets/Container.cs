@@ -1,4 +1,5 @@
-﻿using Scalesoft.DisplayTool.Renderer.Extensions;
+﻿using System.Text.RegularExpressions;
+using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -42,10 +43,17 @@ public class Container : Widget
             return contentResult;
         }
 
+        var type = m_type;
+        if (m_type == ContainerType.Auto)
+        {
+            var hasDiv = DivRegex.Regex().IsMatch(contentResult.Content);
+            type = hasDiv ? ContainerType.Div : ContainerType.Span;
+        }
+
         var viewModel = new ViewModel
         {
             Content = contentResult.Content,
-            Type = m_type,
+            Type = type,
             CustomClass = m_optionalClass,
         };
 
@@ -60,4 +68,10 @@ public class Container : Widget
 
         public required ContainerType Type { get; set; }
     }
+}
+
+public static partial class DivRegex
+{
+    [GeneratedRegex(@"<\s*div\b[^<>]*>", RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Multiline)]
+    public static partial Regex Regex();
 }

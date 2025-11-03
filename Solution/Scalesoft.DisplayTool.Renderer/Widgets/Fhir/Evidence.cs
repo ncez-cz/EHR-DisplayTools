@@ -1,18 +1,24 @@
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
 public class Evidence(
-    XmlDocumentNavigator navigator,
     Widget? collapserTitle = null,
     List<Widget>? variableAdditions = null
-) : Widget
+) : ColumnResourceBase<Evidence>, IResourceWidget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator _, IWidgetRenderer renderer, RenderContext context)
+    public static string ResourceType => "Evidence";
+
+    public Evidence() : this(null)
+    {
+    }
+
+    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
     {
         var headerInfo = new Container([
             collapserTitle ?? new ConstantText("Důkaz"),

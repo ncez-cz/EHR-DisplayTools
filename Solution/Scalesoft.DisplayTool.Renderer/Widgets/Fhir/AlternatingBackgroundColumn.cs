@@ -1,11 +1,10 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class AlternatingBackgroundColumn(List<Widget> widgets) : Widget
+public class AlternatingBackgroundColumn(IList<Widget> widgets) : Widget
 {
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -20,33 +19,26 @@ public class AlternatingBackgroundColumn(List<Widget> widgets) : Widget
 
         List<Widget> finalWidgets = [];
 
-
-        for (var i = 0; i < widgets.Count; i++)
+        foreach (var widget in widgets)
         {
-            var widget = widgets[i];
-
-            string? classToAdd = null;
-
-            if (i % 2 == 0)
+            if (widget.IsNullWidget)
             {
-                classToAdd += "striped-row-bg ";
-
-                if (widget == widgets.Last())
-                {
-                    classToAdd += "pb-4";
-                }
+                continue;
             }
 
-            Widget widgetToAdd = new Container(widget, optionalClass: classToAdd);
+            var lastWidget = widgets.Last();
 
-            if (widget != widgets.Last())
+            Widget widgetToAdd = new Container(widget, optionalClass: "p-1");
+
+            if (!widget.Equals(lastWidget))
             {
-                widgetToAdd = new Concat([widgetToAdd, new ThematicBreak("mx-negative-2")]);
+                widgetToAdd = new Column([widgetToAdd, new ThematicBreak("m-0")], flexContainerClasses: "gap-1");
             }
 
             finalWidgets.Add(widgetToAdd);
         }
 
-        return await finalWidgets.RenderConcatenatedResult(navigator, renderer, context);
+        return await new Container(finalWidgets, optionalClass: "alternating-bg-items-container").Render(navigator,
+            renderer, context);
     }
 }

@@ -2,43 +2,46 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Specimen(XmlDocumentNavigator navigator) : Widget
+public class Specimen : ColumnResourceBase<Specimen>, IResourceWidget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator _, IWidgetRenderer renderer, RenderContext context)
+    public static string ResourceType => "Specimen";
+    
+    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
     {
         var headerInfo = new Container([
             new Container([
                 new ConstantText("Vzorek"),
-                new Optional("f:accessionIdentifier",
+                new HideableDetails(new Optional("f:accessionIdentifier",
                     new ConstantText(" ("),
                     new ShowIdentifier(),
                     new ConstantText(")")
-                ),
+                )),
             ], ContainerType.Span),
-            new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/specimen-status",
-                new DisplayLabel(LabelCodes.Status))
+            new HideableDetails(new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/specimen-status",
+                new DisplayLabel(LabelCodes.Status)))
         ], ContainerType.Div, "d-flex align-items-center gap-1");
 
         var badge = new PlainBadge(new ConstantText("Základní informace"));
 
         var basicInfo = new Container([
-            new Optional("f:accessionIdentifier", new NameValuePair(
+            new Optional("f:accessionIdentifier", new HideableDetails(new NameValuePair(
                 new ConstantText("Identifikátor přístupu"),
                 new ShowIdentifier()
-            )),
+            ))),
             new Optional("f:type", new NameValuePair(
                 new ConstantText("Typ"),
                 new CodeableConcept()
             )),
-            new Condition("f:condition", new NameValuePair(
+            new Condition("f:condition", new HideableDetails(new NameValuePair(
                 new ConstantText("Kondice"),
                 new CommaSeparatedBuilder("f:condition", _ => [new CodeableConcept()])
-            )),
+            ))),
             new Optional("f:subject", new NameValuePair(
                 new ConstantText("Původ vzorku"),
                 new AnyReferenceNamingWidget()
@@ -47,14 +50,14 @@ public class Specimen(XmlDocumentNavigator navigator) : Widget
                 new ConstantText("Čas přijetí"),
                 new ShowDateTime()
             )),
-            new Condition("f:parent", new NameValuePair(
+            new Condition("f:parent", new HideableDetails(new NameValuePair(
                 new ConstantText("Rodiče"),
                 new CommaSeparatedBuilder("f:parent", _ => [new AnyReferenceNamingWidget()])
-            )),
-            new Condition("f:request", new NameValuePair(
+            ))),
+            new Condition("f:request", new HideableDetails(new NameValuePair(
                 new ConstantText("Žádosti"),
                 new CommaSeparatedBuilder("f:request", _ => [new AnyReferenceNamingWidget()])
-            ))
+            )))
         ]);
 
         InfrequentPropertiesData<InfrequentProperties>? collectionInfrequentProperties = null;
@@ -70,10 +73,10 @@ public class Specimen(XmlDocumentNavigator navigator) : Widget
 
         var collectionBadge = new PlainBadge(new ConstantText("Informace o odběru"));
         var collectionInfo = new Container([
-            new Optional("f:collector", new NameValuePair(
+            new Optional("f:collector", new HideableDetails(new NameValuePair(
                 new ConstantText("Sbíral"),
                 new AnyReferenceNamingWidget()
-            )),
+            ))),
             new If(
                 _ => collectionInfrequentProperties != null &&
                      collectionInfrequentProperties.Contains(InfrequentProperties.Collected),
@@ -82,14 +85,14 @@ public class Specimen(XmlDocumentNavigator navigator) : Widget
                     new Chronometry("collected")
                 )
             ),
-            new Optional("f:duration", new NameValuePair(
+            new Optional("f:duration", new HideableDetails(new NameValuePair(
                 new ConstantText("Doba trvání odběru"),
                 new ShowDuration()
-            )),
-            new Optional("f:quantity", new NameValuePair(
+            ))),
+            new Optional("f:quantity", new HideableDetails(new NameValuePair(
                 new ConstantText("Množství"),
                 new ShowQuantity()
-            )),
+            ))),
             new Optional("f:method", new NameValuePair(
                 new ConstantText("Metoda odběru"),
                 new CodeableConcept()
@@ -99,20 +102,20 @@ public class Specimen(XmlDocumentNavigator navigator) : Widget
                 new CodeableConcept()
             )),
             new If(_ => collectionInfrequentProperties != null &&
-                        collectionInfrequentProperties.Contains(InfrequentProperties.BodySite),
-                new NameValuePair(
+                        collectionInfrequentProperties.Contains(InfrequentProperties.BodySiteExtension),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Cílová anatomická poloha nebo struktura"),
                     new AnyReferenceNamingWidget(
                         "f:extension[@url='http://hl7.org/fhir/StructureDefinition/bodySite']/f:valueReference")
-                )
+                ))
             ),
             new If(
                 _ => collectionInfrequentProperties != null &&
                      collectionInfrequentProperties.Contains(InfrequentProperties.FastingStatus),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Stav půstu"),
                     new OpenTypeElement(null, "fastingStatus") // CodeableConcept | Duration
-                )
+                ))
             )
         ]);
 
@@ -211,16 +214,16 @@ public class Specimen(XmlDocumentNavigator navigator) : Widget
                             ])
                         ),
                         new Condition("f:processing",
-                            new Container([
+                            new HideableDetails(new Container([
                                 processingBadge,
                                 processingInfo
-                            ])
+                            ]))
                         ),
                         new Condition("f:container",
-                            new Container([
+                            new HideableDetails(new Container([
                                 containerBadge,
                                 containerInfo
-                            ])
+                            ]))
                         ),
                         new Condition("f:note",
                             new Container([
@@ -250,7 +253,7 @@ public class Specimen(XmlDocumentNavigator navigator) : Widget
         [OpenType("additive")] Additive,
 
         [Extension("http://hl7.org/fhir/StructureDefinition/bodySite")]
-        BodySite,
+        BodySiteExtension,
 
         [Extension("http://hl7.org/fhir/5.0/StructureDefinition/extension-Specimen.container.device")]
         Device,

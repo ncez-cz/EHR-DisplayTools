@@ -14,4 +14,6 @@ public enum TextStyle
     Muted = 1 << 7,
     Capitalize = 1 << 8,
     Uppercase = 1 << 9,
+    CapitalizeFirst = 1 << 10,
+    Light = 1 << 11,
 }

@@ -7,33 +7,35 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.DocumentReference;
 
 public class DocumentReferenceActorsCell(XmlDocumentNavigator item) : Widget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         var infrequentOptions =
             InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
 
         var participantTableCell = new TableCell(
         [
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Author), 
-                [new NameValuePair(
-                    new ConstantText("Autor dokumentu"),
-                    new AnyReferenceNamingWidget("f:author"))]
-            ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Authenticator), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Author), new NameValuePair(
+                new ConstantText("Autor dokumentu"),
+                new AnyReferenceNamingWidget("f:author"))),
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Authenticator),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Ověřil(a)"),
-                    new AnyReferenceNamingWidget("f:authenticator"))]
+                    new AnyReferenceNamingWidget("f:authenticator")))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.Custodian), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Custodian),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Správce dokumentu"),
-                    new AnyReferenceNamingWidget("f:custodian"))]
+                    new AnyReferenceNamingWidget("f:custodian")))
             ),
-            new If(_=> infrequentOptions.Contains(InfrequentPropertiesPaths.RelatesTo), 
-                [new NameValuePair(
+            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.RelatesTo),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Souvisejíci záznam"),
-                    new ItemListBuilder("f:relatesTo/f:target", ItemListType.Unordered, _ => [new AnyReferenceNamingWidget(".")]))]
+                    new ItemListBuilder("f:relatesTo/f:target", ItemListType.Unordered,
+                        _ => [new AnyReferenceNamingWidget()])))
             ),
         ]);
 

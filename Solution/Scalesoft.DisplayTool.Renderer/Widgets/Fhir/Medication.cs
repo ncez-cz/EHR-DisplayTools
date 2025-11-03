@@ -1,13 +1,23 @@
+using JetBrains.Annotations;
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Person;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Medication(bool displayAsCard = true) : Widget
+public class Medication(bool displayAsCard = true) : SequentialResourceBase<Medication>, IResourceWidget
 {
+    public static string ResourceType => "Medication";
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+
+    public Medication() : this(true)
+    {
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -32,10 +42,9 @@ public class Medication(bool displayAsCard = true) : Widget
 
         if (navigator.EvaluateCondition("f:status"))
         {
-            cardContent.Add(
-                new EnumIconTooltip("f:status", "http://hl7.org/fhir/CodeSystem/medication-status",
-                    new DisplayLabel(LabelCodes.Status))
-            );
+            cardContent.Add(new HideableDetails(new EnumIconTooltip("f:status",
+                "http://hl7.org/fhir/CodeSystem/medication-status",
+                new DisplayLabel(LabelCodes.Status))));
         }
 
         if (navigator.EvaluateCondition("f:code"))
@@ -46,12 +55,12 @@ public class Medication(bool displayAsCard = true) : Widget
 
         if (navigator.EvaluateCondition("f:manufacturer"))
         {
-            cardContent.Add(new NameValuePair([new ConstantText("Výrobce")],
+            cardContent.Add(new HideableDetails(new NameValuePair([new ConstantText("Výrobce")],
             [
                 ShowSingleReference.WithDefaultDisplayHandler(
                     x => [new Card(null, new PersonOrOrganization(x), idSource: x)],
                     "f:manufacturer")
-            ]));
+            ])));
         }
 
         if (navigator.EvaluateCondition("f:form"))
@@ -62,8 +71,8 @@ public class Medication(bool displayAsCard = true) : Widget
 
         if (navigator.EvaluateCondition("f:amount"))
         {
-            cardContent.Add(new NameValuePair([new ConstantText("Množství")],
-                [new ChangeContext("f:amount", new ShowRatio())]));
+            cardContent.Add(new HideableDetails(new NameValuePair([new ConstantText("Množství")],
+                [new ChangeContext("f:amount", new ShowRatio())])));
         }
 
         if (navigator.EvaluateCondition("f:ingredient"))

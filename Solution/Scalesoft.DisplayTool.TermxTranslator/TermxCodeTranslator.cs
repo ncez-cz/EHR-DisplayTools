@@ -11,7 +11,7 @@ public class TermxCodeTranslator : ICodeTranslator
 
     // Warning: Most of these mappings are not exact matches. Substitutions were made to similar / related systems
     // Which were actually present in termx at the time of writing.
-    // Note that mappings without an explanation comment may not be correct either - not all discrepancies were noted.
+    // Note that mappings without an explanation comment may not be correct - not all discrepancies were noted.
     private readonly Dictionary<string, string> m_oidToUrlMap = new()
     {
         { "2.16.840.1.113883.5.1150.1", "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips" },
@@ -72,7 +72,8 @@ public class TermxCodeTranslator : ICodeTranslator
             var shortLanguage = language.Split('-')[0];
 
             var systemUrl = codeSystem;
-            if (!codeSystem.StartsWith("http"))
+            if (!codeSystem.StartsWith("http") &&
+                !codeSystem.StartsWith("http://"))
             {
                 if (m_oidToUrlMap.TryGetValue(codeSystem, out var value))
                 {

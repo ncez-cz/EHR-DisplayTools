@@ -78,6 +78,7 @@ public class ShowTiming(string path = ".", FlexDirection nameValuePairDirection 
                         direction: nameValuePairDirection)
                 ),
 
+                // TODO implement count, countMax, duration, durationUnit, frequencyMax, periodMax, offset, code #DT-267
 
                 new Condition("f:repeat/f:when",
                     new NameValuePair([new ConstantText("Denní doby")],

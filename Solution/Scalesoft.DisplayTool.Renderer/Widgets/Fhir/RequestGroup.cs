@@ -6,13 +6,16 @@ using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class RequestGroup : Widget
+public class RequestGroup : SequentialResourceBase<RequestGroup>, IResourceWidget
 {
+    public static string ResourceType => "RequestGroup";
+    
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -41,11 +44,13 @@ public class RequestGroup : Widget
                     new NameValuePair([new ConstantText("Datum vytvoření")], [new ShowDateTime("f:authoredOn")]))
             ]),
             new Choose([
-                new When("f:author", new NameValuePair([new ConstantText("Autor")],
-                [
-                    ShowSingleReference.WithDefaultDisplayHandler(
-                        x => [new Container([new ChangeContext(x, new ActorsNaming())], idSource: x)], "f:author")
-                ]))
+                new When(
+                    "f:author",
+                    new NameValuePair(
+                        new ConstantText("Autor"),
+                        new AnyReferenceNamingWidget()
+                    )
+                )
             ]),
             new Condition("f:reasonCode", new NameValuePair([new ConstantText("Důvod")],
                 [new ItemListBuilder("f:reasonCode", ItemListType.Unordered, _ => [new CodeableConcept()])])),
@@ -191,11 +196,7 @@ public class RequestGroup : Widget
                     new Condition("f:participant", new NameValuePair([new ConstantText("Vykonavatel")],
                     [
                         new ItemListBuilder("f:participant", ItemListType.Unordered,
-                            _ =>
-                            [
-                                ShowSingleReference.WithDefaultDisplayHandler(x =>
-                                    [new Container([new ChangeContext(x, new ActorsNaming())], idSource: x)])
-                            ])
+                            _ => [new AnyReferenceNamingWidget()] )
                     ])),
                     // ignore type
                     // ignore groupingBehavior - display everything visually

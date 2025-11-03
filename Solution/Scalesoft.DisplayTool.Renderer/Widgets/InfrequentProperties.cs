@@ -20,7 +20,7 @@ public static class InfrequentProperties
 
     /// <summary>
     ///     If the given property is present, renders children in the context of the property.
-    ///     If the property is present multiple times, children are evaluated once per occurence and the result is
+    ///     If the property is present multiple times, children are evaluated once per occurrence and the result is
     ///     concatenated.
     /// </summary>
     /// <param name="presentProperties"></param>
@@ -152,7 +152,7 @@ public static class InfrequentProperties
             var lowerCamelCasePropertyName = char.ToLowerInvariant(propertyName[0]) + propertyName[1..];
 
             var field = typeof(T).GetField(property.ToString());
-            var attributes = field?.GetCustomAttributes<InfrequentPropertyAttribute>() .ToList() ?? [];
+            var attributes = field?.GetCustomAttributes<InfrequentPropertyAttribute>().ToList() ?? [];
             var negativeAttributes = field?.GetCustomAttributes<InfrequentPropertyNegativeAttribute>().ToList() ?? [];
 
             List<string> infrequentPaths = [];

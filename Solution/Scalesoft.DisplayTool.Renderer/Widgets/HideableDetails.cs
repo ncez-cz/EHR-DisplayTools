@@ -12,7 +12,7 @@ public class HideableDetails(ContainerType containerType, string? optionalClass,
     {
     }
     
-    public HideableDetails(params Widget[] children) : this(ContainerType.Span, null, children)
+    public HideableDetails(params Widget[] children) : this(ContainerType.Auto, null, children)
     {
     }
 
@@ -22,6 +22,8 @@ public class HideableDetails(ContainerType containerType, string? optionalClass,
         RenderContext context
     )
     {
+        navigator = navigator.WithHideableContext();
+
         return new Container(children, containerType, optionalClass: $"{optionalClass} optional-detail").Render(
             navigator,
             renderer,

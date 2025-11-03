@@ -10,6 +10,7 @@ public class Modal(
     Widget? title,
     Widget content,
     SupportedIcons openButtonIcon,
+    Widget? openButtonContent = null,
     string? openButtonCustomClass = null
 ) : Widget
 {
@@ -29,6 +30,10 @@ public class Modal(
         );
 
         List<Widget> widgets = [content, closeModalCross, closeButton];
+        if (openButtonContent != null)
+        {
+            widgets.Add(openButtonContent);
+        }
 
         if (title != null)
         {
@@ -38,6 +43,7 @@ public class Modal(
         var result = await RenderInternal(navigator, renderer, context, widgets.ToArray());
 
         var renderedContent = result.GetContent(content);
+        var renderedOpenButtonContent = openButtonContent != null ? result.GetContent(openButtonContent) : null;
 
         if (result.IsNull || renderedContent == null)
         {
@@ -50,6 +56,7 @@ public class Modal(
             Title = title != null ? result.GetContent(title) : null,
             CloseButton = result.GetContent(closeButton),
             OpenButtonIcon = renderedOpenButtonIcon,
+            OpenButtonContent = renderedOpenButtonContent,
             InputId = Id,
             OpenButtonClass = openButtonCustomClass,
             CornerCloseCross = result.GetContent(closeModalCross) ?? string.Empty
@@ -62,6 +69,7 @@ public class Modal(
     {
         public required string? CloseButton { get; set; }
         public required string OpenButtonIcon { get; set; }
+        public string? OpenButtonContent { get; set; }
         public string? OpenButtonClass { get; set; }
         public required string Content { get; set; }
         public required string? Title { get; set; }

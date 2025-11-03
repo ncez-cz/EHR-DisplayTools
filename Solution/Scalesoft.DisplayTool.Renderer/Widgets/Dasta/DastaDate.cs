@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -52,8 +53,9 @@ public class DastaDate(string select) : Widget
                 return Task.FromResult<RenderResult>(navigator.GetFullPath());
             }
 
-            var dateFormatTarget = DateTimeFormats.GetFormat(context.Language, dateFormat.Value);
-            return Task.FromResult<RenderResult>(date.ToString(dateFormatTarget, CultureInfo.InvariantCulture));
+            var timeWidgets = DateTimeFormats.GetTimeWidget(date, context.Language, dateFormat.Value);
+
+            return timeWidgets.RenderConcatenatedResult(navigator, renderer, context);
         }
 
         return Task.FromResult(new RenderResult(

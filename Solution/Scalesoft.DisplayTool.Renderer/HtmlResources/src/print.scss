@@ -1,4 +1,6 @@
-﻿@media print {
+﻿@use "theme-variables" as *;
+
+@media print {
     @page {
         size: A4;
         margin: 50px;
@@ -24,6 +26,10 @@
         display: block;
     }
 
+    .section {
+        background-color: unset !important;
+    }
+
     .resource-container > span {
         break-after: avoid;
         break-inside: avoid;
@@ -39,7 +45,9 @@
     .narrative-modal-button,
     .narrative-cell,
     .collapse-all-btn,
-    .collapse-toggler-wrapper {
+    .collapse-toggler-wrapper,
+    .no-print,
+    .collapser-icon-wrapper {
         display: none !important;
     }
 
@@ -48,7 +56,7 @@
         text-decoration: none;
     }
 
-    .no-print {
-        display: none;
+    .collapsible-content-wrapper > .collapsible-content:not(.card > .collapsible-content-wrapper > .collapsible-content) {
+        padding-top: $spacing02;
     }
 }

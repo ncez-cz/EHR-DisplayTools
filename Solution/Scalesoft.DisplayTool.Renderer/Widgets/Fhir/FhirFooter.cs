@@ -4,6 +4,8 @@ using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Person;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -50,8 +52,7 @@ public class FhirFooter : Widget
                                             new PersonOrOrganization(
                                                 nav,
                                                 skipWhenInactive: true,
-                                                collapserTitle: new Optional("f:name", new HumanNameCompact(".")),
-                                                collapserSubtitle: [title]
+                                                collapserTitle: title
                                             ),
                                         ], idSource: nav),
                                     ];
@@ -69,8 +70,7 @@ public class FhirFooter : Widget
                             [
                                 new Container([
                                     new PersonOrOrganization(x, skipWhenInactive: true,
-                                        collapserTitle: new Optional("f:name/@value", new Text()),
-                                        collapserSubtitle: [new DisplayLabel(LabelCodes.Custodian)]),
+                                        collapserTitle: new DisplayLabel(LabelCodes.Custodian)),
                                 ], idSource: x),
                             ], "/f:Bundle/f:entry/f:resource/f:Composition/f:custodian")
                         ),
@@ -84,8 +84,7 @@ public class FhirFooter : Widget
                             [
                                 new Container([
                                     new PersonOrOrganization(x, skipWhenInactive: true,
-                                        collapserTitle: new Optional("f:name/@value", new Text()),
-                                        collapserSubtitle: [new DisplayLabel(LabelCodes.RepresentedOrganization)]),
+                                        collapserTitle: new DisplayLabel(LabelCodes.RepresentedOrganization)),
                                 ], idSource: x),
                             ], "f:managingOrganization")),
 
@@ -101,24 +100,41 @@ public class FhirFooter : Widget
                                     "f:party", "f:text");
 
                                 var tree = new Container([
-                                    new Collapser(
-                                        [
-                                            new ConstantText("Ověřitel pravosti dokumentu"),
-                                        ], [], [
-                                            new Container([
-                                                new Container([
-                                                    new NameValuePair([new ConstantText("Režim ověření")],
+                                        new Collapser(
+                                            [
+                                                new ConstantText("Ověřitel pravosti dokumentu"),
+
+                                                ShowSingleReference.WithDefaultDisplayHandler(
+                                                    nav =>
                                                     [
-                                                        new EnumLabel("f:mode",
-                                                            "http://hl7.org/fhir/ValueSet/composition-attestation-mode"),
-                                                    ]),
-                                                ], optionalClass: "col"),
-                                                new Choose([
-                                                    new When("f:time", new Container([
-                                                        new NameValuePair([new ConstantText("Datum ověření")],
-                                                            [new ShowDateTime("f:time")]),
-                                                    ], optionalClass: "col")),
-                                                ]),
+                                                        new Optional("f:name",
+                                                            new TextContainer(TextStyle.Bold,
+                                                                new Choose([
+                                                                        new When("@value",
+                                                                            new Text("@value"))
+                                                                    ],
+                                                                    new HumanNameCompact(".")),
+                                                                optionalClass: "black ms-4", idSource: nav
+                                                            )
+                                                        )
+                                                    ],
+                                                    "f:party"),
+                                            ], [], [
+                                                new HideableDetails(
+                                                    new Row([
+                                                        new NameValuePair([new ConstantText("Režim ověření")],
+                                                        [
+                                                            new EnumLabel("f:mode",
+                                                                "http://hl7.org/fhir/ValueSet/composition-attestation-mode"),
+                                                        ]),
+                                                        new Choose([
+                                                            new When("f:time",
+                                                                new NameValuePair([new ConstantText("Datum ověření")],
+                                                                    [new ShowDateTime("f:time")])
+                                                            ),
+                                                        ]),
+                                                    ], flexContainerClasses: "justify-content-between mb-2")
+                                                ),
                                                 new Choose([
                                                     new When("f:party", new Container([
                                                         ShowSingleReference.WithDefaultDisplayHandler(
@@ -132,31 +148,75 @@ public class FhirFooter : Widget
                                                                     idSource: nav),
                                                             ],
                                                             "f:party"),
-                                                    ], optionalClass: "col-12")),
+                                                    ])),
                                                 ]),
-                                            ], optionalClass: "row"),
-                                        ],
-                                        footer: attesterNarrative != null
-                                            ?
+                                            ],
+                                            footer: attesterNarrative != null
+                                                ?
+                                                [
+                                                    new NarrativeCollapser(attesterNarrative.GetFullPath()),
+                                                ]
+                                                : null,
+                                            iconPrefix:
                                             [
-                                                new NarrativeCollapser(attesterNarrative.GetFullPath()),
-                                            ]
-                                            : null,
-                                        iconPrefix:
-                                        [
-                                            new If(_ => attesterNarrative != null,
-                                                new NarrativeModal(attesterNarrative?.GetFullPath()!)
-                                            ),
-                                        ]
-                                    ),
-                                ]);
+                                                new If(_ => attesterNarrative != null,
+                                                    new NarrativeModal(attesterNarrative?.GetFullPath()!)
+                                                ),
+                                            ], isCollapsed: true
+                                        ),
+                                    ],
+                                    optionalClass: !x.EvaluateCondition("f:party/f:reference")
+                                        ? "optional-detail"
+                                        : string.Empty);
+
 
                                 return [tree];
                             }
                         ),
 
                         #endregion
-                        
+
+                        #region Encounter
+
+                        new Optional(
+                            "f:encounter",
+                            // multireference widget is used only for customising broken references builder, semantically the reference is x..1
+                            new ShowMultiReference(
+                                ".",
+                                (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
+                                x =>
+                                [
+                                    new Collapser(
+                                        [new ConstantText(Labels.Encounter)],
+                                        [],
+                                        x.ToList(),
+                                        isCollapsed: true
+                                    )
+                                ]
+                            )
+                        ),
+
+                        #endregion
+
+                        #region Presented form
+
+                        new Condition(
+                            "f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
+                            new Collapser(
+                                [new ConstantText("Jiné formy dokumentu")],
+                                [],
+                                [
+                                    new CommaSeparatedBuilder(
+                                        "f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
+                                        _ => [new OpenTypeElement(null)]
+                                    )
+                                ],
+                                customClass: "no-print"
+                            )
+                        ),
+
+                        #endregion
+
                         new UnrenderedResourcesSection(),
                     ],
                     title: [new ConstantText("Další informace o dokumentu")],

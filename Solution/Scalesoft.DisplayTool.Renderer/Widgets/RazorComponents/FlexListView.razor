@@ -12,7 +12,8 @@
 
 @if (Model.ContainerType == ContainerType.Div)
 {
-    <div id="@Model.Id" data-id="@Model.VisualId" class="d-flex flex-wrap flex-@direction @(Model.CustomClass ?? "gap-2")">
+    <div id="@Model.Id" data-id="@Model.VisualId"
+         class="d-flex @(Model.FlexWrap ? "flex-wrap" : string.Empty) flex-@direction @(Model.CustomClass ?? "gap-2")">
         @if (Model.WrapChildren == true)
         {
             @foreach (var child in Model.Children)
@@ -33,7 +34,8 @@
 }
 else if (Model.ContainerType == ContainerType.Span)
 {
-    <span id="@Model.Id" data-id="@Model.VisualId" class="d-flex flex-wrap flex-@direction @(Model.CustomClass ?? "gap-2")">
+    <span id="@Model.Id" data-id="@Model.VisualId"
+          class="d-flex @(Model.FlexWrap ? "flex-wrap" : string.Empty) flex-@direction @(Model.CustomClass ?? "gap-2")">
         @if (Model.WrapChildren == true)
         {
             @foreach (var child in Model.Children)

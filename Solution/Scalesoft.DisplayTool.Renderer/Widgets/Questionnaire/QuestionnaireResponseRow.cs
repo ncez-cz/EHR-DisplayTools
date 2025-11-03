@@ -31,21 +31,11 @@ public class QuestionnaireResponseRow(
                 ])),
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Author),
                 new TableCell([
-                    new Optional("f:author",
-                        ShowSingleReference.WithDefaultDisplayHandler(x =>
-                        [
-                            new Container([new ChangeContext(x, new ActorsNaming())], ContainerType.Span,
-                                idSource: x)
-                        ])),
+                    new Optional("f:author",new AnyReferenceNamingWidget())
                 ])),
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Source),
                 new TableCell([
-                    new Optional("f:source",
-                        ShowSingleReference.WithDefaultDisplayHandler(x =>
-                        [
-                            new Container([new ChangeContext(x, new ActorsNaming())], ContainerType.Span,
-                                idSource: x)
-                        ])),
+                    new Optional("f:source", new AnyReferenceNamingWidget())
                 ])),
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Status),
                 new TableCell([

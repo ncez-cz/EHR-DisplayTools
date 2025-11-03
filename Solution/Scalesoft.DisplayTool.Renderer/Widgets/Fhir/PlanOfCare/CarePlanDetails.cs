@@ -28,16 +28,16 @@ public class CarePlanDetails(XmlDocumentNavigator item) : Widget
             // ignore replaces
             // ignore partOf
             new Optional("f:intent",
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     [new ConstantText("Záměr")],
                     [new EnumLabel(".", "http://hl7.org/fhir/ValueSet/care-plan-intent")]
-                )
+                ))
             ),
             new Optional("f:category",
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     [new ConstantText("Kategorie")],
                     [new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()])]
-                )
+                ))
             ),
             new Optional("f:title",
                 new NameValuePair(
@@ -54,16 +54,16 @@ public class CarePlanDetails(XmlDocumentNavigator item) : Widget
             // ignore subject
             // ignore encounter
             new Optional("f:period",
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     [new ConstantText("Období")],
                     [new ShowPeriod()]
-                )
+                ))
             ),
             new Optional("f:created",
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     [new ConstantText("Datum vytvoření")],
                     [new ShowDateTime()]
-                )
+                ))
             ),
             // ignore author
             // ignore contributor

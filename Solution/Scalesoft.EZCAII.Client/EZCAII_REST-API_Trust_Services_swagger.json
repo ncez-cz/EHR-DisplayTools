@@ -1,0 +1,1310 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "ELDAX.EldaxRestTrustServices.Api",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/listasync/certificates": {
+      "post": {
+        "tags": [
+          "Certificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSignedCertificate"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSignedCertificate"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSignedCertificate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/list/certificates": {
+      "post": {
+        "tags": [
+          "Certificate"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSignedCertificate"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSignedCertificate"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSignedCertificate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/infoasync/component/{id}": {
+      "get": {
+        "tags": [
+          "Component"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/info/component/{id}": {
+      "get": {
+        "tags": [
+          "Component"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/contentasync/component/{id}": {
+      "get": {
+        "tags": [
+          "Component"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/content/component/{id}": {
+      "get": {
+        "tags": [
+          "Component"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/contentasync/package/{id}": {
+      "get": {
+        "tags": [
+          "Component"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/content/package/{id}": {
+      "get": {
+        "tags": [
+          "Component"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/createasync/document": {
+      "post": {
+        "tags": [
+          "Document"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDocumentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDocumentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/create/document": {
+      "post": {
+        "tags": [
+          "Document"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDocumentDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDocumentDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestDocumentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/info/document/{id}": {
+      "get": {
+        "tags": [
+          "Document"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/infoasync/document/{id}": {
+      "get": {
+        "tags": [
+          "Document"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/signasync/document": {
+      "post": {
+        "tags": [
+          "SignDocument"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/sign/document": {
+      "post": {
+        "tags": [
+          "SignDocument"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/signasync/hash": {
+      "post": {
+        "tags": [
+          "SignHash"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignHashModelDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignHashModelDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignHashModelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/sign/hash": {
+      "post": {
+        "tags": [
+          "SignHash"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignHashModelDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignHashModelDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestSignHashModelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/contentasync/report": {
+      "post": {
+        "tags": [
+          "SpecificReport"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSpecificReport"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSpecificReport"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSpecificReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/content/report": {
+      "post": {
+        "tags": [
+          "SpecificReport"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSpecificReport"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSpecificReport"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequesSpecificReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/external/report": {
+      "post": {
+        "tags": [
+          "SpecificReport"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExternalReport"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExternalReport"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExternalReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/externalasync/report": {
+      "post": {
+        "tags": [
+          "SpecificReport"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExternalReport"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExternalReport"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestExternalReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/stampasync/document": {
+      "post": {
+        "tags": [
+          "StampDocument"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/stamp/document": {
+      "post": {
+        "tags": [
+          "StampDocument"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/stampasync/hash": {
+      "post": {
+        "tags": [
+          "StampHash"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampHash"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampHash"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampHash"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/stamp/hash": {
+      "post": {
+        "tags": [
+          "StampHash"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampHash"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampHash"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestStampHash"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/validateasync/document": {
+      "post": {
+        "tags": [
+          "ValidateDocument"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestValidateDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestValidateDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestValidateDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/validate/document": {
+      "post": {
+        "tags": [
+          "ValidateDocument"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestValidateDocument"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestValidateDocument"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestValidateDocument"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DocumentTypeEnum": {
+        "enum": [
+          "ARCHIVATION",
+          "CADES",
+          "PADES",
+          "XADES",
+          "ASIC_S",
+          "ASIC_E",
+          "CADES_ATTACHED",
+          "CADES_DETACHED",
+          "DOCX",
+          "XLSX",
+          "EML",
+          "MSG"
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "DocumentVerificationTypeEnum": {
+        "enum": [
+          "ADES",
+          "DOCX",
+          "XLSX",
+          "EML",
+          "MSG"
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "HashAlgorithmEnum": {
+        "enum": [
+          "MD5",
+          "MD5Cng",
+          "RIPEMD160",
+          "SHA1",
+          "SHA1Cng",
+          "SHA256",
+          "SHA256Cng",
+          "SHA384",
+          "SHA384Cng",
+          "SHA512",
+          "SHA512Cng"
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ReportFormatEnum": {
+        "enum": [
+          "PDF",
+          "XML"
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "ReportTypeEnum": {
+        "enum": [
+          "Simple",
+          "Detailed"
+        ],
+        "type": "integer",
+        "format": "int32"
+      },
+      "RequesAuthenticationModelDto": {
+        "type": "object",
+        "properties": {
+          "userLogin": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequesSignedCertificate": {
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/RequesSignedCertificateModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequesSignedCertificateModelDto": {
+        "type": "object",
+        "properties": {
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequesSpecificReport": {
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "report": {
+            "$ref": "#/components/schemas/RequesSpecificReportModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequesSpecificReportModelDto": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportFormat": {
+            "$ref": "#/components/schemas/ReportFormatEnum"
+          },
+          "reportType": {
+            "$ref": "#/components/schemas/ReportTypeEnum"
+          },
+          "withTS": {
+            "type": "boolean"
+          },
+          "validationType": {
+            "$ref": "#/components/schemas/DocumentVerificationTypeEnum"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestComponentModelDto": {
+        "required": [
+          "documentType",
+          "hashalgorithm"
+        ],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "nullable": true
+          },
+          "hash": {
+            "type": "string",
+            "nullable": true
+          },
+          "hashalgorithm": {
+            "$ref": "#/components/schemas/HashAlgorithmEnum"
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "mimeType": {
+            "type": "string",
+            "nullable": true
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentTypeEnum"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestDocumentDto": {
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RequestDocumentModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestDocumentModelDto": {
+        "required": [
+          "components",
+          "documentClassId",
+          "name",
+          "sourceSystem",
+          "storageId"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 50,
+            "minLength": 0,
+            "type": "string"
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "documentClassId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestComponentModelDto"
+            }
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestExternalReport": {
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RequestExternalReportModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestExternalReportModelDto": {
+        "type": "object",
+        "properties": {
+          "documentContent": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "isSignatureWithTimestamp": {
+            "type": "boolean"
+          },
+          "sourceSystem": {
+            "type": "string",
+            "nullable": true
+          },
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cryptedPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestSignDocument": {
+        "required": [
+          "authentication",
+          "document"
+        ],
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RequestSignDocumentModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestSignDocumentModelDto": {
+        "required": [
+          "certificateId",
+          "cryptedPassword",
+          "documentContent",
+          "documentType",
+          "fileName",
+          "isSignatureWithTimestamp",
+          "sourceSystem",
+          "storageId"
+        ],
+        "type": "object",
+        "properties": {
+          "documentContent": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentTypeEnum"
+          },
+          "fileName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "isSignatureWithTimestamp": {
+            "type": "boolean"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cryptedPassword": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestSignHashModelDto": {
+        "required": [
+          "authentication",
+          "hash"
+        ],
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "hash": {
+            "$ref": "#/components/schemas/SignHashModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestStampDocument": {
+        "required": [
+          "authentication",
+          "document"
+        ],
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RequestStampDocumentModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestStampDocumentModelDto": {
+        "required": [
+          "documentContent",
+          "documentType",
+          "fileName",
+          "sourceSystem",
+          "storageId",
+          "tsaId"
+        ],
+        "type": "object",
+        "properties": {
+          "documentContent": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentTypeEnum"
+          },
+          "fileName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tsaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestStampHash": {
+        "required": [
+          "authentication",
+          "hash"
+        ],
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "hash": {
+            "$ref": "#/components/schemas/RequestStampHashModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestStampHashModelDto": {
+        "required": [
+          "fileName",
+          "hash_value",
+          "hashAlgorithm",
+          "sourceSystem",
+          "storageId",
+          "tsaId"
+        ],
+        "type": "object",
+        "properties": {
+          "hash_value": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hashAlgorithm": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "fileName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "tsaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestValidateDocument": {
+        "required": [
+          "authentication",
+          "document"
+        ],
+        "type": "object",
+        "properties": {
+          "authentication": {
+            "$ref": "#/components/schemas/RequesAuthenticationModelDto"
+          },
+          "document": {
+            "$ref": "#/components/schemas/RequestValidateDocumentModelDto"
+          }
+        },
+        "additionalProperties": false
+      },
+      "RequestValidateDocumentModelDto": {
+        "required": [
+          "documentValidationType",
+          "originalDocumentContent",
+          "originalFileName",
+          "signedDocumentContent",
+          "signedFileName",
+          "sourceSystem",
+          "storageId"
+        ],
+        "type": "object",
+        "properties": {
+          "signedDocumentContent": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "signedFileName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "originalDocumentContent": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "originalFileName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "documentValidationType": {
+            "$ref": "#/components/schemas/DocumentVerificationTypeEnum"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false
+      },
+      "SignHashModelDto": {
+        "required": [
+          "certificateId",
+          "cryptedPassword",
+          "fileName",
+          "hash_value",
+          "hashAlgorithm",
+          "sourceSystem",
+          "storageId"
+        ],
+        "type": "object",
+        "properties": {
+          "hash_value": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "hashAlgorithm": {
+            "$ref": "#/components/schemas/HashAlgorithmEnum"
+          },
+          "fileName": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "sourceSystem": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "certificateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "storageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cryptedPassword": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Enter the Bearer Authorization string as following: `Bearer Generated-JWT-Token`",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
+}

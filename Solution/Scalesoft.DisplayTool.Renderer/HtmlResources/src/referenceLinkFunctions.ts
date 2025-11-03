@@ -32,7 +32,6 @@ function clearActiveTargets() {
 }
 
 function expandToElement(target: HTMLElement): void {
-
     requestAnimationFrame(() => {
         target.classList.add("activeTarget");
     });
@@ -81,7 +80,7 @@ function expandToElement(target: HTMLElement): void {
 
         i++;
     }
-
+    
     updateCollapsibleUI();
     target.scrollIntoView({block: "center"});
 }
@@ -92,7 +91,20 @@ function expandToElement(target: HTMLElement): void {
 export function expandParentCollapsers(): void {
     clearActiveTargets();
     const target = document.querySelector<HTMLElement>("*:target");
-    if (!target) return;
+    if (!target) {
+        return;
+    }
+
+    if (!target.checkVisibility()) {
+        // Redirect to a non-hidden element containing the same resource if possible 
+        const id = target.id;
+        const elementsWithId = document.querySelectorAll<HTMLElement>(`*[data-id="${id}"]`);
+        const visibleTarget = Array.from(elementsWithId).find(el => el.checkVisibility());
+        if (visibleTarget) {
+            expandToElement(visibleTarget);
+            return;
+        }
+    }
 
     expandToElement(target);
 }

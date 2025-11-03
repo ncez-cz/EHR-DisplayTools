@@ -4,6 +4,7 @@ using Scalesoft.DisplayTool.Renderer.DocumentRenderers.Tools;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
 using Scalesoft.DisplayTool.Renderer.Validators;
+using Scalesoft.DisplayTool.Renderer.Validators.Signature;
 using Scalesoft.DisplayTool.Shared.Translation;
 
 namespace Scalesoft.DisplayTool.Renderer.DocumentRenderers;
@@ -17,9 +18,10 @@ public class FhirJsonDocumentRenderer : FhirDocumentRendererBase
         HtmlToPdfConverter htmlToPdfConverter,
         ICodeTranslator translator,
         Language language,
+        IDocumentSignatureValidationManager documentSignatureValidationManager,
         ILoggerFactory loggerFactory
     ) : base(widgetRenderer, documentValidatorProvider, logger, InputFormat.FhirJson, htmlToPdfConverter, translator,
-        language, loggerFactory)
+        language, documentSignatureValidationManager, loggerFactory)
     {
     }
 

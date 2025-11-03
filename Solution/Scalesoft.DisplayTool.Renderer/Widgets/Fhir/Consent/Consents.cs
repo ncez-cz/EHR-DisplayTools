@@ -2,13 +2,21 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Consent;
 
-public class Consents(List<XmlDocumentNavigator> items) : Widget
+public class Consents(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
 {
+    public static string ResourceType => "Consent";
+
+    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
+    {
+        return [new Consents(items)];
+    }
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,

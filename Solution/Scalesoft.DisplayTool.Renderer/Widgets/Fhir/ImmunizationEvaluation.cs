@@ -2,13 +2,17 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Immunization;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Person;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ImmunizationEvaluation : Widget
+public class ImmunizationEvaluation : SequentialResourceBase<ImmunizationEvaluation>, IResourceWidget
 {
+    public static string ResourceType => "ImmunizationEvaluation";
+
     public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
     {
         var cardContent = new List<Widget>

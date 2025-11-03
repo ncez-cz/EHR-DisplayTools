@@ -1,15 +1,25 @@
-﻿using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using JetBrains.Annotations;
+using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Procedures(List<XmlDocumentNavigator> items) : Widget
+public class Procedures(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
 {
+    public static string ResourceType => "Procedure";
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+
+    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
+    {
+        return [new Procedures(items)];
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -36,7 +46,7 @@ public class Procedures(List<XmlDocumentNavigator> items) : Widget
                 new TableCell([new ConstantText("Důvod")], TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                new TableCell([new DisplayLabel(LabelCodes.Status)], TableCellType.Header)
+                new HideableDetails(new TableCell([new DisplayLabel(LabelCodes.Status)], TableCellType.Header))
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Text),
                 new NarrativeCell(false, TableCellType.Header)
@@ -141,11 +151,11 @@ public class Procedures(List<XmlDocumentNavigator> items) : Widget
                     ])
                 ),
                 new If(_ => parentInfrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                    new TableCell([
+                    new HideableDetails(new TableCell([
                         new Optional("f:status",
                             new EnumIconTooltip("@value", "http://hl7.org/fhir/ValueSet/event-status",
                                 new DisplayLabel(LabelCodes.Status))),
-                    ])
+                    ]))
                 ),
                 new If(_ => parentInfrequentOptions.Contains(InfrequentPropertiesPaths.Text),
                     new NarrativeCell()

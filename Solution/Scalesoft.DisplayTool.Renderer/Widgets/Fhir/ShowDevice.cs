@@ -4,13 +4,20 @@ using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Devices;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ShowDevice(List<XmlDocumentNavigator> items) : Widget
+public class ShowDevice(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
 {
+    public static string ResourceType => "Device";
+    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
+    {
+        return [new ShowDevice(items)];
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -29,7 +36,8 @@ public class ShowDevice(List<XmlDocumentNavigator> items) : Widget
                             new If(
                                 _ => infrequentOptions.ContainsAnyOf(InfrequentPropertiesPaths.DistinctIdentifier,
                                     InfrequentPropertiesPaths.SerialNumber),
-                                new TableCell([new DisplayLabel(LabelCodes.DeviceId)], TableCellType.Header)
+                                new HideableDetails(new TableCell([new DisplayLabel(LabelCodes.DeviceId)],
+                                    TableCellType.Header))
                             ),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Type),
                                 new TableCell([new DisplayLabel(LabelCodes.DeviceName)], TableCellType.Header)
@@ -37,16 +45,19 @@ public class ShowDevice(List<XmlDocumentNavigator> items) : Widget
                             new If(_ => infrequentOptions.ContainsAnyOf(InfrequentPropertiesPaths.Manufacturer,
                                     InfrequentPropertiesPaths.DeviceName, InfrequentPropertiesPaths.ModelNumber,
                                     InfrequentPropertiesPaths.SerialNumber, InfrequentPropertiesPaths.Specialization,
-                                    InfrequentPropertiesPaths.ExpirationDate),
+                                    InfrequentPropertiesPaths
+                                        .ExpirationDate),
                                 new TableCell([new DisplayLabel(LabelCodes.DeviceOrImplant)], TableCellType.Header)
                             ),
                             new If(
                                 _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Version),
-                                new TableCell([new ConstantText("Dodatečné informace")], TableCellType.Header)
+                                new HideableDetails(new TableCell([new ConstantText("Dodatečné informace")],
+                                    TableCellType.Header))
                             ),
                             new If(
                                 _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                                new TableCell([new DisplayLabel(LabelCodes.Status)], TableCellType.Header)
+                                new HideableDetails(new TableCell([new DisplayLabel(LabelCodes.Status)],
+                                    TableCellType.Header))
                             ),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Text),
                                 new NarrativeCell(false, TableCellType.Header)
@@ -75,18 +86,19 @@ public class ShowDevice(List<XmlDocumentNavigator> items) : Widget
                                         InfrequentPropertiesPaths.Manufacturer, InfrequentPropertiesPaths.DeviceName,
                                         InfrequentPropertiesPaths.ModelNumber, InfrequentPropertiesPaths.SerialNumber,
                                         InfrequentPropertiesPaths.Specialization,
-                                        InfrequentPropertiesPaths.ExpirationDate),
+                                        InfrequentPropertiesPaths
+                                            .ExpirationDate),
                                     new DeviceInfo(item, infrequentOptions, false, false)
                                 ),
                                 new If(
                                     _ => infrequentOptions.ContainsAnyOf(InfrequentPropertiesPaths.Version),
-                                    new AdditionalDeviceInfo(item, false, false)
+                                    new HideableDetails(new AdditionalDeviceInfo(item, false, false))
                                 ),
                                 new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                                    new TableCell([
+                                    new HideableDetails(new TableCell([
                                         new EnumIconTooltip("f:status", "http://hl7.org/fhir/device-status",
                                             new DisplayLabel(LabelCodes.Status))
-                                    ])
+                                    ]))
                                 ),
                                 new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Text),
                                     new NarrativeCell(narrativePath: item.SelectSingleNode("f:text").GetFullPath())

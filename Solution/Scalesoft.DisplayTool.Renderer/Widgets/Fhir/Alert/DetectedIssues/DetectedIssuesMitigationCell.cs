@@ -39,24 +39,26 @@ public class DetectedIssuesMitigationCell(XmlDocumentNavigator item) : Widget
 
             Widget[] mitigationWidget =
             [
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Action)
-                    ? new NameValuePair([new ConstantText("Vykonána akce")],
-                    [
-                        new Optional("f:action", new CodeableConcept())
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Date)
-                    ? new NameValuePair([new DisplayLabel(LabelCodes.Date)],
-                    [
-                        new Optional("f:date", new ShowDateTime())
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Author)
-                    ? new NameValuePair([new ConstantText("Author opatření")],
-                    [
-                        new AnyReferenceNamingWidget("f:author")
-                    ])
-                    : new NullWidget()
+                new Container([
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Action)
+                        ? new NameValuePair([new ConstantText("Vykonána akce")],
+                        [
+                            new Optional("f:action", new CodeableConcept())
+                        ], direction: FlexDirection.Column)
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Date)
+                        ? new NameValuePair([new DisplayLabel(LabelCodes.Date)],
+                        [
+                            new Optional("f:date", new ShowDateTime())
+                        ])
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Author)
+                        ? new NameValuePair([new ConstantText("Autor opatření")],
+                        [
+                            new AnyReferenceNamingWidget("f:author")
+                        ])
+                        : new NullWidget()
+                ], optionalClass: "name-value-pair-wrapper"),
             ];
             return mitigationWidget.RenderConcatenatedResult(navigator, renderer, context);
         }

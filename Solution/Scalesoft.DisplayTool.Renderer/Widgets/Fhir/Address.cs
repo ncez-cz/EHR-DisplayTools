@@ -1,5 +1,6 @@
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
@@ -35,23 +36,25 @@ public class Address(string addressPath = ".", bool showLabel = true) : Widget
             var label = new Choose([
                 new When($"f:extension[@url='{PermanentResidenceExtensionUrl}']",
                     new ConstantText("Trvalé bydliště"),
-                    new Optional(
+                    new HideableDetails(new Optional(
                         $"f:extension[@url='{PermanentResidenceExtensionUrl}']/f:valueCodeableConcept",
                         new ConstantText(" ("),
                         new CodeableConcept(),
                         new ConstantText(")")
-                    )
+                    ))
                 )
             ], new ConstantText("Adresa"));
             Widget[] value =
             [
                 new Optional($"f:extension[@url='{AddressPointExtensionUrl}']",
-                    new NameValuePair([new ConstantText("RÚIAN")],
+                    new HideableDetails(new NameValuePair([new ConstantText("RÚIAN")],
                         [new ShowIdentifier("f:valueIdentifier")],
-                        size: NameValuePair.NameValuePairSize.Small)
+                        size: NameValuePair.NameValuePairSize.Small))
                 ),
                 new Choose([
-                        new When("f:text", new Text("f:text/@value")),
+                        new When("f:text",
+                            new Text(
+                                "f:text/@value")), // ignore obligations to display structured data and prefer text since according to specification all data shall be in 'text' property
                     ],
                     new If(_ => !nav.EvaluateCondition("f:line/@value"),
                         new ConcatBuilder("f:line", _ =>

@@ -23,13 +23,14 @@ public class DocumentReferenceContext(List<XmlDocumentNavigator> items) : Widget
                 new TableHead([
                     new TableRow([
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Event),
-                            new TableCell([new ConstantText("Událost")], TableCellType.Header)),
+                            new HideableDetails(new TableCell([new ConstantText("Událost")], TableCellType.Header))),
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Period),
                             new TableCell([new ConstantText("Období")], TableCellType.Header)),
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.PracticeSetting),
-                            new TableCell([new ConstantText("Pracoviště")], TableCellType.Header)),
+                            new HideableDetails(new TableCell([new ConstantText("Pracoviště")], TableCellType.Header))),
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.FacilityType),
-                            new TableCell([new ConstantText("Typ zařízení")], TableCellType.Header)),
+                            new HideableDetails(new TableCell([new ConstantText("Typ zařízení")],
+                                TableCellType.Header))),
                     ])
                 ]),
                 ..items.Select(x => new TableBody([new DocumentReferenceContextRowBuilder(x, infrequentOptions)])),
@@ -74,21 +75,24 @@ public class DocumentReferenceContext(List<XmlDocumentNavigator> items) : Widget
 
             var tableRowContent = new List<Widget>
             {
-                new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.Event), new TableCell([
-                    new Optional("f:event", new ItemListBuilder(".", ItemListType.Unordered, _ =>
-                    [
-                        new CodeableConcept()
-                    ]))
-                ])),
+                new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.Event), new HideableDetails(
+                    new TableCell([
+                        new Optional("f:event", new ItemListBuilder(".", ItemListType.Unordered, _ =>
+                        [
+                            new CodeableConcept()
+                        ]))
+                    ]))),
                 new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.Period), new TableCell([
                     new Optional("f:period", new ShowPeriod())
                 ])),
-                new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.FacilityType), new TableCell([
-                    new Optional("f:facilityType", new CodeableConcept())
-                ])),
-                new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.PracticeSetting), new TableCell([
-                    new Optional("f:practiceSetting", new CodeableConcept())
-                ])),
+                new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.FacilityType),
+                    new HideableDetails(new TableCell([
+                        new Optional("f:facilityType", new CodeableConcept())
+                    ]))),
+                new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.PracticeSetting),
+                    new HideableDetails(new TableCell([
+                        new Optional("f:practiceSetting", new CodeableConcept())
+                    ]))),
             };
             var result =
                 await new TableRow(tableRowContent, rowDetails, idSource: item).Render(item, renderer, context);

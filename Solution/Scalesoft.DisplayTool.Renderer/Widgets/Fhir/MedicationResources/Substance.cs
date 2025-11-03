@@ -1,18 +1,22 @@
-﻿using Scalesoft.DisplayTool.Renderer.Extensions;
+﻿using JetBrains.Annotations;
+using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.MedicationResources;
 
-public class Substance(XmlDocumentNavigator item) : Widget
+public class Substance : SequentialResourceBase<Substance>, IResourceWidget
 {
-    
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
+    public static string ResourceType => "Substance";
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
         RenderContext context)
     {
-        navigator = item;
-        
         List<Widget> tree =
         [
             new Optional("f:code", new CodeableConcept()),
@@ -22,7 +26,7 @@ public class Substance(XmlDocumentNavigator item) : Widget
                 new Choose([
                     new When("f:substanceCodeableConcept", new Optional("f:itemCodeableConcept", new CodeableConcept())),
                     new When("f:substanceReference",
-                        ShowSingleReference.WithDefaultDisplayHandler(x => [new Container([new Substance(x)], idSource: x)], "f:substanceReference")
+                        ShowSingleReference.WithDefaultDisplayHandler(x => [new ChangeContext(x, new Container([new Substance()], idSource: x))], "f:substanceReference")
                     ),
                 ]),
             ]),

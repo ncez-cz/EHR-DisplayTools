@@ -2,15 +2,18 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Contract(XmlDocumentNavigator navigator) : Widget
+public class Contract : ColumnResourceBase<Contract>, IResourceWidget
 {
+    public static string ResourceType => "Contract";
+    
     public override Task<RenderResult> Render(
-        XmlDocumentNavigator _,
+        XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
         RenderContext context
     )

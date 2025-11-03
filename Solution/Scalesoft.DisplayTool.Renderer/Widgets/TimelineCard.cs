@@ -67,14 +67,16 @@ public class TimelineCard : DateSortableWidget
         }
 
         // Pre-render group items if provided
-        var groupItems = await m_groupItems.Cast<Widget>().ToList().RenderConcatenatedResult(navigator, renderer, context);
+        var groupItems = await m_groupItems.Cast<Widget>().ToList()
+            .RenderConcatenatedResult(navigator, renderer, context);
 
-        var dateFormat = DateTimeFormats.GetFormat(context.Language, DateFormatType.DayMonthYear);
+        var timeWidgets = DateTimeFormats.GetTimeWidget(SortDate, context.Language, DateFormatType.DayMonthYear);
 
+        var time = await timeWidgets.RenderConcatenatedResult(navigator, renderer, context);
         var viewModel = new ViewModel
         {
             Content = content,
-            Time = SortDate?.ToString(dateFormat),
+            Time = time.Content,
             Title = title,
             GroupItems = groupItems.Content,
             CssClass = CssClass,

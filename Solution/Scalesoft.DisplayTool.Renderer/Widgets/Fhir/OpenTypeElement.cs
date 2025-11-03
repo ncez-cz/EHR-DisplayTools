@@ -22,7 +22,8 @@ public class OpenTypeElement(
     StructuredDetails? collapsibleContent,
     string prefix = "value",
     string path = ".",
-    OpenTypeElementRenderingHints? hints = null
+    OpenTypeElementRenderingHints? hints = null,
+    bool useChartInDetailsPlaceholder = true
 ) : Widget
 {
     // Actual url is http://hl7.org/fhir/5.0/StructureDefinition/extension-Observation.value[x] but this might occur outside Observations too.
@@ -156,7 +157,9 @@ public class OpenTypeElement(
                 var header = new ConstantText($"Graf č. {idTitle} - reprezentace dat");
                 var chartWidget = new ShowSampledData($"f:{valueNodeName}", idSource: new IdentifierSource(id));
                 var link = new Link(
-                    new ConstantText($"Viz přiložený graf č. {idTitle} s hodnotami měření v detailu"),
+                    new ConstantText(useChartInDetailsPlaceholder
+                        ? $"Viz přiložený graf č. {idTitle} s hodnotami měření v detailu"
+                        : $"Viz přiložený graf č. {idTitle} s hodnotami měření"),
                     $"#{id}"
                 );
                 collapsibleContent.Add(new CollapsibleDetail(header, chartWidget, IsHideable: false));

@@ -1,14 +1,24 @@
+using JetBrains.Annotations;
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Allergy;
 
-public class AllergiesAndIntolerances(List<XmlDocumentNavigator> items) : Widget
+public class AllergiesAndIntolerances(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
 {
+    public static string ResourceType => "AllergyIntolerance";
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+
+    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
+    {
+        return [new AllergiesAndIntolerances(items)];
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,

@@ -7,24 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.6" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\Scalesoft.DisplayTool.Renderer\Scalesoft.DisplayTool.Renderer.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <_ContentIncludedByDefault Remove="publish\web.config" />
-      <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
-      <_ContentIncludedByDefault Remove="publish\appsettings.json" />
-      <_ContentIncludedByDefault Remove="publish\appsettings.Production.json" />
-      <_ContentIncludedByDefault Remove="publish\Connected Services\Gazelle.Client\ConnectedService.json" />
-      <_ContentIncludedByDefault Remove="publish\package-lock.json" />
-      <_ContentIncludedByDefault Remove="publish\package.json" />
-      <_ContentIncludedByDefault Remove="publish\Scalesoft.DisplayTool.Service.deps.json" />
-      <_ContentIncludedByDefault Remove="publish\Scalesoft.DisplayTool.Service.runtimeconfig.json" />
-      <_ContentIncludedByDefault Remove="publish\tsconfig.json" />
     </ItemGroup>
 
 </Project>

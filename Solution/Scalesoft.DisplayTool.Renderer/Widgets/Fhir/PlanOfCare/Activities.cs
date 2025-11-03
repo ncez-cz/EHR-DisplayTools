@@ -5,6 +5,7 @@ using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -46,13 +47,13 @@ public class Activities(XmlDocumentNavigator item) : Widget
         if (combinedActivityAndGroupItems.Count > 0)
         {
             var timelineWidget = new Timeline(combinedActivityAndGroupItems, "care-plan-timeline");
-            widgetsToRender.Add(timelineWidget);
+            widgetsToRender.Add(new HideableDetails(timelineWidget));
         }
 
         // Add unscheduled activities card
         if (unscheduledActivityItems.Count > 0)
         {
-            widgetsToRender.Add(CreateUnscheduledActivitiesSection(unscheduledActivityItems));
+            widgetsToRender.Add(new HideableDetails(CreateUnscheduledActivitiesSection(unscheduledActivityItems)));
         }
 
         // Handle accumulated fatal errors before rendering
@@ -408,19 +409,19 @@ public class Activities(XmlDocumentNavigator item) : Widget
                                 ], "f:location")
                             ]))
                         ]), new Choose([
-                            new When("f:performer", new NameValuePair(
-                                [new ConstantText("Odpovědná osoba/tým/zařízení")],
-                                [
-                                    new ItemListBuilder("f:performer", ItemListType.Unordered,
-                                        _ =>
-                                        [
-                                            ShowSingleReference.WithDefaultDisplayHandler(x =>
-                                            [
-                                                new Container([new ChangeContext(x, new ActorsNaming())],
-                                                    ContainerType.Span, idSource: x)
-                                            ])
-                                        ])
-                                ]))
+                            new When(
+                                "f:performer",
+                                new NameValuePair(
+                                    [new ConstantText("Odpovědná osoba/tým/zařízení")],
+                                    [
+                                        new ItemListBuilder(
+                                            "f:performer",
+                                            ItemListType.Unordered,
+                                            _ => [new AnyReferenceNamingWidget()]
+                                        ),
+                                    ]
+                                )
+                            ),
                         ]), new Choose([
                             new When("f:productCodeableConcept|f:productReference", new NameValuePair(
                                 [new DisplayLabel(LabelCodes.MedicalProduct)], [

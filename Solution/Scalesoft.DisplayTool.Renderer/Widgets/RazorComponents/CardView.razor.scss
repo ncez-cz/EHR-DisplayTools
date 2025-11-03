@@ -30,12 +30,3 @@ div:has(~ .card):not(.resource-container) > .card, div:has(> .card):not(.resourc
     margin-top: $spacing02;
 }
 
-.card-footer:has(.narrative-print-collapser-hidden:only-child) {
-    display: none;
-}
-
-@media print {
-    .card-footer:has(.narrative-print-collapser-hidden:only-child) {
-        display: flex;
-    }
-}

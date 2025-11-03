@@ -19,31 +19,7 @@ public class CompositionLab : Widget
         List<Widget> widgets =
         [
             new FhirHeader(),
-            new ModifierExtensionCheck(),
-            new Row([
-                new Button(onClick: "expandOrCollapseAllSections();", variant: ButtonVariant.CollapseSection,
-                    style: ButtonStyle.Outline),
-                new Button(variant: ButtonVariant.ToggleDetails, style: ButtonStyle.Outline),
-                new NarrativeModal(),
-            ], flexContainerClasses: ""),
-            new Condition("f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
-                new Collapser([new ConstantText("Jiné formy dokumentu")], [], [
-                    new CommaSeparatedBuilder(
-                        "f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
-                        _ => [new OpenTypeElement(null)])
-                ], customClass: "no-print")
-            ),
-            new Optional("f:encounter",
-                // multireference widget is used only for customising broken references builder, semantically the reference is x..1 
-                new ShowMultiReference(".",
-                    (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
-                    x =>
-                    [
-                        new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                            isCollapsed: true)
-                    ]
-                )
-            ),
+
             new NarrativeCollapser(),
 
             ShowSingleReference.WithDefaultDisplayHandler(x => [new Patient(x)], "f:subject"),

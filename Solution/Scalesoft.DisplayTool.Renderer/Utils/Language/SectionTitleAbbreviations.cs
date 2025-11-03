@@ -44,4 +44,5 @@ public static class SectionTitleAbbreviations
     public static readonly LocalizedAbbreviations PersonalHistory =  ("OA", "PH"); // Made up section for grouping purposes
     public static readonly LocalizedAbbreviations PatientProvidedData =  ("DP", "PD"); // Made up section for grouping purposes
     public static readonly LocalizedAbbreviations AdditionalDocumentInformation =  ("I", "I"); // Made up section for additional info
+    public static readonly LocalizedAbbreviations SupportingInformation =  ("PI", "SI");
 }

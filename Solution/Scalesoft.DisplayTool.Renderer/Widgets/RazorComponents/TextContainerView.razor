@@ -3,16 +3,26 @@
 @{
     var classes = string.Empty;
 
+    if (Model.Style.HasFlag(TextStyle.Regular))
+    {
+        classes += "fw-normal";
+    }
+
     if (Model.Style.HasFlag(TextStyle.Bold))
     {
-        classes += "fw-bold";
+        classes += " fw-bold";
+    }
+
+    if (Model.Style.HasFlag(TextStyle.Light))
+    {
+        classes += " fw-light";
     }
 
     if (Model.Style.HasFlag(TextStyle.Italic))
     {
         classes += " fst-italic";
     }
-    
+
     if (Model.Style.HasFlag(TextStyle.Underlined))
     {
         classes += " text-decoration-underline";
@@ -27,25 +37,30 @@
     {
         classes += " pre";
     }
-    
+
     if (Model.Style.HasFlag(TextStyle.Small))
     {
         classes += " small";
     }
-    
+
     if (Model.Style.HasFlag(TextStyle.Muted))
     {
         classes += " text-muted";
     }
-    
+
     if (Model.Style.HasFlag(TextStyle.Capitalize))
     {
         classes += " capitalize";
     }
-    
+
     if (Model.Style.HasFlag(TextStyle.Uppercase))
     {
         classes += " uppercase";
+    }
+
+    if (Model.Style.HasFlag(TextStyle.CapitalizeFirst))
+    {
+        classes += " capitalize-first";
     }
 }
 

@@ -88,7 +88,7 @@ public class Collapser(
             Content = contentResult.Content ?? string.Empty,
             Footer = footerResult?.Content,
             HideFooter = footerResult?.IsNullResult ?? true,
-            Icon = IconHelper.GetInstance(SupportedIcons.CaretDown, context),
+            Icon = IconHelper.GetInstance(SupportedIcons.ChevronUp, context),
             CustomClass = customClass,
             IconPrefix = iconPrefixRendered?.Content,
             Severity = getSeverity(),

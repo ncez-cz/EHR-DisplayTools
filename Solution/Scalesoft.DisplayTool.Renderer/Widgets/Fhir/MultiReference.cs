@@ -7,12 +7,23 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
 public class MultiReference(
-    Func<List<XmlDocumentNavigator>, Widget> contentBuilder,
-    string elementName = "f:entry/f:reference")
+    Func<List<XmlDocumentNavigator>, Task<Widget>> contentBuilder,
+    string elementName = "f:entry/f:reference"
+)
     : Reference(elementName)
 {
-    public override async Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+    public MultiReference(
+        Func<List<XmlDocumentNavigator>, Widget> contentBuilder,
+        string elementName = "f:entry/f:reference"
+    ) : this(x => Task.FromResult(contentBuilder(x)), elementName)
+    {
+    }
+
+    public override async Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         //This returns only references with existing content
         var referenceResult = GetReferences(navigator);
@@ -26,7 +37,7 @@ public class MultiReference(
         }
 
         // Render result instead?
-        var contentWidget = contentBuilder(itemNavigators);
+        var contentWidget = await contentBuilder(itemNavigators);
         return await contentWidget.Render(navigator, renderer, context);
     }
 }

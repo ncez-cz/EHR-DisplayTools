@@ -1,7 +1,7 @@
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Person;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.PatientSection;
@@ -40,22 +40,20 @@ public class CoreActors : Widget
                 #region Contacts
 
                 new If(_ => navigator.EvaluateCondition("f:contact"),
-                    new ConcatBuilder("f:contact", (_, _, nav) =>
+                    new HideableDetails(new ConcatBuilder("f:contact", (_, _, nav) =>
                         [
                             new PersonOrOrganization(
                                 nav,
                                 skipWhenInactive: true,
                                 showNarrative: true,
-                                collapserTitle: new HumanNameCompact("f:name"),
-                                collapserSubtitle:
-                                [
-                                    new Condition("f:relationship",
-                                        new TextContainer(TextStyle.Bold, new ConstantText("Vztah: ")),
-                                        new CommaSeparatedBuilder("f:relationship", _ => [new CodeableConcept()])),
-                                ]
+                                collapserTitle:
+                                new Choose([
+                                    new When("f:relationship",
+                                        new CommaSeparatedBuilder("f:relationship", _ => new CodeableConcept()))
+                                ], new ConstantText("Kontakt"))
                             ),
                         ]
-                    )
+                    ))
                 ),
 
                 #endregion

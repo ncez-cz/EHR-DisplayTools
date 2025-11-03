@@ -54,13 +54,3 @@ div:has(~ .collapse):not(.resource-container) > .collapse, div:has(> .collapse):
 .card-main-title {
     font-size: var(--#{$prefix}h6-font-size)
 }
-
-.narrative-print-collapser-hidden, .card-footer:has(.narrative-print-collapser-hidden:only-child) {
-    display: none;
-}
-
-@media print {
-    .narrative-print-collapser-hidden, .card-footer:has(.narrative-print-collapser-hidden:only-child) {
-        display: flex;
-    }
-}

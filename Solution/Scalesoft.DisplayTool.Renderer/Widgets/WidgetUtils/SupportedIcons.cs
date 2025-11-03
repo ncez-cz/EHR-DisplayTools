@@ -73,4 +73,7 @@ public enum SupportedIcons
     HandXMark,
     Calendar,
     FileHand,
+    Eye,
+    EyeSlash,
+    ChevronRight
 }

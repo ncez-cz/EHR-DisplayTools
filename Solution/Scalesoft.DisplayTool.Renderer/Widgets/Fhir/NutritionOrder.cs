@@ -4,13 +4,16 @@ using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Allergy;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class NutritionOrder : Widget
+public class NutritionOrder : SequentialResourceBase<NutritionOrder>, IResourceWidget
 {
+    public static string ResourceType => "NutritionOrder";
+    
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -28,11 +31,7 @@ public class NutritionOrder : Widget
             // ignore patient
             new NameValuePair([new ConstantText("Datum vytvoření")], [new ShowDateTime("f:dateTime")]),
             new Optional("f:orderer",
-                new NameValuePair([new ConstantText("Žadatel")],
-                [
-                    ShowSingleReference.WithDefaultDisplayHandler(x =>
-                        [new Container([new ChangeContext(x, new ActorsNaming())], ContainerType.Span, idSource: x)])
-                ])),
+                new NameValuePair(new ConstantText("Žadatel"), new AnyReferenceNamingWidget())),
         ];
         var labelCollapser =
             ReferenceHandler.BuildCollapserByMultireference(AllergyBuilder, navigator, context, "f:allergyIntolerance",

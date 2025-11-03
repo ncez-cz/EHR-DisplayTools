@@ -12,8 +12,10 @@ public class GoalsCard(XmlDocumentNavigator item) : Widget
         RenderContext context
     )
     {
-        var card = new Condition("f:goal",
-            new Card(new ConstantText("Cíle"), new ShowMultiReference("f:goal", displayResourceType: false)));
+        var card = new Condition(
+            "f:goal",
+            new HideableDetails(new Card(new ConstantText("Cíle"), new ShowMultiReference((x, _) => [new Goals(x)], "f:goal")))
+        );
 
         return await card.Render(item, renderer, context);
     }

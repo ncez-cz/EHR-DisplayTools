@@ -3,6 +3,7 @@ using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Alert.DetectedIssues;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 using ReferenceHandler = Scalesoft.DisplayTool.Renderer.Utils.ReferenceHandler;
 

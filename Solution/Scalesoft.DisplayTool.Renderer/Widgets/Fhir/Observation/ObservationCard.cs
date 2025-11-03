@@ -41,26 +41,44 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
         var infrequentProperties =
             InfrequentProperties.Evaluate<ObservationInfrequentProperties>([navigator]);
 
-        var collapsibleContent = new StructuredDetails();
+        var chartContainer = new StructuredDetails();
 
-        var headerInfo = new Container([
-            new Container([
-                new ConstantText("Pozorování"),
-                new ConstantText(" ("),
-                new ChangeContext("f:code", new CodeableConcept()),
-                new ConstantText(")"),
-            ], ContainerType.Span),
-            new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/observation-status",
-                new DisplayLabel(LabelCodes.Status))
-        ], ContainerType.Div, "d-flex align-items-center gap-1");
-
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
-        var basicInfo = new Container([
-            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Category) && !hideObservationType,
+        var nameValuePairs = new FlexList([
+            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Value),
+                new NameValuePair(
+                    new DisplayLabel(LabelCodes.Result),
+                    new OpenTypeElement(chartContainer, useChartInDetailsPlaceholder: false),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                )
+            ),
+            new If(
+                _ => infrequentProperties.Contains(ObservationInfrequentProperties.Category) &&
+                     !hideObservationType, // prefer decision of MZČR (hide category) to observation obligation at https://build.fhir.org/ig/HL7-cz/img/StructureDefinition-cz-observationResult-obl-img.html
                 new NameValuePair(
                     new ConstantText("Druh pozorování"),
-                    new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()])
+                    new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()]),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
+            ),
+            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Subject),
+                new NameValuePair(
+                    new ConstantText("Subjekt"),
+                    new AnyReferenceNamingWidget("f:subject"),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                )
+            ),
+            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.PartOf),
+                new HideableDetails(new NameValuePair(
+                    new ConstantText("Součástí"),
+                    new ConcatBuilder("f:partOf",
+                        _ => [new AnyReferenceNamingWidget()], new LineBreak()
+                    ),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                ))
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Effective),
                 new NameValuePair(
@@ -74,78 +92,64 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
                             )
                         ),
                     ],
-                    [new Chronometry("effective")]
-                )
-            ),
-            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Subject),
-                new NameValuePair(
-                    new ConstantText("Subjekt"),
-                    new AnyReferenceNamingWidget("f:subject")
+                    [new Chronometry("effective")],
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Focus),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Zaměřeno na"),
                     new ConcatBuilder("f:focus",
-                        _ => [new AnyReferenceNamingWidget()], new LineBreak())
-                )
+                        _ => [new AnyReferenceNamingWidget()], new LineBreak()),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                ))
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.BasedOn),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Založeno na"),
                     new ConcatBuilder("f:basedOn",
-                        _ => [new AnyReferenceNamingWidget()], new LineBreak())
-                )
+                        _ => [new AnyReferenceNamingWidget()], new LineBreak()),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                ))
             ),
-            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.PartOf),
-                new NameValuePair(
-                    new ConstantText("Součástí"),
-                    new ConcatBuilder("f:partOf",
-                        _ => [new AnyReferenceNamingWidget()], new LineBreak()
-                    )
-                )
-            ),
-        ]);
-
-        var additionalBadge = new PlainBadge(new ConstantText("Další informace"));
-        var additionalInfo = new Container([
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.SupportingInfo),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Podpůrné informace"),
                     new ConcatBuilder(
                         $"f:extension[@url='{SupportingInfoExtensionUrl}']/f:valueReference",
                         _ => [new AnyReferenceNamingWidget()], new LineBreak()
-                    )
-                )
+                    ),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                ))
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Issued),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Vydáno"),
-                    new ShowDateTime("f:issued")
-                )
+                    new ShowDateTime("f:issued"),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                ))
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.DerivedFrom),
                 new NameValuePair(
                     new ConstantText("Odvozeno z"),
                     new ConcatBuilder("f:derivedFrom",
                         _ => [new AnyReferenceNamingWidget()], new LineBreak()
-                    )
-                )
-            ),
-        ]);
-
-        var resultBadge = new PlainBadge(new ConstantText("Výsledek"));
-        var resultInfo = new Container([
-            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Value),
-                new NameValuePair(
-                    new DisplayLabel(LabelCodes.Result),
-                    new OpenTypeElement(collapsibleContent)
+                    ),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Method),
                 new NameValuePair(
                     new ConstantText("Metoda"),
-                    new ChangeContext("f:method", new CodeableConcept())
+                    new ChangeContext("f:method", new CodeableConcept()),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Performer),
@@ -163,31 +167,39 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
                                         _ => new CodeableConcept()))
                             )
                         ], ContainerType.Span)
-                    ], new LineBreak())
+                    ], new LineBreak()),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Interpretation),
                 new NameValuePair(
                     new ConstantText("Interpretace"),
-                    new CommaSeparatedBuilder("f:interpretation", _ => [new CodeableConcept()])
+                    new CommaSeparatedBuilder("f:interpretation", _ => [new CodeableConcept()]),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.BodySite),
                 new NameValuePair(
                     new DisplayLabel(LabelCodes.BodySite),
-                    new ChangeContext("f:bodySite", new CodeableConcept())
+                    new ChangeContext("f:bodySite", new CodeableConcept()),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Specimen),
                 new NameValuePair(
                     new ConstantText("Vzorek"),
-                    new AnyReferenceNamingWidget("f:specimen")
+                    new AnyReferenceNamingWidget("f:specimen"),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
                 )
             ),
             new If(_ =>
                     infrequentProperties.ContainsAnyOf(ObservationInfrequentProperties.CertifiedRefMaterialCodeable,
                         ObservationInfrequentProperties.CertifiedRefMaterialIdentifier),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     [
                         new ConstantText("Certifikovaný referenční materiál")
                     ],
@@ -202,209 +214,153 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
                         new CommaSeparatedBuilder(
                             $"f:extension[@url='{CertifiedRefMaterialIdentifierExtensionUrl}']/f:valueIdentifier",
                             _ => [new ShowIdentifier()])
-                    ]
-                )
+                    ],
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                ))
             ),
-        ]);
-
-        var deviceBadge = new PlainBadge(new ConstantText("Zařízení"));
-        var deviceInfo =
             new If(_ =>
                     infrequentProperties.Contains(ObservationInfrequentProperties.LabTestKitExtension) ||
                     infrequentProperties.Contains(ObservationInfrequentProperties.Device),
-                new ListBuilder(
-                    $"f:extension[@url='{LabTestKitExtensionUrl}']/f:valueReference|f:device",
-                    FlexDirection.Column, _ =>
-                    [
-                        ShowSingleReference.WithDefaultDisplayHandler(x =>
-                        [
-                            new Condition(
-                                "f:manufacturer or f:deviceName or f:modelNumber or f:serialNumber or f:specialization or f:expirationDate",
-                                new Card(
-                                    new Concat([
-                                        new Choose([
-                                                new When("f:deviceName/f:name/@value",
-                                                    new Row([
-                                                        new Text("f:deviceName/f:name/@value"),
-                                                        new NarrativeModal()
-                                                    ], flexContainerClasses: "align-items-center")
-                                                )
-                                            ], new Row([
-                                                new ConstantText("Zařízení"),
-                                                new NarrativeModal()
-                                            ], flexContainerClasses: "align-items-center")
-                                        ),
-                                        new EnumIconTooltip("f:status",
-                                            "http://hl7.org/fhir/ValueSet/device-status-reason",
-                                            new ConstantText("Stav zařízení")
+                new NameValuePair([new ConstantText("Zařízení")], [
+                        new ListBuilder(
+                            $"f:extension[@url='{LabTestKitExtensionUrl}']/f:valueReference|f:device",
+                            FlexDirection.Column, _ =>
+                            [
+                                new AnyReferenceNamingWidget()
+                            ],
+                            separator: new LineBreak()
+                        )
+                    ],
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column)
+            ),
+            InfrequentProperties.Optional(
+                new HideableDetails(new LineBreak()),
+                infrequentProperties,
+                ObservationInfrequentProperties.TriggeredByExtension,
+                new HideableDetails(new NameValuePair([new ConstantText("Vyvoláno na základě")], [
+                    new Condition(
+                        "f:extension[@url='observation']",
+                        new NameValuePair(
+                            new ConstantText("Pozorování"),
+                            new CommaSeparatedBuilder(
+                                "f:extension[@url='observation']/f:valueReference",
+                                _ => new AnyReferenceNamingWidget()
+                            ),
+                            style: NameValuePair.NameValuePairStyle.Secondary
+                        )
+                    ),
+                    new Condition(
+                        "f:extension[@url='type']",
+                        new NameValuePair(
+                            new ConstantText("Typ"),
+                            new CommaSeparatedBuilder(
+                                "f:extension[@url='type']/f:valueCode",
+                                _ => new EnumLabel(".", "http://hl7.org/fhir/ValueSet/observation-triggeredbytype")
+                            ),
+                            style: NameValuePair.NameValuePairStyle.Secondary
+                        )
+                    ),
+                    new Condition(
+                        "f:extension[@url='reason']",
+                        new NameValuePair(
+                            new ConstantText("Typ"),
+                            new CommaSeparatedBuilder(
+                                "f:extension[@url='reason']/f:valueString",
+                                _ => new Text("@value")
+                            ),
+                            style: NameValuePair.NameValuePairStyle.Secondary
+                        )
+                    )
+                ], style: NameValuePair.NameValuePairStyle.Primary, direction: FlexDirection.Column))
+            ),
+            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Note),
+                new NameValuePair([new ConstantText("Poznámky")],
+                    [new ConcatBuilder("f:note", _ => [new ShowAnnotationCompact()], new LineBreak())],
+                    style: NameValuePair.NameValuePairStyle.Primary, direction: FlexDirection.Column)
+            ),
+            new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.ReferenceRange),
+                new ReferenceRanges()
+            ),
+            InfrequentProperties.Optional(infrequentProperties, ObservationInfrequentProperties.Encounter,
+                new HideableDetails(new AnyReferenceNamingWidget())
+            )
+        ], FlexDirection.Row, flexContainerClasses: "column-gap-6 row-gap-1");
+
+        var subcomponents = navigator.SelectAllNodes("f:component");
+        var resultWidget = new Concat([
+            new Row([
+                    new Container([
+                        new TextContainer(TextStyle.Bold,
+                            [new ChangeContext("f:code", new CodeableConcept())]),
+                        new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/observation-status",
+                            new DisplayLabel(LabelCodes.Status)),
+                    ], optionalClass: "h5 m-0 blue-color"),
+                    new NarrativeModal(alignRight: false),
+                ], flexContainerClasses: "gap-1 align-items-center",
+                idSource: skipIdPopulation ? null : new IdentifierSource(navigator)),
+            new FlexList([
+                nameValuePairs,
+                new Condition("f:component", new Card(new ConstantText("Složky výsledku"),
+                    new AlternatingBackgroundColumn([
+                        ..subcomponents.Select(nav =>
+                        {
+                            var componentInfrequentProperties =
+                                InfrequentProperties.Evaluate<ObservationInfrequentProperties>([nav]);
+
+                            var chartContainerComponent = new StructuredDetails();
+
+                            var widget = new Concat([
+                                new Row([
+                                    new Container([
+                                        new TextContainer(TextStyle.Bold,
+                                            [new ChangeContext("f:code", new CodeableConcept())]),
+                                    ], optionalClass: "d-flex align-items-center h5 m-0 blue-color"),
+                                ], flexContainerClasses: "gap-1 align-items-center"),
+                                new FlexList([
+                                    new If(
+                                        _ => componentInfrequentProperties.Contains(ObservationInfrequentProperties
+                                            .Value),
+                                        new NameValuePair(
+                                            new DisplayLabel(LabelCodes.Result),
+                                            new OpenTypeElement(chartContainerComponent,
+                                                useChartInDetailsPlaceholder: false),
+                                            style: NameValuePair.NameValuePairStyle.Primary,
+                                            direction: FlexDirection.Column
                                         )
-                                    ]),
-                                    new Concat([
-                                        new DeviceTextInfo(".", true)
-                                    ]), idSource: x
-                                )
-                            )
-                        ]),
-                    ]
-                )
-            );
+                                    ),
+                                    new If(
+                                        _ => componentInfrequentProperties.Contains(ObservationInfrequentProperties
+                                            .Interpretation),
+                                        new NameValuePair(
+                                            new ConstantText("Interpretace"),
+                                            new CommaSeparatedBuilder("f:interpretation", _ => [new CodeableConcept()]),
+                                            style: NameValuePair.NameValuePairStyle.Primary,
+                                            direction: FlexDirection.Column
+                                        )
+                                    ),
+                                    new If(
+                                        _ => componentInfrequentProperties.Contains(ObservationInfrequentProperties
+                                            .ReferenceRange),
+                                        new ReferenceRanges()
+                                    ),
+                                    ..chartContainerComponent.Build()
+                                ], FlexDirection.Column, flexContainerClasses: "px-2 gap-1")
+                            ]);
 
-        var componentResultBadge = new PlainBadge(new ConstantText("Složky výsledku"));
-        var componentResultInfo = new Container([
-            new ListBuilder("f:component", FlexDirection.Row, (i, nav) =>
-            {
-                var componentInfrequentProperties =
-                    InfrequentProperties.Evaluate<ObservationInfrequentProperties>([nav]);
-
-                var collapsibleContentComponent = new StructuredDetails();
-
-                var componenetResultValue =
-                    new If(_ => componentInfrequentProperties.Contains(ObservationInfrequentProperties.Value),
-                        new NameValuePair(
-                            new DisplayLabel(LabelCodes.Result),
-                            new OpenTypeElement(collapsibleContentComponent)
-                        )
-                    );
-
-                var card = new Card(null, new Container([
-                        new NameValuePair(
-                            new ConstantText("Kód"),
-                            new ChangeContext("f:code", new CodeableConcept())
-                        ),
-                        componenetResultValue,
-                        new If(
-                            _ => componentInfrequentProperties.Contains(ObservationInfrequentProperties.Interpretation),
-                            new NameValuePair(
-                                new ConstantText("Interpretace"),
-                                new CommaSeparatedBuilder("f:interpretation", _ => [new CodeableConcept()])
-                            )
-                        ),
-                        new If(
-                            _ => componentInfrequentProperties.Contains(ObservationInfrequentProperties.ReferenceRange),
-                            new ReferenceRanges()
-                        )
-                    ]), footer: new Concat(collapsibleContentComponent.Build())
-                );
-
-                return [card];
-            })
+                            return new ChangeContext(nav, widget);
+                        })
+                    ]))),
+                new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.HasMember),
+                    new Card(new ConstantText("Podzáznamy"),
+                        new ShowMultiReference("f:hasMember", displayResourceType: false))),
+                ..chartContainer.Build(),
+                new Condition("f:text", new NarrativeCollapser()),
+            ], FlexDirection.Column, flexContainerClasses: "px-2 gap-1")
         ]);
 
-        if (infrequentProperties.Contains(ObservationInfrequentProperties.Text))
-        {
-            collapsibleContent.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
-        }
-
-        if (infrequentProperties.Contains(ObservationInfrequentProperties.Encounter))
-        {
-            var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator,
-                "f:encounter", "f:text");
-
-            collapsibleContent.AddCollapser(
-                header: new ConstantText(Labels.Encounter),
-                body: ShowSingleReference.WithDefaultDisplayHandler(
-                    nav => [new EncounterCard(nav, false, false)],
-                    "f:encounter"
-                ),
-                footer: encounterNarrative != null ? [new NarrativeCollapser(encounterNarrative.GetFullPath())] : null,
-                narrativeContent: encounterNarrative != null
-                    ? new NarrativeModal(encounterNarrative.GetFullPath())
-                    : null
-            );
-        }
-
-        var complete =
-            new Collapser([headerInfo], [], [
-                    badge,
-                    basicInfo,
-                    new If(
-                        _ => infrequentProperties.ContainsAnyOf(ObservationInfrequentProperties.SupportingInfo,
-                            ObservationInfrequentProperties.Issued, ObservationInfrequentProperties.DerivedFrom),
-                        new ThematicBreak(),
-                        additionalBadge,
-                        additionalInfo
-                    ),
-                    new If(_ => infrequentProperties.ContainsAnyOf(ObservationInfrequentProperties.Value,
-                            ObservationInfrequentProperties.Method, ObservationInfrequentProperties.Performer),
-                        new ThematicBreak(),
-                        resultBadge,
-                        resultInfo
-                    ),
-                    new If(_ => infrequentProperties.ContainsAnyOf(ObservationInfrequentProperties.Device,
-                            ObservationInfrequentProperties.LabTestKitExtension),
-                        new ThematicBreak(),
-                        deviceBadge,
-                        deviceInfo
-                    ),
-                    new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.ReferenceRange),
-                        new ThematicBreak(),
-                        new ReferenceRanges()
-                    ),
-                    new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Component),
-                        new ThematicBreak(),
-                        componentResultBadge,
-                        componentResultInfo
-                    ),
-                    InfrequentProperties.Condition(
-                        infrequentProperties,
-                        ObservationInfrequentProperties.TriggeredByExtension,
-                        new ThematicBreak()
-                    ),
-                    InfrequentProperties.Optional(
-                        new LineBreak(),
-                        infrequentProperties,
-                        ObservationInfrequentProperties.TriggeredByExtension,
-                        new PlainBadge(new ConstantText("Vyvoláno na základě")),
-                        new Condition(
-                            "f:extension[@url='observation']",
-                            new NameValuePair(
-                                new ConstantText("Pozorování"),
-                                new CommaSeparatedBuilder(
-                                    "f:extension[@url='observation']/f:valueReference",
-                                    _ => new AnyReferenceNamingWidget()
-                                )
-                            )
-                        ),
-                        new Condition(
-                            "f:extension[@url='type']",
-                            new NameValuePair(
-                                new ConstantText("Typ"),
-                                new CommaSeparatedBuilder(
-                                    "f:extension[@url='type']/f:valueCode",
-                                    _ => new EnumLabel(".", "http://hl7.org/fhir/ValueSet/observation-triggeredbytype")
-                                )
-                            )
-                        ),
-                        new Condition(
-                            "f:extension[@url='reason']",
-                            new NameValuePair(
-                                new ConstantText("Typ"),
-                                new CommaSeparatedBuilder(
-                                    "f:extension[@url='reason']/f:valueString",
-                                    _ => new Text("@value")
-                                )
-                            )
-                        )
-                    ),
-                    new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.HasMember),
-                        new ThematicBreak(),
-                        new PlainBadge(new ConstantText("Podzáznamy")),
-                        new Container([
-                            new ShowMultiReference("f:hasMember", displayResourceType: false)
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(ObservationInfrequentProperties.Note),
-                        new ThematicBreak(),
-                        new PlainBadge(new ConstantText("Poznámky")),
-                        new LineBreak(),
-                        new ConcatBuilder("f:note", _ => [new ShowAnnotationCompact()], new LineBreak())
-                    ),
-                ],
-                footer: collapsibleContent.Build(),
-                iconPrefix: [new NarrativeModal()],
-                idSource: skipIdPopulation ? null : new IdentifierSource(navigator));
-
-        return await complete.Render(navigator, renderer, context);
+        return await resultWidget.Render(navigator, renderer, context);
     }
 
     private class ReferenceRanges : Widget
@@ -415,8 +371,7 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
             RenderContext context
         )
         {
-            var referenceRangeBadge = new PlainBadge(new ConstantText("Referenční rozsahy"));
-            var referenceRangeInfo = new Container([
+            var referenceRange = new NameValuePair([new ConstantText("Referenční rozsahy")], [
                 new ListBuilder("f:referenceRange", FlexDirection.Row, _ =>
                     [
                         new Card(null, new Container([
@@ -453,9 +408,9 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
                         ]))
                     ]
                 )
-            ]);
+            ], style: NameValuePair.NameValuePairStyle.Primary, direction: FlexDirection.Column);
 
-            return ((Widget[]) [referenceRangeBadge, referenceRangeInfo]).RenderConcatenatedResult(navigator, renderer,
+            return referenceRange.Render(navigator, renderer,
                 context);
         }
     }

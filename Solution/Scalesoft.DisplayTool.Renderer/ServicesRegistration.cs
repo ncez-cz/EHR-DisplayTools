@@ -13,8 +13,10 @@ using Scalesoft.DisplayTool.Renderer.Validators;
 using Scalesoft.DisplayTool.Renderer.Validators.Cda;
 using Scalesoft.DisplayTool.Renderer.Validators.Dasta;
 using Scalesoft.DisplayTool.Renderer.Validators.Fhir;
+using Scalesoft.DisplayTool.Renderer.Validators.Signature;
 using Scalesoft.DisplayTool.Shared.Configuration;
 using Scalesoft.DisplayTool.TermxTranslator;
+using Scalesoft.EZCAII.Client;
 
 namespace Scalesoft.DisplayTool.Renderer;
 
@@ -97,6 +99,23 @@ public static class ServicesRegistration
                 c.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
             }
         );
+
+        if (!string.IsNullOrEmpty(externalServicesConfiguration.DocumentSignatureValidation.EZCAIIBaseUrl))
+        {
+            var baseUrl = externalServicesConfiguration.DocumentSignatureValidation.EZCAIIBaseUrl;
+            if (!string.IsNullOrEmpty(baseUrl) && !baseUrl.EndsWith("/"))
+            {
+                baseUrl += '/';
+            }
+
+            services.AddHttpClient<SignDocumentClient>(c => { c.BaseAddress = new Uri(baseUrl); });
+            services.AddHttpClient<ValidateDocumentClient>(c => { c.BaseAddress = new Uri(baseUrl); });
+            services.AddScoped<IDocumentSignatureValidationManager, DocumentSignatureValidationManager>();
+        }
+        else
+        {
+            services.AddScoped<IDocumentSignatureValidationManager, NullDocumentSignatureValidationManager>();
+        }
 
         return services.BuildServiceProvider();
     }

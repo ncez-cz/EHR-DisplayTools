@@ -3,13 +3,20 @@ using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Observation;
 
-public class DiagnosticReportCard(bool skipIdPopulation = false) : Widget
+public class DiagnosticReportCard(bool skipIdPopulation = false) : ColumnResourceBase<DiagnosticReportCard>, IResourceWidget
 {
+    public static string ResourceType => "DiagnosticReport";
+
+    public DiagnosticReportCard() : this(false)
+    {
+    }
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -21,20 +28,20 @@ public class DiagnosticReportCard(bool skipIdPopulation = false) : Widget
 
         var headerInfo = new Container([
             new ConstantText("Diagnostická zpráva"),
-            new ConstantText(" ("),
-            new ChangeContext("f:code", new CodeableConcept()),
-            new ConstantText(")"),
-            new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/observation-status",
-                new DisplayLabel(LabelCodes.Status))
+            new HideableDetails(new ConstantText(" ("),
+                new ChangeContext("f:code", new CodeableConcept()),
+                new ConstantText(")"),
+                new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/observation-status",
+                    new DisplayLabel(LabelCodes.Status)))
         ]);
 
         var badge = new PlainBadge(new ConstantText("Základní informace"));
         var basicInfo = new Container([
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Category),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Druh pozorování"),
                     new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()])
-                )
+                ))
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Effective),
                 new NameValuePair(
@@ -43,23 +50,23 @@ public class DiagnosticReportCard(bool skipIdPopulation = false) : Widget
                 )
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Subject),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Subjekt"),
                     new AnyReferenceNamingWidget("f:subject")
-                )
+                ))
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.BasedOn),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Založeno na"),
                     new ConcatBuilder("f:basedOn",
                         _ => [new AnyReferenceNamingWidget()], new LineBreak())
-                )
+                ))
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Issued),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Vydáno"),
                     new ShowDateTime("f:issued")
-                )
+                ))
             ),
         ]);
 
@@ -78,24 +85,26 @@ public class DiagnosticReportCard(bool skipIdPopulation = false) : Widget
                 )
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.ResultsInterpreter),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Intrepret výsledků"),
                     new CommaSeparatedBuilder("f:resultsInterpreter", _ => [new AnyReferenceNamingWidget()])
-                )
+                ))
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Specimen),
-                new NameValuePair(
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Vzorek"),
                     new AnyReferenceNamingWidget("f:specimen")
-                )
+                ))
             ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.ImagingStudy),
-                new NameValuePair(
+            new If(
+                _ => infrequentProperties.Contains(DiagnosticInfrequentProperties
+                    .ImagingStudy),
+                new HideableDetails(new NameValuePair(
                     new ConstantText("Obrazová studie"),
                     new ConcatBuilder("f:imagingStudy",
                         _ => [new AnyReferenceNamingWidget()], new LineBreak()
                     )
-                )
+                ))
             ),
             new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Media),
                 new TextContainer(TextStyle.Bold, new ConstantText("Záznamy:")),

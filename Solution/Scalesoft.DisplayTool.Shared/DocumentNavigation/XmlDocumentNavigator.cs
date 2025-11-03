@@ -4,11 +4,15 @@ namespace Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 public class XmlDocumentNavigator
 {
+    private const string HideableContextName = "hideable-context";
+
     public XmlDocumentNavigator? Parent { get; }
 
     public XPathNavigator? Node { get; }
 
     public string PathFromParent { get; }
+
+    public bool IsInHideableContext => Variables.ContainsKey(HideableContextName);
 
     public Dictionary<string, object> Variables { get; }
 
@@ -19,7 +23,8 @@ public class XmlDocumentNavigator
         XmlDocumentNavigator? parent = null,
         Dictionary<string, object>? parentVariables = null,
         Dictionary<string, string>? namespaces = null,
-        string pathFromParent = "/")
+        string pathFromParent = "/"
+    )
     {
         Parent = parent;
         Node = node;
@@ -66,7 +71,8 @@ public class XmlDocumentNavigator
         var nodes = Node.SelectChildren(type);
 
         return nodes.OfType<XPathNavigator>().Select(x =>
-            new XmlDocumentNavigator(x, this, Variables, Namespaces, "child::node()"));
+            new XmlDocumentNavigator(x, this, Variables, Namespaces, "child::node()")
+        );
     }
 
     public bool EvaluateCondition(string test)
@@ -234,5 +240,13 @@ public class XmlDocumentNavigator
     public XmlDocumentNavigator Clone()
     {
         return new XmlDocumentNavigator(Node, Parent, Variables, Namespaces, PathFromParent);
+    }
+
+    public XmlDocumentNavigator WithHideableContext()
+    {
+        var result = new XmlDocumentNavigator(Node, Parent, Variables, Namespaces, PathFromParent);
+        result.Variables.TryAdd(HideableContextName, true);
+
+        return result;
     }
 }

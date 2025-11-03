@@ -2,14 +2,17 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class EvidenceVariable(XmlDocumentNavigator navigator) : Widget
+public class EvidenceVariable : ColumnResourceBase<EvidenceVariable>, IResourceWidget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator _, IWidgetRenderer renderer, RenderContext context)
+    public static string ResourceType => "EvidenceVariable";
+    
+    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
     {
         var variableBadge = new PlainBadge(new ConstantText("Detaily proměnné"));
         var variableInfo = new Container([
@@ -68,7 +71,7 @@ public class EvidenceVariable(XmlDocumentNavigator navigator) : Widget
         ]);
 
 
-        var evidenceVariable = new Evidence(navigator, new ConstantText("Proměnná důkazu"), [
+        var evidenceVariable = new Evidence(new ConstantText("Proměnná důkazu"), [
             new ThematicBreak(),
             variableBadge,
             variableInfo

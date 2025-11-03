@@ -210,89 +210,93 @@ h6, .h6 {
 
 // Copied from https://hl7.org/fhir/R4/fhir-runtime.css
 
-.bold {
-    font-weight: bold
+.narrative {
+    .bold {
+        font-weight: bold
+    }
+
+    .italics {
+        font-style: italic
+    }
+
+    .underline {
+        text-decoration: underline
+    }
+
+    .strikethrough {
+        text-decoration: line-through
+    }
+
+    .left {
+        text-align: left
+    }
+
+    .right {
+        text-align: right
+    }
+
+    .center {
+        text-align: center
+    }
+
+    .justify {
+        text-align: justify
+    }
+
+    .border-left {
+        border-left: 1px solid grey
+    }
+
+    .border-right {
+        border-right: 1px solid grey
+    }
+
+    .border-top {
+        border-top: 1px solid grey
+    }
+
+    .border-bottom {
+        border-bottom: 1px solid grey
+    }
+
+    .arabic {
+        list-style-type: decimal
+    }
+
+    .little-roman {
+        list-style-type: lower-roman
+    }
+
+    .big-roman {
+        list-style-type: upper-roman
+    }
+
+    .little-alpha {
+        list-style-type: lower-alpha
+    }
+
+    .big-alpha {
+        list-style-type: upper-alpha
+    }
+
+    .disc {
+        list-style-type: disc
+    }
+
+    .circle {
+        list-style-type: circle
+    }
+
+    .square {
+        list-style-type: square
+    }
+
+    .nolist, .unlist {
+        list-style-type: none
+    }
+
 }
 
-.italics {
-    font-style: italic
-}
-
-.underline {
-    text-decoration: underline
-}
-
-.strikethrough {
-    text-decoration: line-through
-}
-
-.left {
-    text-align: left
-}
-
-.right {
-    text-align: right
-}
-
-.center {
-    text-align: center
-}
-
-.justify {
-    text-align: justify
-}
-
-.border-left {
-    border-left: 1px solid grey
-}
-
-.border-right {
-    border-right: 1px solid grey
-}
-
-.border-top {
-    border-top: 1px solid grey
-}
-
-.border-bottom {
-    border-bottom: 1px solid grey
-}
-
-.arabic {
-    list-style-type: decimal
-}
-
-.little-roman {
-    list-style-type: lower-roman
-}
-
-.big-roman {
-    list-style-type: upper-roman
-}
-
-.little-alpha {
-    list-style-type: lower-alpha
-}
-
-.big-alpha {
-    list-style-type: upper-alpha
-}
-
-.disc {
-    list-style-type: disc
-}
-
-.circle {
-    list-style-type: circle
-}
-
-.square {
-    list-style-type: square
-}
-
-.nolist, .unlist {
-    list-style-type: none
-}
 
 .bordered-card {
     flex: 1 1 15rem;
@@ -351,17 +355,13 @@ h6, .h6 {
 }
 
 .header-code {
-    max-height: calc((var(--#{$prefix}h1-font-size) * 4) - var(--#{$prefix}h6-font-size) * 3);
+    max-height: calc((var(--#{$prefix}h1-font-size) * 4) - var(--#{$prefix}h6-font-size) * 4);
     width: auto;
     height: auto;
 }
 
-.header-image {
-    height: calc(var(--#{$prefix}h1-font-size) * 4);
-
-    > img {
-        height: 100%;
-    }
+.header-image > img {
+    max-height: calc((var(--#{$prefix}h1-font-size) * 4) - var(--#{$prefix}h6-font-size) * 4);
 }
 
 .header-code-container {
@@ -513,14 +513,24 @@ h6, .h6 {
     color: #{$blue-400};
 }
 
+.text-gray-600 {
+    color: #{$gray-600};
+}
+
 .collapsible-row-details {
     background-color: #F3F7FB;
 }
 
 .sub-component-row {
+    $subcomponent-padding: 0.35rem;
+
     td:first-child {
-        box-shadow: inset 0.35rem 0 0 0 #{$table-border-color};
-        padding-left: 0.4rem;
+        box-shadow: inset $subcomponent-padding 0 0 0 #{$table-border-color};
+        padding-left: $subcomponent-padding + 0.45rem;
+
+        .collapse-toggler-wrapper {
+            left: $subcomponent-padding;
+        }
     }
 }
 
@@ -631,7 +641,7 @@ body {
 }
 
 .person-photo {
-    max-height: 10rem;
+    max-height: 5rem;
     width: auto;
     height: auto;
     object-fit: contain;
@@ -655,10 +665,6 @@ body {
 tbody:empty {
     // WORKAROUND for Firefox - fix borders. Firefox stops rendering borders if a table has an empty tbody - see https://bugzilla.mozilla.org/show_bug.cgi?id=217769
     display: none;
-}
-
-.document-header {
-    margin-bottom: -0.2rem;
 }
 
 .dosage-container {
@@ -690,9 +696,8 @@ input:checked + .collapse-header:has(.card-subtitle) {
 
 .two-col-grid {
     display: grid;
-    grid-template-columns: max-content max-content;
-    grid-column-gap: $spacing02;
-    justify-content: space-between;
+    grid-template-columns: 1fr fit-content(50%);
+    grid-auto-rows: min-content;
 }
 
 .card-header {
@@ -708,15 +713,129 @@ input:checked + .collapse-header:has(.card-subtitle) {
     --#{$prefix}card-cap-padding-x: #{$spacing02};
 }
 
-.striped-row-bg {
-    padding: $spacing02;
-    margin: -$spacing02;
-    background: var(--#{$prefix}gray-100);
+
+body:has(#detail-toggle:not(:checked)) {
+
+    /* --------------------------------------------------
+       1. Highlight alternating detail blocks
+       --------------------------------------------------
+       When we have an alternating background container adjacent to
+       non-optional elements (i.e., real content rows), draw a border around
+       that group. Also catches the inverse order.
+    */
+    .alternating-bg-items-container:has(~ *:not(.optional-detail)),
+    :not(.optional-detail) ~ .alternating-bg-items-container {
+        border: solid 0.5px var(--#{$prefix}primary-200);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    /* --------------------------------------------------
+       2. Tighten padding for “single-detail” content blocks
+       --------------------------------------------------
+       Collapsible sections (or card bodies) that contain an
+       .alternating-bg-items-container, but do NOT directly contain
+       two or more siblings that are not .optional-detail.
+
+       In other words:
+       If the container has only one “real” (non-optional) child —
+       a simple, single-detail structure (which therefore must be
+       .alternating-bg-items-container) — tighten its padding to
+       visually compress the layout.
+    */
+    .collapsible-content:has(> .alternating-bg-items-container):not(:has(> :not(.optional-detail) ~ :not(.optional-detail))),
+    .card-body:has(> .alternating-bg-items-container):not(:has(> :not(.optional-detail) ~ :not(.optional-detail))) {
+        padding: 1px !important;
+    }
+
+    /* --------------------------------------------------
+       3. Remove bottom padding on sections that only contain
+           a single “simple” collapsible content block
+       --------------------------------------------------
+       Logic: A .section containing a .collapsible-content-wrapper where
+       the inner .collapsible-content (or .card-body) includes an
+       .alternating-bg-items-container, but does NOT have multiple
+       non-optional children.
+       
+       This avoids unnecessary whitespace after simple sections.
+    */
+    .section:has(> .collapsible-content-wrapper > .collapsible-content),
+    .section:has(> .collapsible-content-wrapper > .card-body) {
+        /* add the two conditions as additional top-level pseudos */
+        &:has(> .collapsible-content-wrapper > .collapsible-content > .alternating-bg-items-container):not(:has(> .collapsible-content-wrapper > .collapsible-content > :not(.optional-detail) ~ :not(.optional-detail))),
+        &:has(> .collapsible-content-wrapper > .card-body > .alternating-bg-items-container):not(:has(> .collapsible-content-wrapper > .card-body > :not(.optional-detail) ~ :not(.optional-detail))) {
+            padding-bottom: 0;
+        }
+    }
 }
 
-.mx-negative-2 {
-    margin-left: -$spacing02 !important;
-    margin-right: -$spacing02 !important;
+body:has(#detail-toggle:checked) {
+
+    /* --------------------------------------------------
+       2. Highlight alternating detail blocks
+       --------------------------------------------------
+       In the expanded (checked) state, highlight alternating
+       background containers whenever they appear adjacent to
+       any sibling elements. This ensures grouped detail rows
+       are visually framed even when all details are visible.
+    */
+    .alternating-bg-items-container:has(~ *),
+    * ~ .alternating-bg-items-container {
+        border: solid 0.5px var(--#{$prefix}primary-200);
+        border-radius: 6px;
+        overflow: hidden;
+    }
+
+    /* --------------------------------------------------
+       2. Tighten padding for “simple” expanded content blocks
+       --------------------------------------------------
+       Collapsible sections (or card bodies) that:
+         • Directly contain a single .alternating-bg-items-container, OR
+         • Contain an .alternating-bg-items-container followed by a single
+           .optional-detail:last-child whose only child is
+           .narrative-print-collapser-hidden
+
+       These are “simple” expanded layouts with minimal structure.
+       Tighten their padding for a cleaner, more compact visual flow,
+       and remove internal borders to prevent double outlines.
+    */
+    .collapsible-content:has(> .alternating-bg-items-container:only-child),
+    .card-body:has(> .alternating-bg-items-container:only-child),
+    .collapsible-content:has(> .alternating-bg-items-container:first-child + .optional-detail:last-child > .narrative-print-collapser-hidden:only-child),
+    .card-body:has(> .alternating-bg-items-container:first-child + .optional-detail:last-child > .narrative-print-collapser-hidden:only-child) {
+        padding: 1px !important;
+
+        & > .alternating-bg-items-container {
+            border: none;
+        }
+    }
+
+    /* --------------------------------------------------
+       3. Remove bottom padding on sections that only contain
+           a single “simple” expanded content block
+       --------------------------------------------------
+       Logic: A .section containing a .collapsible-content-wrapper where
+       the inner .collapsible-content (or .card-body) matches one of the
+       “simple” patterns above — either:
+         • a single .alternating-bg-items-container:only-child, or
+         • the “alternating-bg + optional-detail” structure.
+    */
+    .section {
+        &:has(> .collapsible-content-wrapper > .collapsible-content > .alternating-bg-items-container:only-child),
+        &:has(> .collapsible-content-wrapper > .collapsible-content > .alternating-bg-items-container:first-child + .optional-detail:last-child > .narrative-print-collapser-hidden:only-child),
+        &:has(> .collapsible-content-wrapper > .card-body > .alternating-bg-items-container:only-child),
+        &:has(> .collapsible-content-wrapper > .card-body > .alternating-bg-items-container:first-child + .optional-detail:last-child > .narrative-print-collapser-hidden:only-child) {
+            padding-bottom: 0;
+        }
+    }
+}
+
+.alternating-bg-items-container > div:nth-child(even) {
+    background-color: var(--striped-section-bg-color);
+}
+
+.card-body > .alternating-bg-items-container > div:nth-child(even) {
+    background-color: var(--odd-level-section-background-color);
 }
 
 .blue-color {
@@ -742,8 +861,13 @@ input:checked + .collapse-header:has(.card-subtitle) {
     }
 
     .critical-bullet {
-        color: var(--#{$prefix}danger-200);
-        -webkit-text-stroke: 1px var(--#{$prefix}danger-500);
+        color: var(--#{$prefix}danger-500);
+        -webkit-text-stroke: 1px var(--#{$prefix}danger-800);
+    }
+
+    .abnormal-bullet-significant {
+        color: var(--#{$prefix}danger-400);
+        -webkit-text-stroke: 1px var(--#{$prefix}danger-700);
     }
 
     .abnormal-bullet {
@@ -761,4 +885,65 @@ input:checked + .collapse-header:has(.card-subtitle) {
     align-items: center;
     display: flex;
     height: 1rem;
+}
+
+.name-value-pair-wrapper {
+    display: grid;
+    grid-template-columns: max-content auto;
+    column-gap: $spacing04;
+
+    dl:not(.flex-column) {
+        display: contents !important;
+    }
+
+    dl.flex-column {
+        grid-column: span 2;
+    }
+}
+
+.patient-identifier-grid {
+    display: grid;
+    grid-template-columns: max-content auto max-content auto;
+    grid-column-gap: $spacing04;
+
+    dl:not(.flex-column), span:has(dl:not(.flex-column)) {
+        display: contents !important;
+    }
+
+    dl.flex-column {
+        grid-column: span 2;
+    }
+}
+
+.black {
+    color: black;
+}
+
+.document-header {
+    p {
+        color: var(--#{$prefix}blue-800);
+    }
+
+    p, .name-value-pair > .value {
+        font-weight: 600;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+}
+
+.big {
+    font-size: var(--#{$prefix}big-font-size);
+}
+
+.capitalize-first {
+    display: inline-block;
+
+    &:first-letter {
+        text-transform: uppercase;
+    }
+}
+
+
+.merged-service-requests {
+    background-color: var(--#{$prefix}blue-50);
 }

@@ -2,21 +2,24 @@
 @switch (Model.Variant)
 {
     case ButtonVariant.CollapseSection:
-        <div class="d-none" data-collapse-label="Sbalit všechny sekce" data-expand-label="Rozbalit všechny sekce"></div>
-        <input type="checkbox" class="collapse-checkbox" id="@Model.InputId" checked/>
-        <label id="button-@Model.InputId" class="@GetButtonClasses() collapse-label collapse-all-btn"
-               title="@Model.Tooltip" @attributes="AdditionalAttributes" for="@Model.InputId" hidden>
-            @((MarkupString)Model.Icon)
-            <span>
-            @if (Model.Text != null)
-                {
-                    @((MarkupString)Model.Text)
-                }
+        <div class="collapse-section-container">
+            <div class="d-none" data-collapse-label="Sbalit všechny sekce"
+                 data-expand-label="Rozbalit všechny sekce"></div>
+            <input type="checkbox" class="collapse-checkbox" id="@Model.InputId" checked/>
+            <label id="button-@Model.InputId" class="@GetButtonClasses() collapse-label collapse-all-btn gap-1"
+                   title="@Model.Tooltip" @attributes="AdditionalAttributes" for="@Model.InputId" hidden>
+                @((MarkupString)Model.Icon)
+                <span>
+                @if (Model.Text != null)
+                    {
+                        @((MarkupString)Model.Text)
+                    }
             </span>
-        </label>
+            </label>
+        </div>
         break;
     case ButtonVariant.ToggleDetails:
-        <div class="toggle-details-container" >
+        <div class="toggle-details-container">
             <input
                 type="checkbox"
                 id="detail-toggle"
@@ -26,14 +29,27 @@
             />
             @if (Model.LevelOfDocumentDetail == LevelOfDetail.UserDefined)
             {
-                <label for="detail-toggle" class="checked-label @GetButtonClasses() btn">Zjednodušený režim</label>
-                <label for="detail-toggle" class="unchecked-label @GetButtonClasses() btn">Detailní režim</label>
+                <label for="detail-toggle" class="checked-label @GetButtonClasses() btn gap-1">
+                    @if (Model.AltIcon != null)
+                    {
+                        @((MarkupString)Model.AltIcon)
+                    }
+                    else
+                    {
+                        @((MarkupString)Model.Icon)
+                    }
+                    Zjednodušený režim
+                </label>
+                <label for="detail-toggle" class="unchecked-label @GetButtonClasses() btn gap-1">
+                    @((MarkupString)Model.Icon)
+                    Detailní režim
+                </label>
             }
         </div>
         break;
     case ButtonVariant.Default:
     default:
-        <button id="button-@Model.InputId" class="@GetButtonClasses()"
+        <button id="button-@Model.InputId" class="gap-1 @GetButtonClasses()"
                 title="@Model.Tooltip" @attributes="AdditionalAttributes">
             @((MarkupString)Model.Icon)
             @if (Model.Text != null)
@@ -49,7 +65,7 @@
     [Parameter] public Button.ViewModel Model { get; set; } = default!;
 
     private Dictionary<string, object> AdditionalAttributes { get; set; } = new();
-    
+
     protected override void OnParametersSet()
     {
         AdditionalAttributes.Clear();

@@ -11,7 +11,7 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Observation;
 public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
 {
     public const string XPathCondition =
-        "f:category/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/observation-category' and f:code/@value='laboratory'] and f:code/f:coding/f:system[@value='https://nclp.ncez.mzcr.cz/CodeSystem/NCLPPOL']";
+        "f:category/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/observation-category' and f:code/@value='laboratory']";
 
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -557,7 +557,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                     break;
                 case "LU":
                     targetIndex = 2;
-                    targetClass = "abnormal-bullet";
+                    targetClass = "abnormal-bullet-significant";
                     break;
                 case "L":
                     targetIndex = 3;
@@ -573,7 +573,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                     break;
                 case "HU":
                     targetIndex = 8;
-                    targetClass = "abnormal-bullet";
+                    targetClass = "abnormal-bullet-significant";
                     break;
                 case "HH":
                     targetIndex = 10;

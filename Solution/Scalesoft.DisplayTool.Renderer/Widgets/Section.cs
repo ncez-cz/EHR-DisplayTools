@@ -75,7 +75,7 @@ public class Section(
             subtitle != null ? await subtitle.RenderConcatenatedResult(navigator, renderer, context) : null;
 
         var contentResult = await contentWithContext.Render(navigator, renderer, context);
-        var dividerIcon = IconHelper.GetInstance(SupportedIcons.CaretDown, context);
+        var dividerIcon = IconHelper.GetInstance(SupportedIcons.ChevronUp, context);
 
         var narrativeTextModal =
             narrativeModal != null ? await narrativeModal.Render(navigator, renderer, context) : null;

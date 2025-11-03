@@ -27,7 +27,11 @@ public class LazyWidget : Widget
         ShouldShortCircuit = true;
     }
 
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         return (ShouldShortCircuit ? m_value : m_builder()).RenderConcatenatedResult(navigator, renderer, context);
     }

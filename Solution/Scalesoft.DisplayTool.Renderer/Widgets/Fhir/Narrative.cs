@@ -48,7 +48,7 @@ public class Narrative(string path = ".") : Widget
         }
 
         var narrativeNode = navigator.SelectSingleNode(path);
-        var tree = new Container(parseResult.Results, idSource: narrativeNode);
+        var tree = new Container(parseResult.Results, idSource: narrativeNode, optionalClass: "narrative");
 
         return await tree.Render(div, renderer, context);
     }

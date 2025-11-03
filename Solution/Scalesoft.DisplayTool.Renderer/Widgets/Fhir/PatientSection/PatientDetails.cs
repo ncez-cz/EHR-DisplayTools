@@ -30,181 +30,268 @@ public class PatientDetails : Widget
         const string recordedSexOrGender = "http://hl7.org/fhir/StructureDefinition/individual-recordedSexOrGender";
 
         var isAnimal = navigator.EvaluateCondition($"f:extension[@url='{patientAnimal}']");
+        var hasRid = navigator.EvaluateCondition($"f:identifier[f:system/@value='{ridIdentifier}']");
+        var nonRidIdentifiers =
+            navigator.SelectAllNodes($"f:identifier[not(f:system/@value='{ridIdentifier}')]").ToList();
+
+        var otherIdentifiers =
+            new NameValuePair(
+                [
+                    new PlainBadge(new ConstantText("Ostatní identifikátory")),
+                ],
+                [
+                    new ConcatBuilder(
+                        nonRidIdentifiers,
+                        (n, _, nav) =>
+                        {
+                            if (n == 0 && !hasRid)
+                            {
+                                return [new NullWidget()];
+                            }
+
+
+                            var official = nav.EvaluateCondition("f:use/@value='official'");
+                            var showSystem = nav.EvaluateCondition(
+                                "f:type/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/v2-0203' and f:code/@value='PPN']");
+
+                            return official
+                                ? HandleIdentifierDisplay(nav, showSystem || !official,
+                                    insuranceCompanyCodeIdentifier)
+                                :
+                                [
+                                    new HideableDetails(HandleIdentifierDisplay(nav, showSystem || !official,
+                                        insuranceCompanyCodeIdentifier))
+                                ];
+                        }),
+                ], direction: FlexDirection.Column,
+                optionalClasses: new NameValuePair.NameValuePairClasses
+                    { ValueClass = "patient-identifier-grid" }
+            );
 
         var tree = new List<Widget>
         {
-            new Container([
-                new Container([
-                    new Row([
-                        //name
-                        new ChangeContext(name,
-                            new HumanName(".", true, nameWrapper: x => new Heading([x], HeadingSize.H3),
-                                hideNominalLetters: isAnimal)
-                        ),
-                        new Optional($"f:extension[@url='{patientAnimal}']",
-                            new AnimalDetails()
-                        ),
-                        new Optional("f:birthDate",
-                            new Container([
-                                new PlainBadge(new DisplayLabel(LabelCodes.DateOfBirth)),
-                                new Heading([new ShowDateTime()], HeadingSize.H3),
-                            ])
-                        ),
-                        //Gender
+            new Column([
+                new Row([
+                    //name
+                    new ChangeContext(name,
+                        new HumanName(".", true, nameWrapper: x => new HeadingNoMargin([
+                                new TextContainer(TextStyle.Bold, [
+                                    x,
+                                ]),
+                            ], HeadingSize.H6),
+                            hideNominalLetters: isAnimal
+                        )
+                    ),
+                    new Optional($"f:extension[@url='{patientAnimal}']",
+                        new AnimalDetails()
+                    ),
+                    new Optional("f:birthDate",
                         new Container([
-                            new If(_ => navigator.EvaluateCondition("f:gender"),
-                                    new PlainBadge(new DisplayLabel(LabelCodes.AdministrativeGender)), new LineBreak(),
-                                    new Heading(
-                                        [
-                                            new EnumLabel("f:gender",
-                                                "https://hl7.cz/fhir/ValueSet/administrative-gender-cz")
-                                        ],
-                                        HeadingSize.H3))
-                                .Else(
-                                    new Optional($"f:extension[@url='{recordedSexOrGender}']",
-                                        new PlainBadge(new DisplayLabel(LabelCodes.AdministrativeGender)),
-                                        new LineBreak(),
-                                        new Optional("f:extension[@url='value']/f:valueCodeableConcept",
-                                            new Heading([new CodeableConcept()], HeadingSize.H3)
-                                        ),
-                                        new Optional("f:extension[@url='type']/f:valueCodeableConcept",
-                                            new NameValuePair(
-                                                new ConstantText("Typ"),
-                                                new CodeableConcept()
-                                            )
-                                        )
-                                    )
+                            new NameValuePair(
+                                new PlainBadge(
+                                    new DisplayLabel(LabelCodes.DateOfBirth)
                                 ),
-                        ]),
-                    ], flexContainerClasses: "column-gap-4"),
+                                new HeadingNoMargin([
+                                    new TextContainer(TextStyle.Bold, [
+                                        new ShowDateTime()
+                                    ])
+                                ], HeadingSize.H6), direction: FlexDirection.Column
+                            )
+                        ])
+                    ),
+                    //Gender
+                    new Container([
+                        new If(_ => navigator.EvaluateCondition("f:gender"),
+                                new NameValuePair(
+                                    new PlainBadge(
+                                        new DisplayLabel(LabelCodes.AdministrativeGender)
+                                    ),
+                                    new HeadingNoMargin(
+                                        [
+                                            new TextContainer(TextStyle.Bold, [
+                                                new EnumLabel("f:gender",
+                                                    "https://hl7.cz/fhir/ValueSet/administrative-gender-cz")
+                                            ])
+                                        ],
+                                        HeadingSize.H6), direction: FlexDirection.Column
+                                )
+                            )
+                            .Else(
+                                new Optional($"f:extension[@url='{recordedSexOrGender}']",
+                                    new HideableDetails(new NameValuePair(
+                                        [
+                                            new PlainBadge(
+                                                new DisplayLabel(LabelCodes.AdministrativeGender)
+                                            )
+                                        ],
+                                        [
+                                            new Optional("f:extension[@url='value']/f:valueCodeableConcept",
+                                                new HeadingNoMargin([
+                                                    new TextContainer(TextStyle.Bold, [
+                                                        new CodeableConcept()
+                                                    ])
+                                                ], HeadingSize.H6)
+                                            ),
+                                            new Optional("f:extension[@url='type']/f:valueCodeableConcept",
+                                                new NameValuePair(
+                                                    new ConstantText("Typ"),
+                                                    new CodeableConcept()
+                                                )
+                                            )
+                                        ], direction: FlexDirection.Column
+                                    ))
+                                )
+                            ),
+                    ]),
+                    // Nationality
+                    new If(_ => navigator.EvaluateCondition($"f:extension[@url='{nationality}']"),
+                        new HideableDetails(new Container([
+                                new NameValuePair(
+                                    new PlainBadge(
+                                        new ConstantText("Národnost")
+                                    ),
+                                    new ConcatBuilder(
+                                        $"f:extension[@url='{nationality}']", _ =>
+                                        [
+                                            new Concat([
+                                                new Optional("f:extension[@url='code']",
+                                                    new HeadingNoMargin([
+                                                            new TextContainer(TextStyle.Bold, [
+                                                                new OpenTypeElement(null)
+                                                            ])
+                                                        ],
+                                                        HeadingSize.H6)), // CodeableConcept
+                                                new If(
+                                                    _ => navigator.EvaluateCondition("f:extension[@url='period']"),
+                                                    new ConstantText("-"),
+                                                    new Optional("f:extension[@url='period']",
+                                                        new OpenTypeElement(null))), // Period
+                                            ]),
+                                        ]),
+                                    direction: FlexDirection.Column
+                                )
+                            ]
+                        ))),
+                    new If(_ => navigator.EvaluateCondition($"f:identifier[f:system/@value='{ridIdentifier}']"),
+                        new ChangeContext($"f:identifier[f:system/@value='{ridIdentifier}']",
+                            new NameValuePair(
+                                new PlainBadge(
+                                    new ConstantText("Resortní Identifikátor")
+                                ),
+                                new HeadingNoMargin([
+                                    new TextContainer(TextStyle.Bold, [
+                                        new ShowIdentifier(showSystem: false)
+                                    ])
+                                ], HeadingSize.H6), direction: FlexDirection.Column
+                            )
+                        )
+                    ).Else(
+                        new ChangeContext("f:identifier",
+                            new NameValuePair(
+                                new PlainBadge(new ConstantText("Identifikátor pacienta")),
+                                new HeadingNoMargin([
+                                    new TextContainer(TextStyle.Bold, [
+                                        new ShowIdentifier(showSystem: false)
+                                    ])
+                                ], HeadingSize.H6), direction: FlexDirection.Column
+                            )
+                        )
+                    ),
+                ], flexContainerClasses: "justify-content-between column-gap-4", flexWrap: false),
+                new ThematicBreak(),
+                new Column([
                     new Row([
                         //Clinical Gender
                         new If(_ => navigator.EvaluateCondition($"f:extension[@url='{clinicalGender}']"),
-                            new Container([
-                                new PlainBadge(new ConstantText("Pohlaví pro klinické použití")),
-                                new LineBreak(),
-                                new ConcatBuilder($"f:extension[@url='{clinicalGender}']", _ =>
-                                [
-                                    new Concat([
-                                        new TextContainer(TextStyle.Bold,
-                                        [
-                                            new Optional("f:extension[@url='value']", new OpenTypeElement(null))
-                                        ]), // CodeableConcept
-                                        new LineBreak(),
-                                        new NameValuePair(
-                                            [new ConstantText("Období")],
-                                            [
-                                                new Optional("f:extension[@url='period']", new OpenTypeElement(null))
-                                            ] // Period
-                                        ),
-                                        new Container([
-                                            new TextContainer(TextStyle.Bold, [
-                                                new ConstantText("Komentář: ")
-                                            ]),
-                                            new Optional("f:extension[@url='comment']",
-                                                new OpenTypeElement(null)), // string
-                                        ]),
-                                    ], string.Empty),
-                                ], new LineBreak()),
-                            ])),
+                            new HideableDetails(new Container([
+                                new NameValuePair(
+                                    new PlainBadge(new ConstantText("Pohlaví pro klinické použití")),
+                                    new ConcatBuilder($"f:extension[@url='{clinicalGender}']", _ =>
+                                    [
+                                        new Concat([
+                                            new NameValuePair(
+                                                new ConstantText("Pohlaví"),
+                                                new TextContainer(TextStyle.Bold,
+                                                [
+                                                    new Optional("f:extension[@url='value']", new OpenTypeElement(null))
+                                                ]) // CodeableConcept
+                                            ),
+                                            new NameValuePair(
+                                                [new ConstantText("Období")],
+                                                [
+                                                    new Optional("f:extension[@url='period']",
+                                                        new TextContainer(TextStyle.Bold, [
+                                                            new OpenTypeElement(null)
+                                                        ])
+                                                    )
+                                                ] // Period
+                                            ),
+                                            new NameValuePair(
+                                                new ConstantText("Komentář"),
+                                                new Optional("f:extension[@url='comment']",
+                                                    new TextContainer(TextStyle.Bold, [
+                                                        new OpenTypeElement(null)
+                                                    ])
+                                                ) // string
+                                            ),
+                                        ], string.Empty),
+                                    ]), direction: FlexDirection.Column
+                                )
+                            ]))),
                         new Container([
                             //Contacts
                             new ContactInformation(),
                         ]),
                         new Optional(
                             $"f:extension[@url='{patientAnimal}']/f:extension[@url='genderStatus']/f:valueCodeableConcept",
-                            new Container([
-                                new Concat([
-                                    new PlainBadge(new ConstantText("Stav pohlaví")),
-                                    new TextContainer(TextStyle.Bold, new CodeableConcept())
-                                ], new LineBreak())
-                            ])
+                            new NameValuePair(
+                                new PlainBadge(new ConstantText("Stav pohlaví")),
+                                new TextContainer(TextStyle.Bold, new CodeableConcept())
+                            )
                         ),
-                    ], flexContainerClasses: "column-gap-8"),
+
+                        //Identifiers
+                        new If(
+                            _ => (nonRidIdentifiers.Count != 0 && hasRid) || (!hasRid && nonRidIdentifiers.Count > 1),
+                            navigator.EvaluateCondition("not(f:identifier/f:use/@value='official')")
+                                ? new HideableDetails(otherIdentifiers)
+                                : otherIdentifiers
+                        ),
+                    ], flexContainerClasses: "column-gap-6", flexWrap: false),
                     new Row([
                         //Birth Place
-                        new If(_ => navigator.EvaluateCondition($"f:extension[@url='{birthPlace}']"), new Container([
-                            new PlainBadge(new ConstantText("Místo narození")), new LineBreak(), new ChangeContext(
-                                $"f:extension[@url='{birthPlace}']",
-                                new OpenTypeElement(null,
-                                    hints: OpenTypeElementRenderingHints.HideAddressLabel)) // CZ_Address
-                        ])),
-                        // Nationality
-                        new If(_ => navigator.EvaluateCondition($"f:extension[@url='{nationality}']"), new Container([
-                                new PlainBadge(new ConstantText("Národnost")), new LineBreak(), new ConcatBuilder(
-                                    $"f:extension[@url='{nationality}']", _ =>
-                                    [
-                                        new Concat([
-                                            new Optional("f:extension[@url='code']",
-                                                new OpenTypeElement(null)), // CodeableConcept
-                                            new If(_ => navigator.EvaluateCondition("f:extension[@url='period']"),
-                                                new ConstantText("-"),
-                                                new Optional("f:extension[@url='period']",
-                                                    new OpenTypeElement(null))), // Period
-                                        ]),
-                                    ])
-                            ]
-                        )),
-                    ], flexContainerClasses: "column-gap-8"),
-                    new Row([
-                        new If(_ => navigator.EvaluateCondition($"f:extension[@url='{registeringProvider}']"),
-                            new Container([
-                                new PlainBadge(new ConstantText("Registrující poskytovatel")),
-                                new LineBreak(),
-                                new ConcatBuilder($"f:extension[@url='{registeringProvider}']", _ =>
-                                    [
-                                        new Concat([
-                                            new Optional("f:extension[@url='category']",
-                                                new OpenTypeElement(null)), // CodeableConcept
-                                            new ConstantText("-"),
-                                            new Optional("f:extension[@url='value']",
-                                                new OpenTypeElement(
-                                                    null)), // Reference(Organization | Practitioner Role)
-                                        ]),
-                                    ],
-                                    new LineBreak()
+                        new If(_ => navigator.EvaluateCondition($"f:extension[@url='{birthPlace}']"),
+                            new HideableDetails(new Container([
+                                new PlainBadge(new ConstantText("Místo narození")), new LineBreak(), new ChangeContext(
+                                    $"f:extension[@url='{birthPlace}']",
+                                    new TextContainer(TextStyle.Bold,
+                                        new OpenTypeElement(null,
+                                            hints: OpenTypeElementRenderingHints.HideAddressLabel)) // CZ_Address
                                 )
-                            ])
+                            ]))),
+                        new If(_ => navigator.EvaluateCondition($"f:extension[@url='{registeringProvider}']"),
+                            new HideableDetails(new Container([
+                                new NameValuePair(
+                                    new PlainBadge(new ConstantText("Registrující poskytovatel")),
+                                    new ConcatBuilder($"f:extension[@url='{registeringProvider}']", _ =>
+                                        [
+                                            new Concat([
+                                                new NameValuePair(
+                                                    new Optional("f:extension[@url='category']",
+                                                        new OpenTypeElement(null)), // CodeableConcept
+                                                    new Optional("f:extension[@url='value']",
+                                                        new OpenTypeElement(
+                                                            null)) // Reference(Organization | Practitioner Role)
+                                                )
+                                            ]),
+                                        ]
+                                    ), direction: FlexDirection.Column
+                                )
+                            ]))
                         ),
-                    ]),
-                ], optionalClass: ""),
-                new Container([
-                    new If(_ => navigator.EvaluateCondition($"f:identifier[f:system/@value='{ridIdentifier}']"),
-                        new ChangeContext($"f:identifier[f:system/@value='{ridIdentifier}']",
-                            new PlainBadge(new ConstantText("Resortní Identifikátor")),
-                            new LineBreak(),
-                            new Heading([
-                                new ShowIdentifier(showSystem: false)
-                            ], HeadingSize.H3)
-                        )
-                    ).Else(
-                        new ChangeContext("f:identifier",
-                            new PlainBadge(new ConstantText("Identifikátor pacienta")),
-                            new LineBreak(),
-                            new Heading([new ShowIdentifier(showSystem: false)], HeadingSize.H3)
-                        )
-                    ),
-                    //Identifiers
-                    new If(_ => navigator.EvaluateCondition("f:identifier[f:use/@value='official']"),
-                        new PlainBadge(new DisplayLabel(LabelCodes.PrimaryPatientIdentifier))),
-                    new ConcatBuilder(
-                        $"f:identifier[f:use/@value='official' and not(f:system/@value='{ridIdentifier}')]",
-                        (_, _, nav) =>
-                        {
-                            var showSystem = nav.EvaluateCondition(
-                                "f:type/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/v2-0203' and f:code/@value='PPN']");
-
-                            return HandleIdentifierDisplay(nav, showSystem, insuranceCompanyCodeIdentifier);
-                        }),
-                    new If(
-                        _ => navigator.EvaluateCondition(
-                            $"f:identifier[not(f:use/@value='official') and not(f:system/@value='{ridIdentifier}')]"),
-                        new PlainBadge(new DisplayLabel(LabelCodes.SecondaryPatientIdentifier))),
-                    new ConcatBuilder(
-                        $"f:identifier[not(f:use/@value='official') and not(f:system/@value='{ridIdentifier}')]",
-                        (_, _, nav) => HandleIdentifierDisplay(nav, true, insuranceCompanyCodeIdentifier)),
-                ], optionalClass: "ms-auto"),
-            ], optionalClass: "d-flex"),
+                    ], flexContainerClasses: "column-gap-11"),
+                ], flexContainerClasses: "row-gap-1")
+            ], flexContainerClasses: "mb-1"),
         };
 
         return tree.RenderConcatenatedResult(navigator, renderer, context);
@@ -220,7 +307,7 @@ public class PatientDetails : Widget
         if (nav.EvaluateCondition("f:system[@value='https://ncez.mzcr.cz/fhir/sid/cpoj']"))
             return
             [
-                new Container([
+                new Concat([
                     new NameValuePair([new IdentifierSystemLabel(),], [new ShowIdentifier(showSystem: false),]),
                     new ShowSingleReference(issuerNav =>
                     {

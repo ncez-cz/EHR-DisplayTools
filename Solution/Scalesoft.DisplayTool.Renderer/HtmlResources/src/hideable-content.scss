@@ -12,7 +12,7 @@
         > tr > td:first-child .collapse-toggler-wrapper {
             display: none !important;
         }
-        
+
         > .collapsible-row-wrapper {
             display: none !important;
         }
@@ -38,12 +38,22 @@
 
 }
 
+body:has(#detail-toggle:checked) {
+    .card-footer:has(> .optional-detail:only-child > .narrative-print-collapser-hidden:only-child) {
+        display: none;
+    }
+}
+
 /* 
     Hide table row (not collapsible) if there is no content -> all <td> has sub-child with .empty-content
     class excluding <td> with .narrative-cell
 */
-tbody > tr:not(.collapsible-row-wrapper):not(:has(td:not(.narrative-cell, .collapsible-row-wrapper) > .collapse-content-inline > .collapse-toggler-cell-content:not(.empty-content))) {
+.dt-table > tbody > tr:not(.collapsible-row-wrapper):not(:has(td:not(.narrative-cell, .collapsible-row-wrapper) > .collapse-content-inline > .collapse-toggler-cell-content:not(.empty-content))) {
     display: none !important;
+}
+
+.narrative-print-collapser-hidden {
+    display: none;
 }
 
 

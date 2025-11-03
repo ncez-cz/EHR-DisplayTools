@@ -45,13 +45,13 @@ tbody:has(.collapsible-row-wrapper) {
         that is not a hidden narrative. (i.e. hides collapse toggler if 
         collapsible row contains only narrative text and javascript is enabled)
     */
-    &:has(.collapsible-row-wrapper > td > .optional-detail >  :not(.narrative-print-collapser.narrative-print-collapser-hidden)) > tr > td:first-child > .collapse-content-inline > .collapse-toggler-wrapper,
+    &:has(.collapsible-row-wrapper > td > .optional-detail > :not(.narrative-print-collapser.narrative-print-collapser-hidden)) > tr.collapse-toggler-row > td:first-child > .collapse-content-inline > .collapse-toggler-wrapper,
         /* 
             Show the collapse toggler if the associated collapsible row 
             contains at least one direct child that is not an "optional-detail" element. 
             (i.e. ensures the toggler is visible whenever there is non-optional content)
         */
-    &:has(.collapsible-row-wrapper > td > :not( .optional-detail )) > tr > td:first-child > .collapse-content-inline > .collapse-toggler-wrapper {
+    &:has(.collapsible-row-wrapper > td > :not(.optional-detail )) > tr.collapse-toggler-row > td:first-child > .collapse-content-inline > .collapse-toggler-wrapper {
         display: inline-flex;
     }
 

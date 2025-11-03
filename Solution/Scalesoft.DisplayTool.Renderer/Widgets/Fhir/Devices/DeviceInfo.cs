@@ -27,7 +27,7 @@ public class DeviceInfo(
                 _ => infrequentProperties == null || infrequentProperties.ContainsAnyOf(
                     ShowDevice.InfrequentPropertiesPaths.DistinctIdentifier,
                     ShowDevice.InfrequentPropertiesPaths.SerialNumber),
-                new TableCell(
+                new HideableDetails(new TableCell(
                     [
                         new Choose(
                             [
@@ -40,7 +40,7 @@ public class DeviceInfo(
                         )
                     ],
                     idSource: addIdentifier ? navigator : (IdentifierSource?)null
-                )
+                ))
             ),
             new If(
                 _ => infrequentProperties == null ||
@@ -54,7 +54,8 @@ public class DeviceInfo(
                     ShowDevice.InfrequentPropertiesPaths.Manufacturer, ShowDevice.InfrequentPropertiesPaths.DeviceName,
                     ShowDevice.InfrequentPropertiesPaths.ModelNumber, ShowDevice.InfrequentPropertiesPaths.SerialNumber,
                     ShowDevice.InfrequentPropertiesPaths.Specialization,
-                    ShowDevice.InfrequentPropertiesPaths.ExpirationDate),
+                    ShowDevice.InfrequentPropertiesPaths
+                        .ExpirationDate),
                 new TableCell(DeviceParsingInfo.CompactRenderingWidgets,
                     visualIdSource: addVisualIdentifiers ? navigator : (IdentifierSource?)null)
             ),

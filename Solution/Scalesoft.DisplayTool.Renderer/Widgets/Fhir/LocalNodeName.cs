@@ -19,9 +19,10 @@ public class LocalNodeName(string? resourceType = null, bool isPlural = false) :
         Widget nodeName = m_resourceType switch
         {
             "AllergyIntolerance" => new ConstantText("Alergie a intolerance"),
-            "Appointment" => new ConstantText(isPlural ? "Schůzky / objednání k lékaři" : "Schůzka / objednání k lékaři"),
+            "Appointment" => new ConstantText(
+                isPlural ? "Schůzky / objednání k lékaři" : "Schůzka / objednání k lékaři"),
             "Attachment" => new ConstantText(isPlural ? "Přílohy" : "Příloha"),
-            "Binary" => new ConstantText(isPlural ? "Přílohy bez názvu": "Příloha bez názvu"),
+            "Binary" => new ConstantText(isPlural ? "Přílohy bez názvu" : "Příloha bez názvu"),
             "BodyStructure" => new DisplayLabel(LabelCodes.BodySite),
             "CarePlan" => new ConstantText(isPlural ? "Plány péče" : "Plan péče"),
             "CareTeam" => new ConstantText(isPlural ? "Pečovatelské týmy" : "Pečovatelský tým"),
@@ -32,7 +33,8 @@ public class LocalNodeName(string? resourceType = null, bool isPlural = false) :
             "Coverage" => new ConstantText(isPlural ? "Úhrady / Pokrytí" : "Úhrada / Pokrytí"),
             "DetectedIssue" => new ConstantText(isPlural ? "Zjištěné problémy" : "Zjištěný problém"),
             "Device" => new ConstantText("Zařízení"),
-            "DeviceRequest" => new ConstantText(isPlural ? "Žádosti o přístroj/zařízení" : "Žádost o přístroj/zařízení"),
+            "DeviceRequest" =>
+                new ConstantText(isPlural ? "Žádosti o přístroj/zařízení" : "Žádost o přístroj/zařízení"),
             "DeviceUseStatement" => new ConstantText("Záznam o použití zařízení"),
             "DocumentReference" => new ConstantText(isPlural ? "Dokumenty" : "Dokument"),
             "DiagnosticReport" => new ConstantText(isPlural ? "Diagnostické zprávy" : "Diagnostická zpráva"),
@@ -65,14 +67,16 @@ public class LocalNodeName(string? resourceType = null, bool isPlural = false) :
             "Procedure" => new ConstantText(isPlural ? "Procedury" : "Procedura"),
             "Provenance" => new ConstantText("Provenance"),
             "QuestionnaireResponse" => new ConstantText(isPlural ? "Odpovědi na dotazníky" : "Odpověď na dotazník"),
-            "RelatedPerson" => new ConstantText(isPlural ? "Související ososby" : "Související osoba"),
+            "RelatedPerson" => new ConstantText(isPlural ? "Související osoby" : "Související osoba"),
             "RequestGroup" => new ConstantText(isPlural ? "Skupiny požadavků" : "Skupina požadavků"),
             "RiskAssessment" => new ConstantText("Hodnocení rizik"),
             "ServiceRequest" => new ConstantText(isPlural ? "Žádosti o službu" : "Žádost o službu"),
             "Substance" => new ConstantText(isPlural ? "Látky" : "Látka"),
             "Specimen" => new ConstantText(isPlural ? "Vzorky" : "Vzorek"),
             "Task" => new ConstantText(isPlural ? "Úkoly" : "Úkol"),
-            "VisionPrescription" => new ConstantText(isPlural ? "Recepty na brýle / kontaktní čočky" : "Recept na brýle / kontaktní čočky"),
+            "VisionPrescription" => new ConstantText(isPlural
+                ? "Recepty na brýle / kontaktní čočky"
+                : "Recept na brýle / kontaktní čočky"),
             "ClinicalImpression" => new ConstantText("Klinické hodnocení"),
             "Group" => new ConstantText(isPlural ? "Skupiny" : "Skupina"),
             _ => new ConstantText(isPlural ? "Nepodporované záznamy" : "Nepodporovaný záznam"),

@@ -16,7 +16,8 @@ public class AddressesCard(XmlDocumentNavigator item) : Widget
     )
     {
         var card = new Condition("f:addresses",
-            new Card(new ConstantText("Problémy"), new ShowMultiReference("f:addresses", displayResourceType: false))); // Problems
+            new HideableDetails(new Card(new ConstantText("Problémy"),
+                new ShowMultiReference("f:addresses", displayResourceType: false)))); // Problems
 
         return await card.Render(item, renderer, context);
     }

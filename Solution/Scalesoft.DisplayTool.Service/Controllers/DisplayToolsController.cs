@@ -21,7 +21,7 @@ public class DisplayToolsController : ControllerBase
     [HttpPost("patient-summary")]
     public async Task<ActionResult<DisplayToolResponse>> PatientSummary(
         [FromBody] DisplayToolRequest request,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (request.InputFormat == null || request.OutputFormat == null)
@@ -77,7 +77,7 @@ public class DisplayToolsController : ControllerBase
         [FromForm] bool validateDigitalSignature = false,
         [FromForm] bool generateDocumentationInstead = false,
         [FromForm] bool preferTranslationsFromDocument = false,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (inputFormat == null || outputFormat == null)
@@ -123,7 +123,7 @@ public class DisplayToolsController : ControllerBase
     [HttpPost("hospital-discharge-report")]
     public async Task<ActionResult<DisplayToolResponse>> HospitalDischargeReport(
         [FromBody] DisplayToolRequest request,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (request.InputFormat == null || request.OutputFormat == null)
@@ -157,7 +157,7 @@ public class DisplayToolsController : ControllerBase
         [FromForm] bool validateDigitalSignature = false,
         [FromForm] bool generateDocumentationInstead = false,
         [FromForm] bool preferTranslationsFromDocument = false,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (inputFormat == null || outputFormat == null)
@@ -203,7 +203,7 @@ public class DisplayToolsController : ControllerBase
     [HttpPost("laboratory-report")]
     public async Task<ActionResult<DisplayToolResponse>> LaboratoryReport(
         [FromBody] DisplayToolRequest request,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (request.InputFormat == null || request.OutputFormat == null)
@@ -237,7 +237,7 @@ public class DisplayToolsController : ControllerBase
         [FromForm] bool validateDigitalSignature = false,
         [FromForm] bool generateDocumentationInstead = false,
         [FromForm] bool preferTranslationsFromDocument = false,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (inputFormat == null || outputFormat == null)
@@ -283,7 +283,7 @@ public class DisplayToolsController : ControllerBase
     [HttpPost("laboratory-order")]
     public async Task<ActionResult<DisplayToolResponse>> LaboratoryOrder(
         [FromBody] DisplayToolRequest request,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (request.InputFormat == null || request.OutputFormat == null)
@@ -317,7 +317,7 @@ public class DisplayToolsController : ControllerBase
         [FromForm] bool validateDigitalSignature = false,
         [FromForm] bool generateDocumentationInstead = false,
         [FromForm] bool preferTranslationsFromDocument = false,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (inputFormat == null || outputFormat == null)
@@ -363,7 +363,7 @@ public class DisplayToolsController : ControllerBase
     [HttpPost("imaging-report")]
     public async Task<ActionResult<DisplayToolResponse>> ImagingReport(
         [FromBody] DisplayToolRequest request,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (request.InputFormat == null || request.OutputFormat == null)
@@ -385,7 +385,7 @@ public class DisplayToolsController : ControllerBase
         return response.IsRenderedSuccessfully ? Ok(response) : BadRequest(response);
     }
 
-    [HttpPost("imagin-report/form-api")]
+    [HttpPost("imaging-report/form-api")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(DisplayToolResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> ImagingReportFromForm(
@@ -397,7 +397,7 @@ public class DisplayToolsController : ControllerBase
         [FromForm] bool validateDigitalSignature = false,
         [FromForm] bool generateDocumentationInstead = false,
         [FromForm] bool preferTranslationsFromDocument = false,
-        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
     )
     {
         if (inputFormat == null || outputFormat == null)
@@ -427,6 +427,86 @@ public class DisplayToolsController : ControllerBase
                 (OutputFormat)outputFormat,
                 options,
                 DocumentType.ImagingReport,
+                levelOfDetail
+            );
+
+        if (!result.IsRenderedSuccessfully)
+        {
+            var errorResponse = MapResponseAsJson(result);
+            return BadRequest(errorResponse);
+        }
+
+        var actionResult = MapResponseAsFile(result, outputFormat.Value);
+        return actionResult;
+    }
+    
+    [HttpPost("imaging-order")]
+    public async Task<ActionResult<DisplayToolResponse>> ImagingOrder(
+        [FromBody] DisplayToolRequest request,
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
+    )
+    {
+        if (request.InputFormat == null || request.OutputFormat == null)
+        {
+            return BadRequest(CreateErrorResponse("Input and output formats are required"));
+        }
+
+        var options = MapDocumentOptions(request);
+        var result = await m_documentRenderer.RenderAsync(
+            request.FileContent,
+            (InputFormat)request.InputFormat,
+            (OutputFormat)request.OutputFormat,
+            options,
+            DocumentType.ImagingOrder,
+            levelOfDetail
+        );
+        var response = MapResponseAsJson(result);
+
+        return response.IsRenderedSuccessfully ? Ok(response) : BadRequest(response);
+    }
+
+    [HttpPost("imaging-order/form-api")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DisplayToolResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> ImagingOrderFromForm(
+        IFormFile file,
+        [FromForm] InputFormatContract? inputFormat = null,
+        [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool validateDocument = false,
+        [FromForm] bool validateCodeValues = false,
+        [FromForm] bool validateDigitalSignature = false,
+        [FromForm] bool generateDocumentationInstead = false,
+        [FromForm] bool preferTranslationsFromDocument = false,
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
+    )
+    {
+        if (inputFormat == null || outputFormat == null)
+        {
+            return BadRequest(CreateErrorResponse("Input and output formats are required"));
+        }
+
+        var fileContent = ReadFormFileToByteArray(file);
+        var options = new DocumentOptions
+        {
+            ValidateDocument = validateDocument,
+            ValidateCodeValues = validateCodeValues,
+            ValidateDigitalSignature = validateDigitalSignature,
+            PreferTranslationsFromDocument = preferTranslationsFromDocument,
+        };
+        var result = generateDocumentationInstead
+            ? await m_documentRenderer.RenderDocumentationAsync(
+                fileContent,
+                (InputFormat)inputFormat,
+                (OutputFormat)outputFormat,
+                DocumentType.ImagingOrder,
+                LanguageOptions.Czech
+            )
+            : await m_documentRenderer.RenderAsync(
+                fileContent,
+                (InputFormat)inputFormat,
+                (OutputFormat)outputFormat,
+                options,
+                DocumentType.ImagingOrder,
                 levelOfDetail
             );
 

@@ -1,74 +1,66 @@
 @use "../../HtmlResources/src/theme-variables" as *;
 
-
-@media screen and (min-width: 1600px) {
-    .section .section-default {
-        --background-color: var(--#{$prefix}gray-200);
-
-        &:has(> input:checked) {
-            border: none;
-        }
-    }
-
-    .section .section-primary:has(> input:checked) {
-        border: 1px solid var(--#{$prefix}primary-200);
-        border-top: 0;
-    }
-
-    .section-secondary {
-        --background-color: var(--#{$prefix}secondary-100);
-    }
-
-    .section-info {
-        --background-color: var(--#{$prefix}info-100);
-    }
-
-    .section-success {
-        --background-color: var(--#{$prefix}success-200);
-    }
-
-    .section-warning {
-        --background-color: var(--#{$prefix}warning-100);
-    }
-
-    .section-error {
-        --background-color: var(--#{$prefix}danger-200);
-    }
-
-    .section-gray {
-        --background-color: var(--#{$prefix}gray-200);
-    }
-
-    .section {
-        background-color: var(--background-color) 100%;
-        transition: background-color 0.5s ease-in-out;
-
-        &:has(> input:checked) {
-            background-color: var(--background-color);
-            padding-bottom: 0.5rem;
-        }
-
-        .section:has(> input:checked) {
-            margin-bottom: 0.5rem;
-        }
-    }
-
+.section-default {
+    --odd-level-section-background-color: var(--#{$prefix}primary-50);
+    --even-level-section-background-color: white;
 }
+
+.section-secondary {
+    --odd-level-section-background-color: var(--#{$prefix}secondary-100);
+    --even-level-section-background-color: white;
+}
+
+.section-info {
+    --odd-level-section-background-color: var(--#{$prefix}info-100);
+    --even-level-section-background-color: white;
+}
+
+.section-success {
+    --odd-level-section-background-color: var(--#{$prefix}success-100);
+    --even-level-section-background-color: white;
+}
+
+.section-warning {
+    --odd-level-section-background-color: var(--#{$prefix}warning-100);
+    --even-level-section-background-color: white;
+}
+
+.section-error {
+    --odd-level-section-background-color: var(--#{$prefix}danger-100);
+    --even-level-section-background-color: white;
+}
+
+.section-gray {
+    --odd-level-section-background-color: var(--#{$prefix}gray-100);
+    --even-level-section-background-color: white;
+}
+
+// Handle switching bg-color for nested sections by level. Odd and even levels has it's bg-colors defined above for each severity.
+$max-level: 10;
+@mixin nested-section-background($level: 1, $selector: '.section') {
+    @if ($level % 2 == 0) {
+        #{$selector} {
+            background-color: var(--even-level-section-background-color);
+            --striped-section-bg-color: var(--odd-level-section-background-color);
+        }
+    } @else {
+        #{$selector} {
+            background-color: var(--odd-level-section-background-color);
+            --striped-section-bg-color: var(--even-level-section-background-color);
+        }
+    }
+
+    @if $level < $max-level {
+        @include nested-section-background($level + 1, $selector + ' .section');
+    }
+}
+
+@include nested-section-background();
 
 .section {
+    border-radius: var(--dt-border-radius-sm);
     margin-top: $spacing02;
     margin-bottom: $spacing02;
-}
-
-.section .section {
-    margin-top: 0;
-    margin-left: -$spacing01;
-    margin-right: -$spacing01;
-}
-
-.section .section .section {
-    margin-left: 0;
-    margin-right: 0;
 }
 
 .section .section:not(:has(+ .section)) {
@@ -84,8 +76,24 @@
 }
 
 .collapsible-content, .section .section .collapsible-content {
-    padding-left: $spacing01;
-    padding-right: $spacing01;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+}
+
+.section {
+    padding-bottom: $spacing01;
+
+    // When section is closed, small part (few pixels) of it's content is visible because of padding, that eliminates this issue.
+    &:not(:has(> input:checked)) {
+        padding-bottom: 0;
+    }
+
+    // Remove top margin in case it's first child of collapsible-content which has top padding applied. 
+    // Two selectors because if hideable detail is present, actual content is wrapped in div element.
+    & .collapsible-content-wrapper > .collapsible-content > :first-child.section,
+    .collapsible-content-wrapper > .collapsible-content > div > :first-child.section {
+        margin-top: 0 !important;
+    }
 }
 
 .collapsible-content:has(.badge:not(.collapser .badge):not(.card .badge):not(table .badge)) {
@@ -101,3 +109,4 @@
 .other-section-margin:not(:only-child) {
     margin-top: $spacing02;
 }
+

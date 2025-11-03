@@ -1,7 +1,9 @@
 ﻿using System.Text;
+using JetBrains.Annotations;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -16,8 +18,16 @@ public class Attachment(
     string? altText = null,
     bool onlyContentOrUrl = false,
     string? imageOptionalClass = null
-) : Widget
+) : ItemListResourceBase<Attachment>, IResourceWidget
 {
+    public static string ResourceType => "Attachment";
+    [UsedImplicitly]
+    public static bool RequiresExternalTitle => true;
+
+    public Attachment() : this(null)
+    {
+    }
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,

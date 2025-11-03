@@ -6,7 +6,7 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class NarrativeModal(string path = "f:text", bool alignRight = true) : Widget
+public class NarrativeModal(string path = "f:text", bool alignRight = true, Widget? openButtonContent = null) : Widget
 {
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -32,7 +32,8 @@ public class NarrativeModal(string path = "f:text", bool alignRight = true) : Wi
                         "m-0"
                     ),
                     new Narrative(path),
-                    SupportedIcons.File,
+                    SupportedIcons.FileLines,
+                    openButtonContent,
                     openButtonCustomClass: "narrative-modal-button"
                 )
             );

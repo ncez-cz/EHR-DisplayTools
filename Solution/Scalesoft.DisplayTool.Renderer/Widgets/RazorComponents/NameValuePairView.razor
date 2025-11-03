@@ -1,8 +1,11 @@
 ﻿@using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils
 <dl id="@Model.Id" data-id="@Model.VisualId"
-    class="@Model.CustomClass d-flex @(Model.Direction == FlexDirection.Row ? "flex-row" : string.Empty) @(Model.Direction == FlexDirection.Column ? "flex-column" : string.Empty) @(Model.Size == NameValuePair.NameValuePairSize.Small ? "small" : string.Empty) @(Model.Style == NameValuePair.NameValuePairStyle.Primary ? "primary" : string.Empty) @(Model.Style == NameValuePair.NameValuePairStyle.Secondary ? "secondary" : string.Empty) flex-wrap column-gap-1 name-value-pair">
-    <dt class="name m-0">@((MarkupString)Model.NameContent)</dt>
-    <dd class="value m-0">@((MarkupString)Model.ValueContent)</dd>
+    class="@Model.CustomClass @(Model.Direction == FlexDirection.Row ? "flex-row" : string.Empty) @(Model.Direction == FlexDirection.Column ? "flex-column" : string.Empty) @(Model.Size == NameValuePair.NameValuePairSize.Small ? "small" : string.Empty) @(Model.Style == NameValuePair.NameValuePairStyle.Primary ? "primary" : string.Empty) @(Model.Style == NameValuePair.NameValuePairStyle.Secondary ? "secondary" : string.Empty) flex-wrap column-gap-1 name-value-pair">
+    @if (!string.IsNullOrWhiteSpace(Model.NameContent))
+    {
+        <dt class="name m-0 capitalize-first @Model.NameClass">@((MarkupString)Model.NameContent)</dt>
+    }
+    <dd class="value m-0 @Model.ValueClass">@((MarkupString)Model.ValueContent)</dd>
 </dl>
 
 @code {

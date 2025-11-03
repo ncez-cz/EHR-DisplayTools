@@ -16,6 +16,7 @@ public class Button(
     string? cssClass = null,
     ButtonVariant variant = ButtonVariant.Default,
     SupportedIcons? icon = null,
+    SupportedIcons? altIcon = null,
     Dictionary<string, object>? additionalAttributes = null
 ) : Widget
 {
@@ -26,6 +27,8 @@ public class Button(
     )
     {
         var renderedIcon = icon == null ? string.Empty : IconHelper.GetInstance(icon.Value, context);
+        var renderedAltIcon = altIcon == null ? string.Empty : IconHelper.GetInstance(altIcon.Value, context);
+
         var viewModel = new ViewModel
         {
             InputId = Id,
@@ -41,6 +44,7 @@ public class Button(
                 : renderedIcon,
             AdditionalAttributes = additionalAttributes ?? new Dictionary<string, object>(),
             LevelOfDocumentDetail = context.LevelOfDetail,
+            AltIcon = renderedAltIcon
         };
 
         var view = await renderer.RenderButton(viewModel);
@@ -67,8 +71,10 @@ public class Button(
         public required string Icon { get; init; }
 
         public Dictionary<string, object> AdditionalAttributes { get; set; } = new();
-        
+
         public LevelOfDetail LevelOfDocumentDetail { get; set; }
+
+        public string? AltIcon { get; set; }
     }
 }
 
