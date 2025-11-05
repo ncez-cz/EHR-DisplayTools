@@ -129,7 +129,7 @@ public class FhirSection(
                 }
                 else
                 {
-                    sectionContent = [..sectionContentWithTypes.Content, new NarrativeCard()];
+                    sectionContent = [..sectionContentWithTypes.Content, new Narrative("f:text")];
                 }
 
                 var codeIsLoinc = sectionNav.EvaluateCondition("f:code/f:coding/f:system[@value='http://loinc.org']");

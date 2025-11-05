@@ -18,40 +18,42 @@ public class FamilyMemberAdditionalInfoCell(XmlDocumentNavigator item) : Widget
 
         var familyMemberTableCell = new TableCell(
         [
-            new HideableDetails(
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Identifier)
-                    ? new NameValuePair([new ConstantText("Identifikátor týmu")],
-                    [
-                        new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()]),
-                    ])
-                    : infrequentOptions.Contains(InfrequentPropertiesPaths.Id)
-                        ? new NameValuePair([new ConstantText("Technický identifikátor týmu")],
+            new Container([
+                new HideableDetails(
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Identifier)
+                        ? new NameValuePair([new ConstantText("Identifikátor týmu")],
                         [
-                            new Optional("f:id", new Text("@value")),
+                            new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()]),
                         ])
-                        : new ConstantText("Identifikátor podání není specifikován")
-            ),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode)
-                ? new NameValuePair([new ConstantText("Důvod provedení")],
-                [
-                    new ItemListBuilder("f:reasonCode", ItemListType.Unordered, _ => [new CodeableConcept()]),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonReference)
-                ? new NameValuePair([new ConstantText("Související záznam")],
-                [
-                    new ItemListBuilder("f:reasonReference", ItemListType.Unordered, _ =>
+                        : infrequentOptions.Contains(InfrequentPropertiesPaths.Id)
+                            ? new NameValuePair([new ConstantText("Technický identifikátor týmu")],
+                            [
+                                new Optional("f:id", new Text("@value")),
+                            ])
+                            : new ConstantText("Identifikátor podání není specifikován")
+                ),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode)
+                    ? new NameValuePair([new ConstantText("Důvod provedení")],
                     [
-                        new Optional(".", new AnyReferenceNamingWidget()),
+                        new ItemListBuilder("f:reasonCode", ItemListType.Unordered, _ => [new CodeableConcept()]),
                     ])
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Date)
-                ? new NameValuePair([new ConstantText("Datum změny")],
-                [
-                    new ShowDateTime("f:date"),
-                ])
-                : new NullWidget(),
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonReference)
+                    ? new NameValuePair([new ConstantText("Související záznam")],
+                    [
+                        new ItemListBuilder("f:reasonReference", ItemListType.Unordered, _ =>
+                        [
+                            new Optional(".", new AnyReferenceNamingWidget()),
+                        ])
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Date)
+                    ? new NameValuePair([new ConstantText("Datum změny")],
+                    [
+                        new ShowDateTime("f:date"),
+                    ])
+                    : new NullWidget(),
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
         if (infrequentOptions.Count == 0)
         {

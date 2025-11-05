@@ -25,13 +25,13 @@ public class MedicationDispenseActorCell(XmlDocumentNavigator item) : Widget
                         [
                             new Container([new AnyReferenceNamingWidget("f:actor")], ContainerType.Span, idSource: nav)
                         ])
-                ])
+                ], direction: FlexDirection.Column)
                 : new NullWidget(),
             infrequentOptions.Contains(InfrequentPropertiesPaths.AuthorizingPrescription)
                 ? new NameValuePair([new ConstantText("Identifikátor žádosti")],
                 [
                     new CommaSeparatedBuilder("f:authorizingPrescription", _ => [new AnyReferenceNamingWidget()])
-                ])
+                ], direction: FlexDirection.Column)
                 : new NullWidget()
         ]);
 

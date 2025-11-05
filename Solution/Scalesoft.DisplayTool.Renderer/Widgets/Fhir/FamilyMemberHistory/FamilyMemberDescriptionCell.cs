@@ -33,37 +33,39 @@ public class FamilyMemberDescriptionCell(XmlDocumentNavigator item) : Widget
                     ], HeadingSize.H5),
                 ])
                 : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Relationship) &&
-            !infrequentOptions.Contains(InfrequentPropertiesPaths.Name)
-                ? new NameValuePair([new ConstantText("Vztah")],
-                [
-                    new Optional("f:relationship", new CodeableConcept()),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Born)
-                ? new NameValuePair([new ConstantText("Datum narození")],
-                [
-                    new Chronometry("born"),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Age)
-                ? new NameValuePair([new ConstantText("Věk")],
-                [
-                    new OpenTypeElement(null, "age"), // Age | Range | string
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Deceased)
-                ? new NameValuePair([new ConstantText("Zesnulý")],
-                [
-                    new OpenTypeElement(null, "deceased"), // boolean | Age | Range | date | string
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Sex)
-                ? new NameValuePair([new ConstantText("Pohlaví")],
-                [
-                    new Optional("f:sex", new CodeableConcept()),
-                ])
-                : new NullWidget(),
+            new Container([
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Relationship) &&
+                !infrequentOptions.Contains(InfrequentPropertiesPaths.Name)
+                    ? new NameValuePair([new ConstantText("Vztah")],
+                    [
+                        new Optional("f:relationship", new CodeableConcept()),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Born)
+                    ? new NameValuePair([new ConstantText("Datum narození")],
+                    [
+                        new Chronometry("born"),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Age)
+                    ? new NameValuePair([new ConstantText("Věk")],
+                    [
+                        new OpenTypeElement(null, "age"), // Age | Range | string
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Deceased)
+                    ? new NameValuePair([new ConstantText("Zesnulý")],
+                    [
+                        new OpenTypeElement(null, "deceased"), // boolean | Age | Range | date | string
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Sex)
+                    ? new NameValuePair([new ConstantText("Pohlaví")],
+                    [
+                        new Optional("f:sex", new CodeableConcept()),
+                    ])
+                    : new NullWidget(),
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
         ]);
 
         if (infrequentOptions.Count == 0)

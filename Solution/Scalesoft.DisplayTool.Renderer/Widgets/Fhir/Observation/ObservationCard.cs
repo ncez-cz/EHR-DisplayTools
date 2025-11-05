@@ -371,44 +371,54 @@ public class ObservationCard(bool skipIdPopulation = false, bool hideObservation
             RenderContext context
         )
         {
-            var referenceRange = new NameValuePair([new ConstantText("Referenční rozsahy")], [
+            var referenceRange =
                 new ListBuilder("f:referenceRange", FlexDirection.Row, _ =>
-                    [
-                        new Card(null, new Container([
+                [
+                    new NameValuePair([new ConstantText("Referenční rozsah")], [
+                        new Container([
                             new Condition("f:low or f:high",
                                 new NameValuePair(
                                     new ConstantText("Rozsah"),
-                                    new ShowRange()
+                                    new ShowRange(),
+                                    style: NameValuePair.NameValuePairStyle.Secondary,
+                                    size: NameValuePair.NameValuePairSize.Small
                                 )
                             ),
                             new Optional("f:type",
                                 new NameValuePair(
                                     new ConstantText("Typ"),
-                                    new CodeableConcept()
+                                    new CodeableConcept(),
+                                    style: NameValuePair.NameValuePairStyle.Secondary,
+                                    size: NameValuePair.NameValuePairSize.Small
                                 )
                             ),
                             new Condition("f:appliesTo",
                                 new NameValuePair(
-                                    new ConstantText("Platí pro"),
-                                    new CommaSeparatedBuilder("f:appliesTo", _ => [new CodeableConcept()])
+                                    new ConstantText("Aplikovatelné pro"),
+                                    new CommaSeparatedBuilder("f:appliesTo", _ => [new CodeableConcept()]),
+                                    style: NameValuePair.NameValuePairStyle.Secondary,
+                                    size: NameValuePair.NameValuePairSize.Small
                                 )
                             ),
                             new Optional("f:age",
                                 new NameValuePair(
-                                    new ConstantText("Příslušný věk"),
-                                    new ShowRange()
+                                    new ConstantText("Věk"),
+                                    new ShowRange(),
+                                    style: NameValuePair.NameValuePairStyle.Secondary,
+                                    size: NameValuePair.NameValuePairSize.Small
                                 )
                             ),
                             new Optional("f:text",
                                 new NameValuePair(
-                                    new ConstantText("Rozsah textových referencí"),
-                                    new Text("@value")
+                                    new ConstantText("Textová reprezentace"),
+                                    new Text("@value"),
+                                    style: NameValuePair.NameValuePairStyle.Secondary,
+                                    size: NameValuePair.NameValuePairSize.Small
                                 )
                             ),
-                        ]))
-                    ]
-                )
-            ], style: NameValuePair.NameValuePairStyle.Primary, direction: FlexDirection.Column);
+                        ], optionalClass: "name-value-pair-wrapper two-col-grid column-gap-4")
+                    ], style: NameValuePair.NameValuePairStyle.Primary, direction: FlexDirection.Column)
+                ], flexContainerClasses: "column-gap-6");
 
             return referenceRange.Render(navigator, renderer,
                 context);

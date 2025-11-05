@@ -19,30 +19,32 @@ public class CareTeamsBasicInfoCell(XmlDocumentNavigator item) : Widget
 
         var participantTableCell = new TableCell(
         [
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Category)
-                ? new NameValuePair([new ConstantText("Kategorie")],
-                [
-                    new Optional("f:category", new CommaSeparatedBuilder(".", _ => new CodeableConcept())),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Name)
-                ? new NameValuePair([new DisplayLabel(LabelCodes.Name)],
-                [
-                    new Optional("f:name", new Text("@value")),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Period)
-                ? new NameValuePair([new DisplayLabel(LabelCodes.Duration)],
-                [
-                    new ShowPeriod("f:period"),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Telecom)
-                ? new NameValuePair([new ConstantText("Kontakt")],
-                [
-                    new ItemListBuilder(".", ItemListType.Unordered, _ => [new ShowContactPoint()]),
-                ])
-                : new NullWidget()
+            new Container([
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Category)
+                    ? new NameValuePair([new ConstantText("Kategorie")],
+                    [
+                        new Optional("f:category", new CommaSeparatedBuilder(".", _ => new CodeableConcept())),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Name)
+                    ? new NameValuePair([new DisplayLabel(LabelCodes.Name)],
+                    [
+                        new Optional("f:name", new Text("@value")),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Period)
+                    ? new NameValuePair([new DisplayLabel(LabelCodes.Duration)],
+                    [
+                        new ShowPeriod("f:period"),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Telecom)
+                    ? new NameValuePair([new ConstantText("Kontakt")],
+                    [
+                        new ItemListBuilder(".", ItemListType.Unordered, _ => [new ShowContactPoint()]),
+                    ])
+                    : new NullWidget()
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
 
         if (infrequentOptions.Count == 0)

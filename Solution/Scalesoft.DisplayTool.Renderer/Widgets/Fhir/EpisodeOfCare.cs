@@ -29,18 +29,22 @@ public class EpisodeOfCare : SequentialResourceBase<EpisodeOfCare>, IResourceWid
                     new ConstantText(")"),
                 ])
             ])),
-            new Condition("f:type", new NameValuePair([new ConstantText("Typ")], [
-                new CommaSeparatedBuilder("f:type", _ =>
-                [
-                    new CodeableConcept(),
-                ])
-            ])),
-            new Optional("f:period", new NameValuePair([new ConstantText("Období")], [new ShowPeriod()])),
+            new Container([
+                new Condition("f:type", new NameValuePair([new ConstantText("Typ")], [
+                    new CommaSeparatedBuilder("f:type", _ =>
+                    [
+                        new CodeableConcept(),
+                    ])
+                ])),
+                new Optional("f:period", new NameValuePair([new ConstantText("Období")], [new ShowPeriod()])),
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
             new Condition("f:diagnosis", new Card(new ConstantText("Diagnózy"), new Container([
                 new ListBuilder("f:diagnosis", FlexDirection.Column, _ =>
                 [
-                    new Optional("f:role", new NameValuePair([new ConstantText("Role")], [new CodeableConcept()])),
-                    new Optional("f:rank", new NameValuePair([new ConstantText("Pořadí")], [new Text("@value")])),
+                    new Container([
+                        new Optional("f:role", new NameValuePair([new ConstantText("Role")], [new CodeableConcept()])),
+                        new Optional("f:rank", new NameValuePair([new ConstantText("Pořadí")], [new Text("@value")])),
+                    ], optionalClass: "name-value-pair-wrapper w-max-content"),
                     new Collapser([new ConstantText("Potíž / Událost")], [],
                     [
                         ShowSingleReference.WithDefaultDisplayHandler(

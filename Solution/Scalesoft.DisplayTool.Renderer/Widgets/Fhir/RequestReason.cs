@@ -19,7 +19,7 @@ public class RequestReason(XmlDocumentNavigator nav) : Widget
         switch (nav.Node?.Name)
         {
             case "Condition":
-                result = new Conditions([nav], new ConstantText("Problém"), true);
+                result = new Conditions([nav], new ConstantText("Problém"));
                 break;
             case "Observation":
                 result = new ChangeContext(nav, new ObservationCard(true));

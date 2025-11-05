@@ -30,7 +30,8 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
 
         var basicInfo = new Container([
             new Optional("f:active", new TextContainer(TextStyle.Bold,
-                new ShowBoolean("Neaktivní", "Aktivní")
+                new ShowBoolean("Neaktivní", "Aktivní"),
+                optionalClass: "full-grid-row"
             )),
             new Optional("f:name", new NameValuePair(
                 new DisplayLabel(LabelCodes.Name),
@@ -62,7 +63,7 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
                 new ConstantText("Umístění"),
                 new CommaSeparatedBuilder("f:location", _ => [new AnyReferenceNamingWidget()])
             )),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var detailBadge = new PlainBadge(new ConstantText("Detailní informace"));
         var detailInfo = new Container([
@@ -78,18 +79,22 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
                     new Attachment()
                 )
             ),
-            new Condition("f:telecom", new NameValuePair(
-                new DisplayLabel(LabelCodes.Telecom),
-                new ShowContactPoint()
-            )),
-            new Condition("f:coverageArea", new NameValuePair(
-                new ConstantText("Pokrytí oblastí"),
-                new CommaSeparatedBuilder("f:coverageArea", _ => [new AnyReferenceNamingWidget()])
-            )),
-            new Condition("f:serviceProvisionCode", new NameValuePair(
-                new ConstantText("Podmínky poskytování služeb"),
-                new CommaSeparatedBuilder("f:serviceProvisionCode", _ => [new CodeableConcept()])
-            )),
+            new Container([
+                new Condition("f:telecom",
+                    new TextContainer(TextStyle.Bold, new DisplayLabel(LabelCodes.Telecom)),
+                    new Row([new ShowContactPoint()])
+                )
+            ], ContainerType.Div, "mt-2 mb-2"),
+            new Container([
+                new Condition("f:coverageArea", new NameValuePair(
+                    new ConstantText("Pokrytí oblastí"),
+                    new CommaSeparatedBuilder("f:coverageArea", _ => [new AnyReferenceNamingWidget()])
+                )),
+                new Condition("f:serviceProvisionCode", new NameValuePair(
+                    new ConstantText("Podmínky poskytování služeb"),
+                    new CommaSeparatedBuilder("f:serviceProvisionCode", _ => [new CodeableConcept()])
+                )),
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
             new Condition("f:eligibility",
                 new TextContainer(TextStyle.Bold, new ConstantText("Podmínky způsobilosti:")),
                 new ItemListBuilder("f:eligibility", ItemListType.Unordered, _ =>
@@ -110,18 +115,20 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
                     ])
                 ])
             ),
-            new Condition("f:program", new NameValuePair(
-                new ConstantText("Programy"),
-                new CommaSeparatedBuilder("f:program", _ => [new CodeableConcept()])
-            )),
-            new Condition("f:characteristic", new NameValuePair(
-                new ConstantText("Charakteristiky"),
-                new CommaSeparatedBuilder("f:characteristic", _ => [new CodeableConcept()])
-            )),
-            new Condition("f:referralMethod", new NameValuePair(
-                new ConstantText("Způsoby doporučení"),
-                new CommaSeparatedBuilder("f:referralMethod", _ => [new CodeableConcept()])
-            )),
+            new Container([
+                new Condition("f:program", new NameValuePair(
+                    new ConstantText("Programy"),
+                    new CommaSeparatedBuilder("f:program", _ => [new CodeableConcept()])
+                )),
+                new Condition("f:characteristic", new NameValuePair(
+                    new ConstantText("Charakteristiky"),
+                    new CommaSeparatedBuilder("f:characteristic", _ => [new CodeableConcept()])
+                )),
+                new Condition("f:referralMethod", new NameValuePair(
+                    new ConstantText("Způsoby doporučení"),
+                    new CommaSeparatedBuilder("f:referralMethod", _ => [new CodeableConcept()])
+                )),
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
             //ignore endpoint
         ]);
 

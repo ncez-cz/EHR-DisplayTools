@@ -8,7 +8,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 public class AnyReferenceNamingWidget(
     string path = ".",
     bool showOptionalDetails = false,
-    Widget? customFallbackName = null
+    Widget? customFallbackName = null,
+    ReferenceNamingWidgetModel? widgetModel = null
 ) : Widget
 {
     public override Task<RenderResult> Render(
@@ -19,7 +20,7 @@ public class AnyReferenceNamingWidget(
     {
         return ReferenceHandler
             .BuildAnyReferencesNaming(navigator, path, context, renderer, showOptionalDetails: showOptionalDetails,
-                customFallbackName: customFallbackName)
+                customFallbackName: customFallbackName, widgetModel)
             .Render(navigator, renderer, context);
     }
 }

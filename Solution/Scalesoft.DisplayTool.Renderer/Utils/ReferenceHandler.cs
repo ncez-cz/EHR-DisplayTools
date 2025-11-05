@@ -6,6 +6,7 @@ using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -541,6 +542,7 @@ public static partial class ReferenceHandler
     ///     in a container to represent a distinct reference block.
     /// </summary>
     /// <param name="customFallbackName">Fallback name widget to use if regular fallback fails, before identifier  fallback</param>
+    /// <param name="widgetModel">Specify how the result should be rendered.</param>
     /// <returns>
     ///     A list of <see cref="Widget" /> elements, each wrapped in a <see cref="Container" /> to represent
     ///     a semantically separated reference group suitable for rendering.
@@ -551,7 +553,8 @@ public static partial class ReferenceHandler
         RenderContext context,
         IWidgetRenderer renderer,
         bool showOptionalDetails = false,
-        Widget? customFallbackName = null
+        Widget? customFallbackName = null,
+        ReferenceNamingWidgetModel? widgetModel = null
     )
     {
         if (context.RenderMode == RenderMode.Documentation)
@@ -635,6 +638,22 @@ public static partial class ReferenceHandler
             }
 
             var displayName = originalNav.SelectSingleNode("f:display/@value").Node?.InnerXml;
+            Widget? resourceSummaryLabel = null;
+            Widget? resourceSummaryValue = null;
+
+            if (reference.Node?.Name is { } nodeName)
+            {
+                resourceSummaryLabel = new LocalNodeName(nodeName);
+
+                var (summaryLabel, summaryValue) = GetResourceSummary(reference);
+                if (summaryLabel != null)
+                {
+                    resourceSummaryLabel = summaryLabel;
+                }
+
+                resourceSummaryValue = summaryValue;
+            }
+
             if (!string.IsNullOrEmpty(displayName))
             {
                 resultAltogether.Add(new ConstantText(displayName));
@@ -646,6 +665,10 @@ public static partial class ReferenceHandler
                         resultAltogether.Add(hrefErrorMessage);
                     }
                 }
+            }
+            else if (resourceSummaryValue != null)
+            {
+                resultAltogether.Add(resourceSummaryValue);
             }
             else
             {
@@ -668,6 +691,21 @@ public static partial class ReferenceHandler
             if (resourceHref == null)
             {
                 result = new Concat(resultAltogether);
+            }
+            else if (widgetModel?.Type == ReferenceNamingWidgetType.NameValuePair)
+            {
+                if (widgetModel.LabelOverride != null)
+                {
+                    resourceSummaryLabel = widgetModel.LabelOverride;
+                }
+
+                result = new NameValuePair(
+                    resourceSummaryLabel ?? new NullWidget(),
+                    new Link(new Concat(resultAltogether), resourceHref, optionalClass: "d-inline-block"),
+                    direction: widgetModel.Direction,
+                    size: widgetModel.Size,
+                    style: widgetModel.Style
+                );
             }
             else
             {
@@ -725,6 +763,18 @@ public static partial class ReferenceHandler
         return new Concat(resultSeparatedSemantically, ", ");
     }
 
+    public static (Widget? Label, Widget? Value) GetResourceSummary(XmlDocumentNavigator resource)
+    {
+        var nodeName = resource.Node?.Name;
+        if (nodeName == null || !SupportedResourceProvider.SupportedResources.TryGetValue(nodeName, out var descriptor))
+        {
+            return (null, null);
+        }
+
+        var summaryModel = descriptor.RenderSummary(resource);
+        return (summaryModel?.Label, summaryModel?.Value);
+    }
+
     private static Widget BuildMutedWidget(string? typeName) =>
         BuildMutedWidget(new ConstantText($" ({typeName}) "));
 
@@ -741,15 +791,12 @@ public static partial class ReferenceHandler
         Widget? customFallbackName = null
     )
     {
-        //HumanName 
-        if (reference.EvaluateCondition("f:name/f:family/@value") &&
-            reference.EvaluateCondition("f:name/f:given/@value"))
+        //HumanName
+        var humanNameSummary = ResourceSummaryUtils.SummaryByHumanName(reference);
+        if (humanNameSummary != null)
         {
             var name = reference.SelectSingleNode("f:name");
-            var firstName = name.SelectSingleNode("f:family/@value").Node?.Value;
-            var secondName = name.SelectSingleNode("f:given/@value").Node?.Value;
-
-            return (name, new ConstantText(firstName + " " + secondName));
+            return (name, humanNameSummary.Value);
         }
 
         //Name 
@@ -757,12 +804,6 @@ public static partial class ReferenceHandler
         {
             var name = reference.SelectSingleNode("f:name/@value");
             return (name, new ConstantText(name.Node?.Value ?? ""));
-        }
-
-        var resourceFallback = ResourceSummaryProvider.GetSummary(reference, showKind);
-        if (resourceFallback != null)
-        {
-            return (resourceFallback.Navigator, resourceFallback.Widget);
         }
 
         //Codeable 
@@ -868,6 +909,35 @@ public static partial class ReferenceHandler
         var referencedResourceNavigator = referencesWithContent[0];
         var node = referencedResourceNavigator.SelectSingleNode(nodePath);
         return node;
+    }
+
+    /// <summary>
+    ///     Retrieves the XMLDocumentNavigators of multiple nodes from referenced resources.
+    /// </summary>
+    /// <param name="navigator">The XML navigator positioned at the element containing the references.</param>
+    /// <param name="referencePath">The XPath to the reference element(s) (e.g., "f:subject").</param>
+    /// <param name="nodePath">The XPath to the desired node(s) within each referenced resource (e.g., "f:birthDate/@value").</param>
+    /// <returns>
+    ///     A list of XMLDocumentNavigators for all matching nodes across all resolved references.
+    ///     Returns an empty list if no references resolve or no matching nodes are found.
+    /// </returns>
+    public static List<XmlDocumentNavigator>? GetNodeNavigatorsFromReferences(
+        XmlDocumentNavigator navigator,
+        string referencePath,
+        string nodePath
+    )
+    {
+        var result = new List<XmlDocumentNavigator>();
+        var referencesWithContent = GetContentFromReferences(navigator, referencePath);
+
+
+        foreach (var nodes in referencesWithContent.Select(referencedResourceNavigator =>
+                     referencedResourceNavigator.SelectAllNodes(nodePath).ToList()))
+        {
+            result.AddRange(nodes);
+        }
+
+        return result.Count == 0 ? null : result;
     }
 
     /// <summary>

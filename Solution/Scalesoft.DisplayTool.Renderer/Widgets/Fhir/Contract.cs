@@ -91,7 +91,7 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
                 new ConstantText("Relevantní historie"),
                 new CommaSeparatedBuilder("f:relevantHistory", _ => [new AnyReferenceNamingWidget()])
             )),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var actorsBadge = new PlainBadge(new ConstantText("Činitelé"));
         var actorsInfo = new Container([
@@ -137,7 +137,7 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
                     )
                 ])
             )
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var precursorBadge = new PlainBadge(new ConstantText("Předzvěst smlouvy"));
         var precursorInfo = new Container([
@@ -165,7 +165,7 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
                 new ConstantText("Autorská práva"),
                 new Markdown("@value")
             )),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var contractsBadge = new PlainBadge(new ConstantText("Právní obsah"));
         var contractsInfo = new Row([

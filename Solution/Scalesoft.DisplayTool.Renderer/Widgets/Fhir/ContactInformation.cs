@@ -18,24 +18,15 @@ public class ContactInformation(
         RenderContext context
     )
     {
-        Widget[] addressContactWidgets =
-        [
-            new Address(addressPath),
-            new FlexList([
-                new ShowContactPoint(telecomPath)
-            ], FlexDirection.Column, flexContainerClasses: string.Empty)
-        ];
-
         List<Widget> contact =
         [
             new If(_ => navigator.EvaluateCondition(addressPath) ||
                         navigator.EvaluateCondition(telecomPath),
-                new NameValuePair(
-                    new PlainBadge(new DisplayLabel(LabelCodes.ContactInformation)),
-                    new FlexList(addressContactWidgets, FlexDirection.Column,
-                        flexContainerClasses: "column-gap-6 row-gap-0"),
-                    direction: FlexDirection.Column
-                )
+                new PlainBadge(new DisplayLabel(LabelCodes.ContactInformation)),
+                new Container([
+                    new Address(addressPath),
+                    new ShowContactPoint(telecomPath),
+                ], optionalClass: "name-value-pair-wrapper")
             ),
         ];
 

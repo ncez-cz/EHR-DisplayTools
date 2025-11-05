@@ -29,8 +29,9 @@ public class Group : ColumnResourceBase<Group>, IResourceWidget
                                 [
                                     new Optional(
                                         "f:active",
-                                        new TextContainer(TextStyle.Bold,
-                                            new ShowBoolean(new ConstantText("Neaktivní"), new ConstantText("Aktivní"))
+                                        new TextContainer(TextStyle.Bold, 
+                                            new ShowBoolean(new ConstantText("Neaktivní"), new ConstantText("Aktivní")),
+                                            optionalClass: "full-grid-row"
                                         )
                                     ),
                                     new NameValuePair(
@@ -73,7 +74,7 @@ public class Group : ColumnResourceBase<Group>, IResourceWidget
                                             new AnyReferenceNamingWidget()
                                         )
                                     ),
-                                ]
+                                ], optionalClass: "name-value-pair-wrapper w-max-content"
                             ),
                             new Condition(
                                 "f:characteristic",
@@ -169,26 +170,28 @@ public class OptionalGroupCharacteristicCard(string path, string title) : Widget
             path,
             new Card(
                 new ConstantText(title),
-                new ConcatBuilder(
-                    path,
-                    _ =>
-                    [
-                        new NameValuePair([new ChangeContext("f:code", new CodeableConcept())], [
-                            new OpenTypeElement(null), // CodeableConcept | boolean | Quantity | Range | Reference()
-                            new Optional(
-                                "f:period",
-                                new TextContainer(
-                                    TextStyle.Muted,
-                                    [
-                                        new ConstantText(" (V období: "),
-                                        new ShowPeriod(),
-                                        new ConstantText(")"),
-                                    ]
+                new Container([
+                    new ConcatBuilder(
+                        path,
+                        _ =>
+                        [
+                            new NameValuePair([new ChangeContext("f:code", new CodeableConcept())], [
+                                new OpenTypeElement(null), // CodeableConcept | boolean | Quantity | Range | Reference()
+                                new Optional(
+                                    "f:period",
+                                    new TextContainer(
+                                        TextStyle.Muted,
+                                        [
+                                            new ConstantText(" (V období: "),
+                                            new ShowPeriod(),
+                                            new ConstantText(")"),
+                                        ]
+                                    )
                                 )
-                            )
-                        ])
-                    ]
-                )
+                            ])
+                        ]
+                    )
+                ], optionalClass: "name-value-pair-wrapper w-max-content")
             )
         );
 

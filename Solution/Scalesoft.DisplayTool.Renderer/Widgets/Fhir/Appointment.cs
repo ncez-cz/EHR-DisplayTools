@@ -17,45 +17,6 @@ public class Appointment : ColumnResourceBase<Appointment>, IResourceWidget
         RenderContext context
     )
     {
-        var participantsInfo =
-            new ListBuilder("f:participant", FlexDirection.Row, _ =>
-                {
-                    var tree =
-                        new Card(
-                            new Container([
-                                new Container([
-                                    new ConstantText("Činitel"),
-                                    new Optional("f:actor",
-                                        new ConstantText(" ("),
-                                        new AnyReferenceNamingWidget(),
-                                        new ConstantText(")")
-                                    ),
-                                ], ContainerType.Span),
-                                new EnumIconTooltip("f:status",
-                                    "https://hl7.org/fhir/R4/valueset-participationstatus.html",
-                                    new ConstantText("Stav účasti")
-                                )
-                            ], ContainerType.Div, "d-flex align-items-center gap-1"),
-                            new Container([
-                                new Optional("f:actor", new NameValuePair(
-                                    new ConstantText("Činitel"),
-                                    new AnyReferenceNamingWidget()
-                                )),
-                                new Condition("f:type", new NameValuePair(
-                                    new ConstantText("Typ"),
-                                    new CommaSeparatedBuilder("f:type", _ => [new CodeableConcept()])
-                                )),
-                                new Optional("f:period", new NameValuePair(
-                                    new ConstantText("Doba účasti"),
-                                    new ShowPeriod()
-                                ))
-                            ])
-                        );
-
-                    return [tree];
-                }, flexContainerClasses: "gap-2"
-            );
-
         var infrequentProperties =
             InfrequentProperties.Evaluate<AppointmentInfrequentProperties>([navigator]);
 
@@ -104,7 +65,7 @@ public class Appointment : ColumnResourceBase<Appointment>, IResourceWidget
                     new ChangeContext("f:appointmentType", new CodeableConcept())
                 )
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var timingBadge = new PlainBadge(new ConstantText("Časové údaje"));
         var timingInfo = new Container([
@@ -142,7 +103,7 @@ public class Appointment : ColumnResourceBase<Appointment>, IResourceWidget
                         _ => [new Container([new ShowPeriod()], ContainerType.Span)], flexContainerClasses: "gap-0")
                 )
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var additionalDetailsBadge = new PlainBadge(new ConstantText("Další detaily"));
         var additionalDetails = new Container([
@@ -190,10 +151,48 @@ public class Appointment : ColumnResourceBase<Appointment>, IResourceWidget
                     new CommaSeparatedBuilder("f:basedOn", _ => [new AnyReferenceNamingWidget()])
                 )
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var participantsBadge = new PlainBadge(new ConstantText("Činitelé"));
+        var participantsInfo =
+            new ListBuilder("f:participant", FlexDirection.Column, _ =>
+                {
+                    var tree =
+                        new Card(
+                            new Container([
+                                new Container([
+                                    new ConstantText("Činitel"),
+                                    new Optional("f:actor",
+                                        new ConstantText(" ("),
+                                        new AnyReferenceNamingWidget(),
+                                        new ConstantText(")")
+                                    ),
+                                ], ContainerType.Span),
+                                new EnumIconTooltip("f:status",
+                                    "https://hl7.org/fhir/R4/valueset-participationstatus.html",
+                                    new ConstantText("Stav účasti")
+                                )
+                            ], ContainerType.Div, "d-flex align-items-center gap-1"),
+                            new Container([
+                                new Optional("f:actor", new NameValuePair(
+                                    new ConstantText("Činitel"),
+                                    new AnyReferenceNamingWidget()
+                                )),
+                                new Condition("f:type", new NameValuePair(
+                                    new ConstantText("Typ"),
+                                    new CommaSeparatedBuilder("f:type", _ => [new CodeableConcept()])
+                                )),
+                                new Optional("f:period", new NameValuePair(
+                                    new ConstantText("Doba účasti"),
+                                    new ShowPeriod()
+                                ))
+                            ], optionalClass: "name-value-pair-wrapper w-max-content")
+                        );
 
+                    return [tree];
+                },flexContainerClasses: "gap-2"
+            );
+        
         var complete =
             new Collapser([headerInfo], [], [
                     badge,

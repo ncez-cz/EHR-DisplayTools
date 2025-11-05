@@ -19,6 +19,14 @@ public class FhirFooter : Widget
         RenderContext context
     )
     {
+        Widget authorResourceTitle = new DisplayLabel(LabelCodes.Author);
+
+        if (context.DocumentType is DocumentType.ImagingOrder
+            or DocumentType.LaboratoryOrder)
+        {
+            authorResourceTitle = new ConstantText("Žadatel");
+        }
+
         var widget = new Container(
             content:
             [
@@ -34,30 +42,23 @@ public class FhirFooter : Widget
                         new If(
                             _ => navigator.EvaluateCondition(
                                 "/f:Bundle/f:entry/f:resource/f:Composition/f:author/f:reference"),
-                            new ConcatBuilder("/f:Bundle/f:entry/f:resource/f:Composition/f:author", _ =>
-                            [
-                                ShowSingleReference.WithDefaultDisplayHandler(nav =>
-                                {
-                                    Widget title = new DisplayLabel(LabelCodes.Author);
-
-                                    if (context.DocumentType is DocumentType.ImagingOrder
-                                        or DocumentType.LaboratoryOrder)
-                                    {
-                                        title = new ConstantText("Žadatel");
-                                    }
-
-                                    return
-                                    [
-                                        new Container([
-                                            new PersonOrOrganization(
-                                                nav,
-                                                skipWhenInactive: true,
-                                                collapserTitle: title
-                                            ),
-                                        ], idSource: nav),
-                                    ];
-                                }),
-                            ])
+                            new ShowMultiReference("/f:Bundle/f:entry/f:resource/f:Composition/f:author", (items, _) =>
+                                    items.Select(Widget (nav) => new Container([
+                                        new PersonOrOrganization(
+                                            nav,
+                                            skipWhenInactive: true,
+                                            collapserTitle: authorResourceTitle
+                                        ),
+                                    ], idSource: nav)).ToList(),
+                                x =>
+                                [
+                                    new Collapser(
+                                        [authorResourceTitle],
+                                        [],
+                                        x.ToList(),
+                                        isCollapsed: true
+                                    )
+                                ])
                         ),
 
                         #endregion
@@ -66,13 +67,23 @@ public class FhirFooter : Widget
 
                         new If(
                             _ => navigator.EvaluateCondition("/f:Bundle/f:entry/f:resource/f:Composition/f:custodian"),
-                            ShowSingleReference.WithDefaultDisplayHandler(x =>
-                            [
-                                new Container([
+                            // multireference widget is used only for customising broken references builder, semantically the reference is x..1
+                            new ShowMultiReference(
+                                "/f:Bundle/f:entry/f:resource/f:Composition/f:custodian",
+                                (items, _) => items.Select(Widget (x) => new Container([
                                     new PersonOrOrganization(x, skipWhenInactive: true,
                                         collapserTitle: new DisplayLabel(LabelCodes.Custodian)),
-                                ], idSource: x),
-                            ], "/f:Bundle/f:entry/f:resource/f:Composition/f:custodian")
+                                ], idSource: x)).ToList(),
+                                x =>
+                                [
+                                    new Collapser(
+                                        [new DisplayLabel(LabelCodes.Custodian)],
+                                        [],
+                                        x.ToList(),
+                                        isCollapsed: true
+                                    )
+                                ]
+                            )
                         ),
 
                         #endregion
@@ -80,13 +91,22 @@ public class FhirFooter : Widget
                         #region Managing Organization
 
                         new If(_ => navigator.EvaluateCondition("f:managingOrganization"),
-                            ShowSingleReference.WithDefaultDisplayHandler(x =>
-                            [
-                                new Container([
+                            new ShowMultiReference(
+                                "f:managingOrganization",
+                                (items, _) => items.Select(Widget (x) => new Container([
                                     new PersonOrOrganization(x, skipWhenInactive: true,
                                         collapserTitle: new DisplayLabel(LabelCodes.RepresentedOrganization)),
-                                ], idSource: x),
-                            ], "f:managingOrganization")),
+                                ], idSource: x)).ToList(),
+                                x =>
+                                [
+                                    new Collapser(
+                                        [new DisplayLabel(LabelCodes.RepresentedOrganization)],
+                                        [],
+                                        x.ToList(),
+                                        isCollapsed: true
+                                    )
+                                ]
+                            )),
 
                         #endregion
 

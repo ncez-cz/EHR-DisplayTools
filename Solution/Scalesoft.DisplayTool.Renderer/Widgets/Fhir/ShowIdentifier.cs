@@ -47,7 +47,7 @@ public class ShowIdentifier(string path = ".", bool showSystem = true) : Widget
         if (isValue)
         {
             widgets.Add(
-                new TextContainer(TextStyle.Regular, [new Optional($"{path}/f:value", new Text("@value"))])
+                new TextContainer(TextStyle.Bold, [new Optional($"{path}/f:value", new Text("@value"))])
             );
             widgets.Add(new ConstantText(" "));
         }

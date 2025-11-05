@@ -18,37 +18,39 @@ public class CareTeamsAdditionalInfoCell(XmlDocumentNavigator item) : Widget
 
         var participantTableCell = new TableCell(
         [
-            new HideableDetails(
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Identifier)
-                    ? new NameValuePair([new ConstantText("Identifikátor týmu")],
-                    [
-                        new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()]),
-                    ])
-                    : infrequentOptions.Contains(InfrequentPropertiesPaths.Id)
-                        ? new NameValuePair([new ConstantText("Technický identifikátor týmu")],
+            new Container([
+                new HideableDetails(
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Identifier)
+                        ? new NameValuePair([new ConstantText("Identifikátor týmu")],
                         [
-                            new Optional("f:id", new Text("@value"))
+                            new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()]),
                         ])
-                        : new ConstantText("Identifikátor podání není specifikován")
-            ),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode)
-                ? new NameValuePair([new ConstantText("Účel týmu")],
-                [
-                    new CommaSeparatedBuilder("f:reasonCode", _ => [new CodeableConcept()]),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.ManagingOrganization)
-                ? new NameValuePair([new ConstantText("Odpovědná organizace")],
-                [
-                    new CommaSeparatedBuilder("f:managingOrganization", _ => [new AnyReferenceNamingWidget()]),
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Note)
-                ? new NameValuePair([new ConstantText("Komentář")],
-                [
-                    new ItemListBuilder("f:note", ItemListType.Unordered, _ => [new ShowAnnotationCompact()]),
-                ])
-                : new NullWidget()
+                        : infrequentOptions.Contains(InfrequentPropertiesPaths.Id)
+                            ? new NameValuePair([new ConstantText("Technický identifikátor týmu")],
+                            [
+                                new Optional("f:id", new Text("@value"))
+                            ])
+                            : new ConstantText("Identifikátor podání není specifikován")
+                ),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode)
+                    ? new NameValuePair([new ConstantText("Účel týmu")],
+                    [
+                        new CommaSeparatedBuilder("f:reasonCode", _ => [new CodeableConcept()]),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.ManagingOrganization)
+                    ? new NameValuePair([new ConstantText("Odpovědná organizace")],
+                    [
+                        new CommaSeparatedBuilder("f:managingOrganization", _ => [new AnyReferenceNamingWidget()]),
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Note)
+                    ? new NameValuePair([new ConstantText("Komentář")],
+                    [
+                        new ItemListBuilder("f:note", ItemListType.Unordered, _ => [new ShowAnnotationCompact()]),
+                    ])
+                    : new NullWidget()
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
 
         if (infrequentOptions.Count == 0)

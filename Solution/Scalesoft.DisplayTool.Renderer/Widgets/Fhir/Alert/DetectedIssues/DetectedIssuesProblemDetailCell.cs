@@ -15,8 +15,8 @@ public class DetectedIssuesProblemDetailCell(XmlDocumentNavigator item) : Widget
     {
         var infrequentOptions = InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
 
-        var tree = new TableCell([
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Code)
+        var tree = new TableCell([new Container([
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Code)
                 ? new NameValuePair([new ConstantText("Kategorie")],
                 [
                     new Optional("f:code", new CodeableConcept())
@@ -26,7 +26,7 @@ public class DetectedIssuesProblemDetailCell(XmlDocumentNavigator item) : Widget
                 ? new NameValuePair([new ConstantText("Detail")],
                 [
                     new Optional("f:detail", new Text("@value"))
-                ])
+                ], direction: FlexDirection.Column)
                 : new NullWidget(),
             infrequentOptions.Contains(InfrequentPropertiesPaths.Implicated)
                 ? new NameValuePair([new ConstantText("Související zdroje")],
@@ -35,6 +35,7 @@ public class DetectedIssuesProblemDetailCell(XmlDocumentNavigator item) : Widget
                         new LineBreak())
                 ], direction: FlexDirection.Column)
                 : new NullWidget()
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
 
         if (infrequentOptions.Count == 0)

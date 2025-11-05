@@ -146,8 +146,8 @@ public class CompositionHdr : Widget
                 titleAbbreviations: SectionTitleAbbreviations.AdditionalDocuments),
             new FhirSection(
                 CodedValueDefinition.LoincValue(LoincSectionCodes.PaymentSources),
-                (x, _, _) => 
-                    new Coverages(x),
+                (_, _, _) => 
+                    new Coverages(),
                 titleAbbreviations: SectionTitleAbbreviations.PaymentSources
             ),
             new FhirSection(

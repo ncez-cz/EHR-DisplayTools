@@ -20,42 +20,44 @@ public class RiskAssessmentPredictionCell(XmlDocumentNavigator item) : Widget
         var actorsTableCell = new TableCell(
         [
             new ChangeContext(predictionNav,
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Outcome)
-                    ? new NameValuePair([new ConstantText("Důsledek")],
-                    [
-                        new Optional("f:outcome", new CodeableConcept())
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Probability)
-                    ? new NameValuePair([new ConstantText("Pravděpodobnost")],
-                    [
-                        new OpenTypeElement(null, "probability") // decimal | Range
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.QualitativeRisk)
-                    ? new NameValuePair([new ConstantText("Kvalitativní riziko")],
-                    [
-                        new Optional("f:qualitativeRisk", new CodeableConcept())
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.RelativeRisk)
-                    ? new NameValuePair([new ConstantText("Relativní riziko")],
-                    [
-                        new Optional("f:relativeRisk", new ShowDecimal())
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.When)
-                    ? new NameValuePair([new ConstantText("Období")],
-                    [
-                        new OpenTypeElement(null, "when") // Period | Range
-                    ])
-                    : new NullWidget(),
-                infrequentOptions.Contains(InfrequentPropertiesPaths.Rationale)
-                    ? new NameValuePair([new ConstantText("Vysvětlení")],
-                    [
-                        new Optional("f:rationale", new Text("@value"))
-                    ])
-                    : new NullWidget()
+                new Container([
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Outcome)
+                        ? new NameValuePair([new ConstantText("Důsledek")],
+                        [
+                            new Optional("f:outcome", new CodeableConcept())
+                        ])
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Probability)
+                        ? new NameValuePair([new ConstantText("Pravděpodobnost")],
+                        [
+                            new OpenTypeElement(null, "probability") // decimal | Range
+                        ])
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.QualitativeRisk)
+                        ? new NameValuePair([new ConstantText("Kvalitativní riziko")],
+                        [
+                            new Optional("f:qualitativeRisk", new CodeableConcept())
+                        ])
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.RelativeRisk)
+                        ? new NameValuePair([new ConstantText("Relativní riziko")],
+                        [
+                            new Optional("f:relativeRisk", new ShowDecimal())
+                        ])
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.When)
+                        ? new NameValuePair([new ConstantText("Období")],
+                        [
+                            new OpenTypeElement(null, "when") // Period | Range
+                        ])
+                        : new NullWidget(),
+                    infrequentOptions.Contains(InfrequentPropertiesPaths.Rationale)
+                        ? new NameValuePair([new ConstantText("Vysvětlení")],
+                        [
+                            new Optional("f:rationale", new Text("@value"))
+                        ], direction: FlexDirection.Column)
+                        : new NullWidget()
+                ], optionalClass: "name-value-pair-wrapper")
             )
         ]);
 

@@ -180,13 +180,23 @@ public class ServiceRequest(
                     new If(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Insurance) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Insurance),
-                        new HideableDetails(new NameValuePair(
-                            new ConstantText("Úhrada"),
+                        new HideableDetails(
                             new CommaSeparatedBuilder("f:insurance",
-                                _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
-                            style: nameValuePairStyle,
-                            direction: FlexDirection.Column
-                        ))
+                                _ =>
+                                [
+                                    new AnyReferenceNamingWidget(
+                                        showOptionalDetails: false,
+                                        widgetModel: new ReferenceNamingWidgetModel
+                                        {
+                                            Type = ReferenceNamingWidgetType.NameValuePair,
+                                            Direction = FlexDirection.Column,
+                                            Style = NameValuePair.NameValuePairStyle.Primary,
+                                            LabelOverride = new ConstantText("Úhrada"),
+                                        }
+                                    ),
+                                ]
+                            )
+                        )
                     ),
                     new If(
                         _ => displayableProperties.Contains(ServiceRequestProperties.SupportingInfo) &&

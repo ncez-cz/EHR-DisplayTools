@@ -18,25 +18,27 @@ public class DocumentReferenceActorsCell(XmlDocumentNavigator item) : Widget
 
         var participantTableCell = new TableCell(
         [
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Author), new NameValuePair(
-                new ConstantText("Autor dokumentu"),
-                new AnyReferenceNamingWidget("f:author"))),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Authenticator),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Ověřil(a)"),
-                    new AnyReferenceNamingWidget("f:authenticator")))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Custodian),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Správce dokumentu"),
-                    new AnyReferenceNamingWidget("f:custodian")))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.RelatesTo),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Souvisejíci záznam"),
-                    new ItemListBuilder("f:relatesTo/f:target", ItemListType.Unordered,
-                        _ => [new AnyReferenceNamingWidget()])))
-            ),
+            new Container([
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Author), new NameValuePair(
+                    new ConstantText("Autor dokumentu"),
+                    new AnyReferenceNamingWidget("f:author"))),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Authenticator),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Ověřil(a)"),
+                        new AnyReferenceNamingWidget("f:authenticator")))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Custodian),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Správce dokumentu"),
+                        new AnyReferenceNamingWidget("f:custodian")))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.RelatesTo),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Souvisejíci záznam"),
+                        new ItemListBuilder("f:relatesTo/f:target", ItemListType.Unordered,
+                            _ => [new AnyReferenceNamingWidget()])))
+                ),
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
         ]);
 
         if (infrequentOptions.Count == 0)

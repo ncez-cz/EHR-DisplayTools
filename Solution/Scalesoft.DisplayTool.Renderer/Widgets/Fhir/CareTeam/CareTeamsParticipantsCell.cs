@@ -27,24 +27,26 @@ public class CareTeamsParticipantsCell(XmlDocumentNavigator item) : Widget
                         ? new TextContainer(TextStyle.Bold | TextStyle.Underlined,
                             [new Optional("f:member", new AnyReferenceNamingWidget()), new LineBreak()])
                         : new NullWidget(),
-                    infrequentOptions.Contains(InfrequentPropertiesPaths.Role)
-                        ? new NameValuePair([new ConstantText("Role")],
-                        [
-                            new Optional("f:role", new CodeableConcept()),
-                        ])
-                        : new NullWidget(),
-                    infrequentOptions.Contains(InfrequentPropertiesPaths.Period)
-                        ? new NameValuePair([new DisplayLabel(LabelCodes.Duration)],
-                        [
-                            new ShowPeriod("f:period")
-                        ])
-                        : new NullWidget(),
-                    infrequentOptions.Contains(InfrequentPropertiesPaths.OnBehalfOf)
-                        ? new NameValuePair([new ConstantText("Organizace")],
-                        [
-                            new Optional("f:onBehalfOf", new AnyReferenceNamingWidget())
-                        ])
-                        : new NullWidget()
+                    new Container([
+                        infrequentOptions.Contains(InfrequentPropertiesPaths.Role)
+                            ? new NameValuePair([new ConstantText("Role")],
+                            [
+                                new Optional("f:role", new CodeableConcept()),
+                            ])
+                            : new NullWidget(),
+                        infrequentOptions.Contains(InfrequentPropertiesPaths.Period)
+                            ? new NameValuePair([new DisplayLabel(LabelCodes.Duration)],
+                            [
+                                new ShowPeriod("f:period")
+                            ])
+                            : new NullWidget(),
+                        infrequentOptions.Contains(InfrequentPropertiesPaths.OnBehalfOf)
+                            ? new NameValuePair([new ConstantText("Organizace")],
+                            [
+                                new Optional("f:onBehalfOf", new AnyReferenceNamingWidget())
+                            ])
+                            : new NullWidget()
+                    ], optionalClass: "name-value-pair-wrapper"),
                 ];
             }),
         ]);

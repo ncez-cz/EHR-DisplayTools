@@ -38,7 +38,7 @@ public class RiskAssessmentBasicInfoCell(XmlDocumentNavigator item) : Widget
                 ? new NameValuePair([new ConstantText("Důvody")],
                 [
                     new ItemListBuilder("f:reasonCode", ItemListType.Unordered, _ => [new CodeableConcept()])
-                ])
+                ], direction: FlexDirection.Column)
                 : new NullWidget(),
             infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonReference)
                 ? new NameValuePair([new ConstantText("Odkazy na důvod")],

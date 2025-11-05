@@ -63,7 +63,7 @@ public class MedicationDispenseMedicationCell(XmlDocumentNavigator item) : Widge
                         new Optional("f:whenHandedOver", new ShowDateTime())
                     ])
                     : new NullWidget(),
-            ])
+            ], optionalClass: "name-value-pair-wrapper")
         ]);
 
         return medicationTableCell.Render(item, renderer, context);

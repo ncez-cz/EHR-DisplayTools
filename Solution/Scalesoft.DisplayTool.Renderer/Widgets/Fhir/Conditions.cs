@@ -6,12 +6,11 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
 public class Conditions(
     List<XmlDocumentNavigator> items,
-    Widget problemColumnLabel,
-    bool skipIdPopulation = false
+    Widget problemColumnLabel
 ) : Widget
 {
     public Conditions(List<XmlDocumentNavigator> items, bool skipIdPopulation = false) : this(items,
-        new ConstantText("Problém"), skipIdPopulation)
+        new ConstantText("Problém"))
     {
     }
 
@@ -26,7 +25,7 @@ public class Conditions(
                 new AlternatingBackgroundColumn(
                     items.Select(x => new ChangeContext(
                             x,
-                            new ConditionResource(problemColumnLabel, skipIdPopulation)
+                            new ConditionResource(problemColumnLabel)
                         )
                     ).ToList<Widget>()
                 ),

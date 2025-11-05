@@ -67,36 +67,40 @@ public class CommunicationRequest : ColumnResourceBase<CommunicationRequest>, IR
                     new ShowDateTime("f:authoredOn")
                 )
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var messageBadge = new PlainBadge(new ConstantText("Zpráva"));
-        var messageInfo = new Container([
+        var messageInfo = new Concat([
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Payload),
-                new ConcatBuilder("f:payload", _ =>
-                [
-                    new OpenTypeElement(null, "content") // string | Attachment | Reference(Any)
-                ], new LineBreak())
+                new Container([
+                    new ConcatBuilder("f:payload", _ =>
+                    [
+                        new OpenTypeElement(null, "content") // string | Attachment | Reference(Any)
+                    ])
+                ])
             ),
-            new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Requester),
-                new NameValuePair(
-                    new ConstantText("Žadatel"),
-                    new AnyReferenceNamingWidget("f:requester")
-                )
-            ),
-            new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Sender),
-                new NameValuePair(
-                    new ConstantText("Odesílatel"),
-                    new AnyReferenceNamingWidget("f:sender")
-                )
-            ),
-            new If(
-                _ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.DoNotPerform) &&
-                     navigator.EvaluateCondition("f:doNotPerform[@value='true']"),
-                new NameValuePair(
-                    new ConstantText("Zákaz"),
-                    new ShowDoNotPerform()
-                )
-            ),
+            new Container([
+                new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Requester),
+                    new NameValuePair(
+                        new ConstantText("Žadatel"),
+                        new AnyReferenceNamingWidget("f:requester")
+                    )
+                ),
+                new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Sender),
+                    new NameValuePair(
+                        new ConstantText("Odesílatel"),
+                        new AnyReferenceNamingWidget("f:sender")
+                    )
+                ),
+                new If(
+                    _ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.DoNotPerform) &&
+                         navigator.EvaluateCondition("f:doNotPerform[@value='true']"),
+                    new NameValuePair(
+                        new ConstantText("Zákaz"),
+                        new ShowDoNotPerform()
+                    )
+                ),
+            ], optionalClass: "name-value-pair-wrapper w-max-content")
         ]);
 
         var complete =

@@ -68,7 +68,7 @@ public class DiagnosticReportCard(bool skipIdPopulation = false) : ColumnResourc
                     new ShowDateTime("f:issued")
                 ))
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var resultBadge = new PlainBadge(new ConstantText("Výsledek"));
         var resultInfo = new Container([
@@ -78,71 +78,73 @@ public class DiagnosticReportCard(bool skipIdPopulation = false) : ColumnResourc
                     new CommaSeparatedBuilder("f:result", _ => [new AnyReferenceNamingWidget()])
                 )
             ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Performer),
-                new NameValuePair(
-                    new DisplayLabel(LabelCodes.Performer),
-                    new CommaSeparatedBuilder("f:performer", _ => [new AnyReferenceNamingWidget()])
-                )
-            ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.ResultsInterpreter),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Intrepret výsledků"),
-                    new CommaSeparatedBuilder("f:resultsInterpreter", _ => [new AnyReferenceNamingWidget()])
-                ))
-            ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Specimen),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Vzorek"),
-                    new AnyReferenceNamingWidget("f:specimen")
-                ))
-            ),
-            new If(
-                _ => infrequentProperties.Contains(DiagnosticInfrequentProperties
-                    .ImagingStudy),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Obrazová studie"),
-                    new ConcatBuilder("f:imagingStudy",
-                        _ => [new AnyReferenceNamingWidget()], new LineBreak()
+            new Container([
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Performer),
+                    new NameValuePair(
+                        new DisplayLabel(LabelCodes.Performer),
+                        new CommaSeparatedBuilder("f:performer", _ => [new AnyReferenceNamingWidget()])
                     )
-                ))
-            ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Media),
-                new TextContainer(TextStyle.Bold, new ConstantText("Záznamy:")),
-                new ListBuilder("f:media", FlexDirection.Row, _ =>
-                [
-                    new Card(null, new Container([
-                            new NameValuePair(
-                                new ConstantText("Média"),
-                                new AnyReferenceNamingWidget("f:link")
-                            ),
-                            new Optional("f:comment",
+                ),
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.ResultsInterpreter),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Intrepret výsledků"),
+                        new CommaSeparatedBuilder("f:resultsInterpreter", _ => [new AnyReferenceNamingWidget()])
+                    ))
+                ),
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Specimen),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Vzorek"),
+                        new AnyReferenceNamingWidget("f:specimen")
+                    ))
+                ),
+                new If(
+                    _ => infrequentProperties.Contains(DiagnosticInfrequentProperties
+                        .ImagingStudy),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Obrazová studie"),
+                        new ConcatBuilder("f:imagingStudy",
+                            _ => [new AnyReferenceNamingWidget()], new LineBreak()
+                        )
+                    ))
+                ),
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Media),
+                    new TextContainer(TextStyle.Bold, new ConstantText("Záznamy:")),
+                    new ListBuilder("f:media", FlexDirection.Row, _ =>
+                    [
+                        new Card(null, new Container([
                                 new NameValuePair(
-                                    new ConstantText("Popis"),
-                                    new Text("@value")
-                                )
-                            ),
-                        ])
+                                    new ConstantText("Média"),
+                                    new AnyReferenceNamingWidget("f:link")
+                                ),
+                                new Optional("f:comment",
+                                    new NameValuePair(
+                                        new ConstantText("Popis"),
+                                        new Text("@value")
+                                    )
+                                ),
+                            ])
+                        )
+                    ])
+                ),
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Conclusion),
+                    new NameValuePair(
+                        new ConstantText("Závěr"),
+                        new Text("f:conclusion/@value")
                     )
-                ])
-            ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.Conclusion),
-                new NameValuePair(
-                    new ConstantText("Závěr"),
-                    new Text("f:conclusion/@value")
-                )
-            ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.ConclusionCode),
-                new NameValuePair(
-                    new ConstantText("Kód závěru"),
-                    new CommaSeparatedBuilder("f:conclusionCode", _ => [new CodeableConcept()])
-                )
-            ),
-            new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.PresentedForm),
-                new NameValuePair(
-                    new ConstantText("Předložené formuláře"),
-                    new CommaSeparatedBuilder("f:presentedForm", _ => [new Attachment()])
-                )
-            ),
+                ),
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.ConclusionCode),
+                    new NameValuePair(
+                        new ConstantText("Kód závěru"),
+                        new CommaSeparatedBuilder("f:conclusionCode", _ => [new CodeableConcept()])
+                    )
+                ),
+                new If(_ => infrequentProperties.Contains(DiagnosticInfrequentProperties.PresentedForm),
+                    new NameValuePair(
+                        new ConstantText("Předložené formuláře"),
+                        new CommaSeparatedBuilder("f:presentedForm", _ => [new Attachment()])
+                    )
+                ),
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
 
         var complete =

@@ -16,30 +16,32 @@ public class RiskAssessmentActorsCell(XmlDocumentNavigator item) : Widget
         var infrequentOptions = InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
 
         var actorsTableCell = new TableCell([
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Performer)
-                ? new NameValuePair([new ConstantText("Provedl(a)")],
-                [
-                    new Optional("f:performer", new AnyReferenceNamingWidget())
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Parent)
-                ? new NameValuePair([new ConstantText("Nadřazený záznam")],
-                [
-                    new Optional("f:parent", new AnyReferenceNamingWidget())
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.Subject)
-                ? new NameValuePair([new ConstantText("Subjekt")],
-                [
-                    new Optional("f:subject", new AnyReferenceNamingWidget())
-                ])
-                : new NullWidget(),
-            infrequentOptions.Contains(InfrequentPropertiesPaths.BasedOn)
-                ? new NameValuePair([new ConstantText("Na základě")],
-                [
-                    new Optional("f:basedOn", new AnyReferenceNamingWidget())
-                ])
-                : new NullWidget(),
+            new Container([
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Performer)
+                    ? new NameValuePair([new ConstantText("Provedl(a)")],
+                    [
+                        new Optional("f:performer", new AnyReferenceNamingWidget())
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Subject)
+                    ? new NameValuePair([new ConstantText("Subjekt")],
+                    [
+                        new Optional("f:subject", new AnyReferenceNamingWidget())
+                    ])
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.Parent)
+                    ? new NameValuePair([new ConstantText("Nadřazený záznam")],
+                    [
+                        new Optional("f:parent", new AnyReferenceNamingWidget())
+                    ], direction: FlexDirection.Column)
+                    : new NullWidget(),
+                infrequentOptions.Contains(InfrequentPropertiesPaths.BasedOn)
+                    ? new NameValuePair([new ConstantText("Na základě")],
+                    [
+                        new Optional("f:basedOn", new AnyReferenceNamingWidget())
+                    ], direction: FlexDirection.Column)
+                    : new NullWidget(),
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
 
         if (infrequentOptions.Count == 0)

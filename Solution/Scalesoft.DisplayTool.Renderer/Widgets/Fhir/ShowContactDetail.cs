@@ -20,7 +20,7 @@ public class ShowContactDetail(string xpath) : Widget
                     )
                 ),
                 new ShowContactPoint()
-            ], ContainerType.Span)
+            ], ContainerType.Span, optionalClass: "name-value-pair-wrapper w-max-content")
         ]);
 
 

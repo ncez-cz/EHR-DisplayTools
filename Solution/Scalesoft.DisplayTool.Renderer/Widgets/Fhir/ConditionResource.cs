@@ -8,7 +8,7 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ConditionResource(Widget resourceTypeLabel, bool skipIdPopulation = false)
+public class ConditionResource(Widget resourceTypeLabel)
     : AlternatingBackgroundColumnResourceBase<ConditionResource>, IResourceWidget
 {
     public static string ResourceType => "Condition";

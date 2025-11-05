@@ -17,7 +17,8 @@ public class MedicationDispenseAdditionalInfoCell(XmlDocumentNavigator item) : W
 
         var supportingInfoTableCell = new TableCell(
         [
-            new HideableDetails(
+            new Container([
+                new HideableDetails(
                 infrequentOptions.Contains(InfrequentPropertiesPaths.Identifier)
                     ? new NameValuePair([new ConstantText("Identifikátor podáni")],
                     [
@@ -66,6 +67,7 @@ public class MedicationDispenseAdditionalInfoCell(XmlDocumentNavigator item) : W
                     new CommaSeparatedBuilder("f:note", _ => [new Optional("f:text", new Text("@value"))])
                 ])
                 : new NullWidget()
+            ], optionalClass: "name-value-pair-wrapper"),
         ]);
 
         if (infrequentOptions.Count == 0)

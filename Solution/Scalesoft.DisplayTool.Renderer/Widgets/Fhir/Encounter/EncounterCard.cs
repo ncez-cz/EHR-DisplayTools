@@ -77,7 +77,7 @@ public class EncounterCard(XmlDocumentNavigator? navigatorParam, bool displayAsC
                     new ShowDuration()
                 ))
             )
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var actorsBadge = new PlainBadge(new ConstantText("Zainteresované strany"));
         var actorsInfo = new Container([
@@ -109,85 +109,65 @@ public class EncounterCard(XmlDocumentNavigator? navigatorParam, bool displayAsC
                     ])
                 ))
             )
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var additionalInfoBadge = new PlainBadge(new ConstantText("Dodatečné informace"));
-        var additionalInfo = new Container(
-            [
-                new Condition(
-                    "f:identifier",
-                    new NameValuePair(
-                        new ConstantText("Identifikátor kontaktu"),
-                        new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()])
-                    )
-                ),
-                new Optional(
-                    "f:priority",
-                    new NameValuePair(
-                        new ConstantText("Priorita"),
-                        new CodeableConcept()
-                    )
-                ),
-                new Condition(
-                    "f:type",
-                    new NameValuePair(
-                        new ConstantText("Typ"),
-                        new CommaSeparatedBuilder("f:type", _ => [new CodeableConcept()])
-                    )
-                ),
-                new Optional(
-                    "f:serviceType",
-                    new NameValuePair(
-                        new ConstantText("Druh služby"),
-                        new CodeableConcept()
-                    )
-                ),
-                // Související zdroje
-                new Optional(
-                    "f:partOf",
-                    new NameValuePair(
-                        new ConstantText("Nadzáznam"),
-                        new AnyReferenceNamingWidget()
-                    )
-                ),
-                new Condition(
-                    "f:basedOn",
-                    new NameValuePair(
-                        new ConstantText("Na základě"),
-                        new ItemListBuilder(
-                            "f:basedOn",
-                            ItemListType.Unordered,
-                            _ =>
-                                [new AnyReferenceNamingWidget()]
-                        )
-                    )
-                ),
-                new Condition(
-                    "f:episodeOfCare",
-                    new NameValuePair(
-                        new ConstantText("Epizoda péče"),
-                        new ItemListBuilder(
-                            "f:episodeOfCare",
-                            ItemListType.Unordered,
-                            _ =>
-                                [new AnyReferenceNamingWidget()]
-                        )
-                    )
-                ),
-                new Condition(
-                    "f:reasonReference",
-                    new NameValuePair(
-                        new ConstantText("Důvod"),
-                        new ItemListBuilder(
-                            "f:reasonReference",
-                            ItemListType.Unordered,
-                            _ =>
-                                [new AnyReferenceNamingWidget()]
-                        )
-                    )
-                ),
-            ]
-        );
+        var additionalInfo =
+        new Container([
+            new Condition("f:identifier",
+                new NameValuePair(
+                    new ConstantText("Identifikátor kontaktu"),
+                    new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()])
+                )
+            ),
+            new Optional("f:priority",
+                new NameValuePair(
+                    new ConstantText("Priorita"),
+                    new CodeableConcept()
+                )
+            ),
+            new Condition("f:type",
+                new NameValuePair(
+                    new ConstantText("Typ"),
+                    new CommaSeparatedBuilder("f:type", _ => [new CodeableConcept()])
+                )
+            ),
+            new Optional("f:serviceType",
+                new NameValuePair(
+                    new ConstantText("Druh služby"),
+                    new CodeableConcept()
+                )
+            ),
+            // Související zdroje
+            new Optional("f:partOf",
+                new NameValuePair(
+                    new ConstantText("Nadzáznam"),
+                    new AnyReferenceNamingWidget()
+                )
+            ),
+            new Condition("f:basedOn",
+                new NameValuePair(
+                    new ConstantText("Na základě"),
+                    new ItemListBuilder("f:basedOn", ItemListType.Unordered, _ =>
+                        [new AnyReferenceNamingWidget()])
+                )
+            ),
+            new Condition("f:episodeOfCare",
+                new NameValuePair(
+                    new ConstantText("Epizoda péče"),
+                    new ItemListBuilder("f:episodeOfCare", ItemListType.Unordered, _ =>
+                        [new AnyReferenceNamingWidget()])
+                )
+            ),
+            new Condition("f:reasonReference",
+                new HideableDetails(new NameValuePair(
+                    new ConstantText("Důvod"),
+                    new ItemListBuilder("f:reasonReference", ItemListType.Unordered, _ =>
+                        [new AnyReferenceNamingWidget()])
+                ))
+            ),
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
+        
         var locationBadge = new PlainBadge(new ConstantText("Lokace"));
         var locationInfo = new Container(
             [

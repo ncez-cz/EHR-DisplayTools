@@ -208,7 +208,7 @@ public class PatientDetails : Widget
                                     new PlainBadge(new ConstantText("Pohlaví pro klinické použití")),
                                     new ConcatBuilder($"f:extension[@url='{clinicalGender}']", _ =>
                                     [
-                                        new Concat([
+                                        new Container([
                                             new NameValuePair(
                                                 new ConstantText("Pohlaví"),
                                                 new TextContainer(TextStyle.Bold,
@@ -232,9 +232,10 @@ public class PatientDetails : Widget
                                                     new TextContainer(TextStyle.Bold, [
                                                         new OpenTypeElement(null)
                                                     ])
-                                                ) // string
+                                                ), // string
+                                                direction: FlexDirection.Column
                                             ),
-                                        ], string.Empty),
+                                        ], optionalClass: "name-value-pair-wrapper"),
                                     ]), direction: FlexDirection.Column
                                 )
                             ]))),
@@ -271,22 +272,24 @@ public class PatientDetails : Widget
                             ]))),
                         new If(_ => navigator.EvaluateCondition($"f:extension[@url='{registeringProvider}']"),
                             new HideableDetails(new Container([
-                                new NameValuePair(
+                                new Container([
                                     new PlainBadge(new ConstantText("Registrující poskytovatel")),
-                                    new ConcatBuilder($"f:extension[@url='{registeringProvider}']", _ =>
-                                        [
-                                            new Concat([
-                                                new NameValuePair(
-                                                    new Optional("f:extension[@url='category']",
-                                                        new OpenTypeElement(null)), // CodeableConcept
-                                                    new Optional("f:extension[@url='value']",
-                                                        new OpenTypeElement(
-                                                            null)) // Reference(Organization | Practitioner Role)
-                                                )
-                                            ]),
-                                        ]
-                                    ), direction: FlexDirection.Column
-                                )
+                                    new Container([
+                                        new ConcatBuilder($"f:extension[@url='{registeringProvider}']", _ =>
+                                            [
+                                                new Concat([
+                                                    new NameValuePair(
+                                                        new Optional("f:extension[@url='category']",
+                                                            new OpenTypeElement(null)), // CodeableConcept
+                                                        new Optional("f:extension[@url='value']",
+                                                            new OpenTypeElement(
+                                                                null)) // Reference(Organization | Practitioner Role)
+                                                    )
+                                                ]),
+                                            ]
+                                        )
+                                    ], optionalClass: "name-value-pair-wrapper"),
+                                ], optionalClass: "d-flex flex-column"),
                             ]))
                         ),
                     ], flexContainerClasses: "column-gap-11"),

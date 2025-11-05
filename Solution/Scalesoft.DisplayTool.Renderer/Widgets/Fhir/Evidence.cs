@@ -76,7 +76,7 @@ public class Evidence(
                 new ConstantText("Témata"),
                 new CommaSeparatedBuilder("f:topic", _ => [new CodeableConcept()])
             )),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var actorInfo = new Container([
             new Condition("f:contact|f:publisher",
@@ -98,7 +98,9 @@ public class Evidence(
             new Condition("f:author",
                 new Container([
                     new PlainBadge(new ConstantText("Autor")),
-                    new Row([new ShowContactDetail("f:author")])
+                    new Row([
+                        new ShowContactDetail("f:author")
+                    ])
                 ], optionalClass: "mt-2")
             ),
             new Condition("f:editor",
@@ -123,24 +125,26 @@ public class Evidence(
 
         var componentBadge = new PlainBadge(new ConstantText("Komponenty důkazu"));
         var componentInfo = new Container([
-            new Condition("f:exposureBackground",
-                new NameValuePair(
-                    new ConstantText("Zkoumaná populace"),
-                    new AnyReferenceNamingWidget("f:exposureBackground")
-                )
-            ),
-            new Condition("f:exposureVariant",
-                new NameValuePair(
-                    new ConstantText("Zkoumaná intervence"),
-                    new AnyReferenceNamingWidget("f:exposureBackground")
-                )
-            ),
-            new Condition("f:outcome",
-                new NameValuePair(
-                    new DisplayLabel(LabelCodes.Outcome),
-                    new AnyReferenceNamingWidget("f:exposureBackground")
-                )
-            ),
+            new Container([
+                new Condition("f:exposureBackground",
+                    new NameValuePair(
+                        new ConstantText("Zkoumaná populace"),
+                        new AnyReferenceNamingWidget("f:exposureBackground")
+                    )
+                ),
+                new Condition("f:exposureVariant",
+                    new NameValuePair(
+                        new ConstantText("Zkoumaná intervence"),
+                        new AnyReferenceNamingWidget("f:exposureBackground")
+                    )
+                ),
+                new Condition("f:outcome",
+                    new NameValuePair(
+                        new DisplayLabel(LabelCodes.Outcome),
+                        new AnyReferenceNamingWidget("f:exposureBackground")
+                    )
+                ),
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
             new Condition("f:relatedArtifact",
                 new TextContainer(TextStyle.Bold, new ConstantText("Související artefakty:")),
                 new ListBuilder("f:relatedArtifact", FlexDirection.Row, _ =>

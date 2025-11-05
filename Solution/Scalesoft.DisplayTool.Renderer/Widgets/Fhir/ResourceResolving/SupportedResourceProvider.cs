@@ -26,8 +26,9 @@ public static class SupportedResourceProvider
                     ?.GetValue(null) as bool? ?? false;
 
             var instantiateDelegate = GetMethod<InstantiateDelegate>(type, nameof(IResourceWidget.InstantiateMultiple));
+            var renderSummaryDelegate = GetMethod<RenderSummaryDelegate>(type, nameof(IResourceWidget.RenderSummary));
 
-            if (instantiateDelegate == null)
+            if (instantiateDelegate == null || renderSummaryDelegate == null)
             {
                 continue;
             }
@@ -38,6 +39,7 @@ public static class SupportedResourceProvider
                 {
                     RequiresExternalTitle = requiresTitle,
                     Instantiate = instantiateDelegate,
+                    RenderSummary = renderSummaryDelegate,
                 }
             );
         }
@@ -67,6 +69,6 @@ public static class SupportedResourceProvider
             return GetMethod<TDelegate>(type.BaseType, name);
         }
 
-        return null;
+        return GetMethod<TDelegate>(typeof(IResourceWidget), name);
     }
 }

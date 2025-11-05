@@ -14,7 +14,7 @@
     };
 }
 
-<p id="@Model.Id" data-id="@Model.VisualId" class="@sizeClass @Model.CustomClass">@((MarkupString)Model.Content)</p>
+<div id="@Model.Id" data-id="@Model.VisualId" class="@sizeClass @Model.CustomClass">@((MarkupString)Model.Content)</div>
 
 @code {
     [Parameter] public required Heading.ViewModel Model { get; set; }

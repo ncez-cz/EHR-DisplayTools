@@ -18,39 +18,41 @@ public class DocumentReferenceBasicInfoCell(XmlDocumentNavigator item) : Widget
 
         var participantTableCell = new TableCell(
         [
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Description),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Popis"),
-                    new Text("f:description/@value")))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Stav záznamu"),
-                    new EnumLabel("f:status", "http://hl7.org/fhir/ValueSet/document-reference-status")))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.DocStatus),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Stav dokumentu"),
-                    new EnumLabel("f:docStatus", "http://hl7.org/fhir/ValueSet/composition-status")))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Type),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Typ dokumentu"),
-                    new Optional("f:type", new CodeableConcept())))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Category),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Kategorie dokumentu"),
-                    new Optional("f:category", new CodeableConcept())))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.SecurityLabel),
-                new HideableDetails(new NameValuePair(
-                    new ConstantText("Citlivost dokumentu"),
-                    new Optional("f:securityLabel", new CodeableConcept())))
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Date), new NameValuePair(
-                new ConstantText("Datum vytvoření záznamu"),
-                new Optional("f:date", new ShowDateTime())))
+            new Container([
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Description),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Popis"),
+                        new Text("f:description/@value")))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Stav záznamu"),
+                        new EnumLabel("f:status", "http://hl7.org/fhir/ValueSet/document-reference-status")))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.DocStatus),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Stav dokumentu"),
+                        new EnumLabel("f:docStatus", "http://hl7.org/fhir/ValueSet/composition-status")))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Type),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Typ dokumentu"),
+                        new Optional("f:type", new CodeableConcept())))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Category),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Kategorie dokumentu"),
+                        new Optional("f:category", new CodeableConcept())))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.SecurityLabel),
+                    new HideableDetails(new NameValuePair(
+                        new ConstantText("Citlivost dokumentu"),
+                        new Optional("f:securityLabel", new CodeableConcept())))
+                ),
+                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Date), new NameValuePair(
+                    new ConstantText("Datum vytvoření záznamu"),
+                    new Optional("f:date", new ShowDateTime())))
+            ], optionalClass: "name-value-pair-wrapper w-max-content"),
         ]);
 
         if (infrequentOptions.Count == 0)

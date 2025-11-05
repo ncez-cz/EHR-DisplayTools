@@ -126,30 +126,33 @@ public class MedicationAdministrationCard : AlternatingBackgroundColumnResourceB
                 new If(_ => infrequentProperties.ContainsAnyOf(MedicationAdministrationInfrequentProperties.Performer,
                         MedicationAdministrationInfrequentProperties.Subject,
                         MedicationAdministrationInfrequentProperties.Device),
-                    new NameValuePair([new ConstantText("Zainteresované strany")], [
-                        new If(
-                            _ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Performer),
-                            new NameValuePair([new ConstantText("Žadatel")],
-                            [
-                                new CommaSeparatedBuilder("f:performer",
-                                    (_, _, nav) =>
-                                    [
-                                        new Container([new AnyReferenceNamingWidget("f:actor")], ContainerType.Span,
-                                            idSource: nav)
-                                    ])
-                            ], style: NameValuePair.NameValuePairStyle.Secondary)),
-                        new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Subject),
-                            new HideableDetails(new NameValuePair([new ConstantText("Příjemce")],
-                            [
-                                ReferenceHandler.BuildAnyReferencesNaming(medicationAdministrationNav, "f:subject",
-                                    context,
-                                    renderer)
-                            ], style: NameValuePair.NameValuePairStyle.Secondary))),
-                        new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Device),
-                            new NameValuePair([new ConstantText("Zařízení")],
-                            [
-                                new CommaSeparatedBuilder("f:device", _ => [new AnyReferenceNamingWidget()])
-                            ], style: NameValuePair.NameValuePairStyle.Secondary)),
+                    new NameValuePair([new ConstantText("Zainteresované strany")], 
+                    [
+                        new Container([
+                            new If(
+                                _ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Performer),
+                                new NameValuePair([new ConstantText("Žadatel")],
+                                [
+                                    new CommaSeparatedBuilder("f:performer",
+                                        (_, _, nav) =>
+                                        [
+                                            new Container([new AnyReferenceNamingWidget("f:actor")], ContainerType.Span,
+                                                idSource: nav)
+                                        ])
+                                ], style: NameValuePair.NameValuePairStyle.Secondary)),
+                            new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Subject),
+                                new HideableDetails(new NameValuePair([new ConstantText("Příjemce")],
+                                [
+                                    ReferenceHandler.BuildAnyReferencesNaming(medicationAdministrationNav, "f:subject",
+                                        context,
+                                        renderer)
+                                ], style: NameValuePair.NameValuePairStyle.Secondary))),
+                            new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Device),
+                                new NameValuePair([new ConstantText("Zařízení")],
+                                [
+                                    new CommaSeparatedBuilder("f:device", _ => [new AnyReferenceNamingWidget()])
+                                ], style: NameValuePair.NameValuePairStyle.Secondary)),
+                        ], optionalClass: "name-value-pair-wrapper"),
                     ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary)),
                 new If(_ => infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.PartOf),
                     new HideableDetails(new NameValuePair([new ConstantText("Související úkony")],
@@ -158,8 +161,10 @@ public class MedicationAdministrationCard : AlternatingBackgroundColumnResourceB
                     ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary))),
                 new If(
                     _ => infrequentProperties.HasAnyOfGroup("InfoCell"),
-                    new HideableDetails(new NameValuePair([new ConstantText("Doplňujíci informace")], [
-                        new HideableDetails(
+                    new HideableDetails(new NameValuePair([new ConstantText("Doplňujíci informace")], 
+                    [
+                        new Container([
+                            new HideableDetails(
                             infrequentProperties.Contains(MedicationAdministrationInfrequentProperties.Identifier)
                                 ? new NameValuePair([new ConstantText("Identifikátor podání")],
                                 [
@@ -204,6 +209,7 @@ public class MedicationAdministrationCard : AlternatingBackgroundColumnResourceB
                                 new CommaSeparatedBuilder("f:note", _ => [new Optional("f:text", new Text("@value"))])
                             ], style: NameValuePair.NameValuePairStyle.Secondary)
                             : new NullWidget(),
+                        ], optionalClass: "name-value-pair-wrapper"),
                     ], direction: FlexDirection.Column, style: NameValuePair.NameValuePairStyle.Primary))
                 )
             ));

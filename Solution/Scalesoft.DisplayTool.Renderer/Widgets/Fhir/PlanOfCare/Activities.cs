@@ -289,6 +289,9 @@ public class Activities(XmlDocumentNavigator item) : Widget
         {
             Widget[] widgetTree =
             [
+                new Container([
+
+                ], optionalClass: "name-value-pair-wrapper"),
                 new Choose([
                     new When("f:outcomeCodeableConcept", new NameValuePair(
                         [new DisplayLabel(LabelCodes.Outcome)],

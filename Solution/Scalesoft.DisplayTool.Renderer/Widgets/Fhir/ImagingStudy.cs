@@ -31,52 +31,56 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
                     new NarrativeModal()
                 ]),
                 new Container([
-                    // ignore identifier
-                    new Condition("f:modality", new NameValuePair([new ConstantText("Modality")], [
-                        new ItemListBuilder("f:modality", ItemListType.Unordered, _ => [new Coding()])
-                    ])),
-                    new Optional("f:started", new NameValuePair([new ConstantText("Zahájeno")], [new ShowDateTime()])),
-                    // ignore subject
-
-                    new Condition("f:referrer",
-                        new HideableDetails(new NameValuePair([new ConstantText("Odkazující lékař"),],
-                            [new AnyReferenceNamingWidget("f:referrer")]))),
-                    new Condition("f:interpreter", new HideableDetails(new ListBuilder("f:interpreter",
-                        FlexDirection.Column,
-                        _ =>
-                        [
-                            new NameValuePair([new ConstantText("Interpretující lékař")],
-                                [new AnyReferenceNamingWidget(),]),
-                        ], flexContainerClasses: "gap-0"))),
-                    // ignore endpoint - little value to the end user - reader
-                    new Optional("f:numberOfSeries",
-                        new NameValuePair([new ConstantText("Počet řad")], [new Text("@value")])),
-                    new Optional("f:numberOfInstances",
-                        new NameValuePair([new ConstantText("Počet instancí")], [new Text("@value")])),
-                    new Condition("f:location", new HideableDetails(new Collapser([new ConstantText("Lokace"),], [],
-                    [
-                        ShowSingleReference.WithDefaultDisplayHandler(
-                            nav => [new AnyResource(nav, displayResourceType: false)],
-                            "f:location")
-                    ], true))),
-                    new Condition("f:reasonCode",
-                        new NameValuePair([new ConstantText("Důvody")],
-                            [new CommaSeparatedBuilder("f:reasonCode", _ => new CodeableConcept())])),
-                    new Condition("f:reasonReference", new HideableDetails(new Collapser([new ConstantText("Důvody"),],
-                        [],
-                        [
-                            new ListBuilder("f:reasonReference", FlexDirection.Column,
-                                _ =>
+                    new Container([
+                        new Condition("f:modality", new NameValuePair([new ConstantText("Modality")], [
+                            new ItemListBuilder("f:modality", ItemListType.Unordered, _ => [new Coding()])
+                        ])),
+                        new Optional("f:started",
+                            new NameValuePair([new ConstantText("Zahájeno")], [new ShowDateTime()])),
+                        // ignore subject
+                        // ignore identifier
+                        new Condition("f:referrer",
+                            new HideableDetails(new NameValuePair([new ConstantText("Odkazující lékař"),],
+                                [new AnyReferenceNamingWidget("f:referrer")]))),
+                        new Condition("f:interpreter", new HideableDetails(
+                            new NameValuePair(
+                                [new ConstantText("Interpretující lékaři")],
                                 [
-                                    ShowSingleReference.WithDefaultDisplayHandler(nav =>
-                                        [new AnyResource(nav, displayResourceType: false)])
-                                ],
-                                separator: new LineBreak()),
+                                    new ItemListBuilder("f:interpreter", ItemListType.Unordered,
+                                        _ => [new AnyReferenceNamingWidget()])
+                                ]
+                            )
+                        )),
+                        // ignore endpoint - little value to the end user - reader
+                        new Optional("f:numberOfSeries",
+                            new NameValuePair([new ConstantText("Počet řad")], [new Text("@value")])),
+                        new Optional("f:numberOfInstances",
+                            new NameValuePair([new ConstantText("Počet instancí")], [new Text("@value")])),
+                        new Condition("f:location", new HideableDetails(new Collapser([new ConstantText("Lokace"),], [],
+                        [
+                            ShowSingleReference.WithDefaultDisplayHandler(
+                                nav => [new AnyResource(nav, displayResourceType: false)],
+                                "f:location")
                         ], true))),
-                    //ignore note
-                    new Condition("f:procedureCode",
-                        new NameValuePair([new ConstantText("Procedury")],
-                            [new CommaSeparatedBuilder("f:procedureCode", _ => new CodeableConcept())])),
+                        new Condition("f:reasonCode",
+                            new NameValuePair([new ConstantText("Důvody")],
+                                [new CommaSeparatedBuilder("f:reasonCode", _ => new CodeableConcept())])),
+                        new Condition("f:reasonReference", new HideableDetails(new Collapser([new ConstantText("Důvody"),],
+                            [],
+                            [
+                                new ListBuilder("f:reasonReference", FlexDirection.Column,
+                                    _ =>
+                                    [
+                                        ShowSingleReference.WithDefaultDisplayHandler(nav =>
+                                            [new AnyResource(nav, displayResourceType: false)])
+                                    ],
+                                    separator: new LineBreak()),
+                            ], true))),
+                        //ignore note
+                        new Condition("f:procedureCode",
+                            new NameValuePair([new ConstantText("Procedury")],
+                                [new CommaSeparatedBuilder("f:procedureCode", _ => new CodeableConcept())])),
+                    ], optionalClass: "name-value-pair-wrapper w-max-content"),
                     new Condition("f:procedureReference", new HideableDetails(new Collapser(
                         [new ConstantText("Procedura"),], [],
                         [
@@ -97,7 +101,8 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
                                             new Text("f:uid/@value"))
                                     ],
                                     [], [
-                                        new Optional("f:number",
+                                        new Container([
+                                            new Optional("f:number",
                                             new NameValuePair([new ConstantText("Identifikátor")],
                                                 [new Text("@value")])),
                                         new HideableDetails(new NameValuePair([new ConstantText("Modalita")], [
@@ -126,6 +131,7 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
                                         new Optional("f:started",
                                             new HideableDetails(new NameValuePair([new ConstantText("Zahájeno")],
                                                 [new ShowDateTime()]))),
+                                        ], optionalClass: "name-value-pair-wrapper w-max-content"),
                                         new Condition("f:performer", new Collapser([new ConstantText("Provedl/a")], [],
                                         [
                                             new ListBuilder("f:performer", FlexDirection.Column,
@@ -143,18 +149,20 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
                                                 new ListBuilder("f:instance", FlexDirection.Column,
                                                     _ =>
                                                     [
-                                                        new ChangeContext("f:uid",
-                                                            new NameValuePair([new ConstantText("Identifikátor")],
-                                                                [new Text("@value")])),
-                                                        new ChangeContext("f:sopClass",
-                                                            new NameValuePair([new ConstantText("Typ")],
-                                                                [new Coding()])),
-                                                        new Optional("f:number",
-                                                            new NameValuePair([new ConstantText("Identifikátor")],
-                                                                [new Text("@value")])),
-                                                        new Optional("f:title",
-                                                            new NameValuePair([new ConstantText("Popis")],
-                                                                [new Text("@value")])),
+                                                        new Container([
+                                                            new ChangeContext("f:uid",
+                                                                new NameValuePair([new ConstantText("Identifikátor")],
+                                                                    [new Text("@value")])),
+                                                            new ChangeContext("f:sopClass",
+                                                                new NameValuePair([new ConstantText("Typ")],
+                                                                    [new Coding()])),
+                                                            new Optional("f:number",
+                                                                new NameValuePair([new ConstantText("Identifikátor")],
+                                                                    [new Text("@value")])),
+                                                            new Optional("f:title",
+                                                                new NameValuePair([new ConstantText("Popis")],
+                                                                    [new Text("@value")])),
+                                                        ], optionalClass: "name-value-pair-wrapper w-max-content"),
                                                     ],
                                                     separator: new ThematicBreak(), flexContainerClasses: "gap-0"),
                                             ]))),

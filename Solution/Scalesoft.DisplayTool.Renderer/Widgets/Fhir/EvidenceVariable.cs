@@ -64,7 +64,7 @@ public class EvidenceVariable : ColumnResourceBase<EvidenceVariable>, IResourceW
                             new EnumLabel("f:groupMeasure", "http://hl7.org/fhir/ValueSet/group-measure")
                         )
                     ),
-                ]));
+                ], optionalClass: "name-value-pair-wrapper"));
 
                 return [characteristicInfo];
             }, flexContainerClasses: "gap-2")

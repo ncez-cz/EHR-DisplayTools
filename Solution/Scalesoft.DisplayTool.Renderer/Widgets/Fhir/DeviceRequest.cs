@@ -83,7 +83,7 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                     new ShowDoNotPerform()
                 )
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var deviceBadge = new Concat([
             new PlainBadge(new ConstantText("Zařízení")),
@@ -107,7 +107,7 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                         )))
                 ])
             )
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var actorBadge = new PlainBadge(new ConstantText("Činitelé"));
         var actorInfo = new Container([
@@ -123,7 +123,7 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                     new AnyReferenceNamingWidget("f:performer")
                 )
             ),
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var complete =
             new Collapser([headerInfo], [], [

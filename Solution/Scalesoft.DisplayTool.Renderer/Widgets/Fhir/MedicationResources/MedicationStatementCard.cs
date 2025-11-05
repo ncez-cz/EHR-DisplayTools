@@ -15,6 +15,56 @@ public class MedicationStatementCard : AlternatingBackgroundColumnResourceBase<M
     public static string ResourceType => "MedicationStatement";
     [UsedImplicitly] public static bool RequiresExternalTitle => true;
 
+
+    [UsedImplicitly]
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator navigator)
+    {
+        var medicationCodeableConcept = navigator.SelectSingleNode("f:medicationCodeableConcept");
+        if (medicationCodeableConcept.Node != null)
+        {
+            return new ResourceSummaryModel
+            {
+                Value = new ChangeContext(medicationCodeableConcept, new CodeableConcept()),
+            };
+        }
+
+        if (navigator.EvaluateCondition("f:medicationReference"))
+        {
+            var medicationNavs = ReferenceHandler.GetReferencesWithContent(navigator, "f:medicationReference");
+            if (medicationNavs.Count == 1)
+            {
+                var medicationResource = medicationNavs.First().Value;
+                if (medicationResource.EvaluateCondition("f:code"))
+                {
+                    var widget = new ChangeContext(medicationResource.SelectSingleNode("f:code"),
+                        new CodeableConcept());
+
+                    return new ResourceSummaryModel
+                    {
+                        Value = widget,
+                    };
+                }
+            }
+
+            var medicationDisplays =
+                ReferenceHandler.GetReferencesWithDisplayValue(navigator, "f:medicationReference");
+            if (medicationDisplays.Count == 1)
+            {
+                var medicationDisplay = medicationDisplays.First();
+                var display = medicationDisplay.SelectSingleNode("f:display/@value").Node?.Value;
+                if (!string.IsNullOrEmpty(display))
+                {
+                    return new ResourceSummaryModel
+                    {
+                        Value = new ConstantText(display),
+                    };
+                }
+            }
+        }
+        
+        return null;
+    }
+    
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,

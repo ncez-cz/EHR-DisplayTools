@@ -1,4 +1,5 @@
-﻿using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using JetBrains.Annotations;
+using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -16,6 +17,64 @@ public class ShowDevice(List<XmlDocumentNavigator> items) : Widget, IResourceWid
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {
         return [new ShowDevice(items)];
+    }
+
+    [UsedImplicitly]
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator navigator)
+    {
+        if (navigator.EvaluateCondition("f:deviceName"))
+        {
+            var deviceNames = navigator.SelectAllNodes("f:deviceName/@value")
+                .Where(x => !string.IsNullOrEmpty(x.Node?.Value)).Select(x => x.Node!.Value).ToArray();
+            if (deviceNames.Length != 0)
+            {
+                return new ResourceSummaryModel
+                {
+                    Value = new ConstantText(string.Join(", ", deviceNames)),
+                };
+            }
+        }
+
+        var display = string.Empty;
+        if (navigator.EvaluateCondition("f:manufacturer"))
+        {
+            if (display != string.Empty)
+            {
+                display += " ";
+            }
+
+            display += navigator.SelectSingleNode("f:manufacturer/@value").Node?.Value;
+        }
+
+        if (navigator.EvaluateCondition("f:modelNumber"))
+        {
+            if (display != string.Empty)
+            {
+                display += " ";
+            }
+
+            display += navigator.SelectSingleNode("f:modelNumber/@value").Node?.Value;
+        }
+
+        if (navigator.EvaluateCondition("f:serialNumber"))
+        {
+            if (display != string.Empty)
+            {
+                display += " ";
+            }
+
+            display += $"({navigator.SelectSingleNode("f:serialNumber/@value").Node?.Value})";
+        }
+
+        if (string.IsNullOrEmpty(display))
+        {
+            return null;
+        }
+        
+        return new ResourceSummaryModel
+        {
+            Value = new ConstantText(display),
+        };
     }
 
     public override Task<RenderResult> Render(

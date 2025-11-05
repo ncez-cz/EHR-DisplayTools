@@ -40,7 +40,9 @@ public class PersonOrOrganization(
     bool skipWhenInactive = false,
     Widget? collapserTitle = null,
     bool showNarrative = true,
-    bool showCollapser = false
+    bool showCollapser = false,
+    bool noFormat = false,
+    bool noPhoto = false
 ) : Widget
 {
     public override async Task<RenderResult> Render(
@@ -76,7 +78,13 @@ public class PersonOrOrganization(
             return RenderResult.NullResult;
         }
 
-        var photos = navigator.SelectAllNodes("f:photo").ToList();
+        var practitionerNavigator =
+            ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator, "f:practitioner", ".");
+
+        var photosFromReference =
+            ReferenceHandler.GetNodeNavigatorsFromReferences(navigator, "f:practitioner", "f:photo");
+
+        var photos = photosFromReference ?? navigator.SelectAllNodes("f:photo").ToList();
         var newestPhoto = photos
             .Select(photo => new
             {
@@ -89,160 +97,182 @@ public class PersonOrOrganization(
             .Select(x => x.Photo) // back to original navigator
             .FirstOrDefault();
 
-        List<Widget> tree =
+        List<Widget> innerWidgets =
         [
-            new Row([
-                new Row([
-                    new Choose([
-                        new When("f:name/@value",
-                            new NameValuePair(
-                                new PlainBadge(new ConstantText("Název")),
-                                new Text("f:name/@value"),
-                                direction: FlexDirection.Column
-                            )),
-                        new When(name, new HumanName("f:name"))
-                    ]),
-                    new Optional("f:gender",
-                        new NameValuePair(
-                            new PlainBadge(new DisplayLabel(LabelCodes.AdministrativeGender)),
-                            new EnumLabel(".", "http://hl7.org/fhir/ValueSet/administrative-gender"),
-                            direction: FlexDirection.Column
-                        )
-                    ),
-                    new If(_ => !showCollapser && navigator.EvaluateCondition("f:code"),
-                        new HideableDetails(new NameValuePair(
-                            new PlainBadge(new ConstantText("Role")),
-                            new CommaSeparatedBuilder("f:code", _ => [new CodeableConcept()]),
-                            direction: FlexDirection.Column
-                        ))
-                    ),
-                    new Optional("f:organization",
-                        new NameValuePair(
-                            new PlainBadge(new DisplayLabel(LabelCodes.RepresentedOrganization)),
-                            new AnyReferenceNamingWidget(), direction: FlexDirection.Column
-                        )
-                    ),
-                    new Condition("f:specialty",
-                        new NameValuePair(
-                            new PlainBadge(new ConstantText("Specializace")),
-                            new CommaSeparatedBuilder("f:specialty", _ => [new CodeableConcept()]),
-                            direction: FlexDirection.Column
-                        )
-                    ),
-                    new Optional("f:practitioner",
-                        ShowSingleReference.WithDefaultDisplayHandler(x =>
-                            [
-                                new PersonOrOrganization(x,
-                                    collapserTitle: new ConstantText("Informace o lékaři"))
-                            ]
-                        )
-                    ),
-                    new Optional("f:birthDate",
-                        new NameValuePair(
-                            new PlainBadge(new DisplayLabel(LabelCodes.DateOfBirth)),
-                            new ShowDateTime(), direction: FlexDirection.Column
-                        )
-                    ),
-                    new Condition("f:qualification",
-                        new HideableDetails(new NameValuePair(
-                            new PlainBadge(new ConstantText("Kvalifikace")),
-                            new CommaSeparatedBuilder(
-                                "f:qualification", (_, _, x) =>
+            new Choose([
+                new When("f:name/@value",
+                    new NameValuePair(
+                        new PlainBadge(new ConstantText("Název")),
+                        new Text("f:name/@value"),
+                        direction: FlexDirection.Column
+                    )),
+                new When(name, new HumanName("f:name"))
+            ]),
+            new Optional("f:gender",
+                new NameValuePair(
+                    new PlainBadge(new DisplayLabel(LabelCodes.AdministrativeGender)),
+                    new EnumLabel(".", "http://hl7.org/fhir/ValueSet/administrative-gender"),
+                    direction: FlexDirection.Column
+                )
+            ),
+            new If(_ => !showCollapser && navigator.EvaluateCondition("f:code"),
+                new HideableDetails(new NameValuePair(
+                    new PlainBadge(new ConstantText("Role")),
+                    new CommaSeparatedBuilder("f:code", _ => [new CodeableConcept()]),
+                    direction: FlexDirection.Column
+                ))
+            ),
+            new Optional("f:organization",
+                new NameValuePair(
+                    new PlainBadge(new DisplayLabel(LabelCodes.RepresentedOrganization)),
+                    new AnyReferenceNamingWidget(), direction: FlexDirection.Column
+                )
+            ),
+            new Condition("f:specialty",
+                new NameValuePair(
+                    new PlainBadge(new ConstantText("Specializace")),
+                    new CommaSeparatedBuilder("f:specialty", _ => [new CodeableConcept()]),
+                    direction: FlexDirection.Column
+                )
+            ),
+            new Optional("f:birthDate",
+                new NameValuePair(
+                    new PlainBadge(new DisplayLabel(LabelCodes.DateOfBirth)),
+                    new ShowDateTime(), direction: FlexDirection.Column
+                )
+            ),
+            new Condition("f:qualification",
+                new HideableDetails(new NameValuePair(
+                    new PlainBadge(new ConstantText("Kvalifikace")),
+                    new CommaSeparatedBuilder(
+                        "f:qualification", (_, _, x) =>
+                        {
+                            if (x.EvaluateCondition("f:period/f:end"))
+                            {
+                                var periodEnd =
+                                    x.SelectSingleNode("f:period/f:end/@value").Node
+                                        ?.ValueAsDateTime ??
+                                    DateTime.MaxValue;
+                                if (periodEnd < DateTime.Now)
                                 {
-                                    if (x.EvaluateCondition("f:period/f:end"))
-                                    {
-                                        var periodEnd =
-                                            x.SelectSingleNode("f:period/f:end/@value").Node
-                                                ?.ValueAsDateTime ??
-                                            DateTime.MaxValue;
-                                        if (periodEnd < DateTime.Now)
-                                        {
-                                            return
-                                            [
-                                                new TextContainer(TextStyle.Strike,
-                                                    new ChangeContext("f:code", new CodeableConcept()))
-                                            ];
-                                        }
-                                    }
-
-                                    var code = new ChangeContext("f:code",
-                                        new CodeableConcept()
-                                    );
-
-                                    return [code];
+                                    return
+                                    [
+                                        new TextContainer(TextStyle.Strike,
+                                            new ChangeContext("f:code", new CodeableConcept()))
+                                    ];
                                 }
-                            ), direction: FlexDirection.Column
-                        ))
-                    ),
-                    new Condition("f:communication",
-                        new HideableDetails(new NameValuePair(
-                            new PlainBadge(new ConstantText("Jazyky komunikace")),
-                            new CommaSeparatedBuilder(
-                                "f:communication",
-                                (_, _, _) =>
-                                [
-                                    new Choose([
-                                        new When("f:language",
-                                            new ChangeContext("f:language", new CodeableConcept()))
-                                    ], new CodeableConcept())
-                                ], orderer: elements =>
-                                {
-                                    return elements
-                                        .OrderByDescending(e =>
-                                            e.EvaluateCondition("f:preferred[@value='true']"))
-                                        .ToList();
-                                }
-                            ), direction: FlexDirection.Column
-                        ))
-                    ),
-                    new Container([
-                        new ContactInformation(),
-                    ]),
-                    new Condition("f:type",
-                        new HideableDetails(new NameValuePair(
-                            new PlainBadge(new ConstantText("Druhy zařízení")),
-                            new CommaSeparatedBuilder(
-                                "f:type",
-                                _ => [new CodeableConcept()]
-                            ), direction: FlexDirection.Column
-                        ))
-                    ),
-                    new Optional("f:partOf",
-                        new HideableDetails(new NameValuePair(
-                            new PlainBadge(new ConstantText("Součástí")),
-                            new AnyReferenceNamingWidget(), direction: FlexDirection.Column
-                        ))
-                    ),
-                    new If(
-                        _ => navigator.EvaluateCondition("f:text") && collapserTitle == null &&
-                             !showCollapser && showNarrative,
-                        new NarrativeCollapser()
-                    ),
-                    new Condition("f:identifier",
-                        new NameValuePair(
-                            new PlainBadge(new ConstantText("Identifikátory")),
-                            new ListBuilder(
-                                "f:identifier",
-                                FlexDirection.Column, _ =>
-                                [
-                                    new NameValuePair([new IdentifierSystemLabel()], [new ShowIdentifier()]),
-                                ], flexContainerClasses: "gap-0"
-                            ), direction: FlexDirection.Column
-                        )
-                    ),
-                ], flexContainerClasses: "column-gap-6"),
-                new If(
-                    _ => newestPhoto !=
-                         null, // display photos as per design if they are not marked as 'SHALL display' by obligations
-                    new ChangeContext(newestPhoto!,
-                        new Attachment(onlyContentOrUrl: true, imageOptionalClass: "ms-auto person-photo")
-                    )
-                ),
-            ], flexWrap: false)
+                            }
+
+                            var code = new ChangeContext("f:code",
+                                new CodeableConcept()
+                            );
+
+                            return [code];
+                        }
+                    ), direction: FlexDirection.Column
+                ))
+            ),
+            new Condition("f:communication",
+                new HideableDetails(new NameValuePair(
+                    new PlainBadge(new ConstantText("Jazyky komunikace")),
+                    new CommaSeparatedBuilder(
+                        "f:communication",
+                        (_, _, _) =>
+                        [
+                            new Choose([
+                                new When("f:language",
+                                    new ChangeContext("f:language", new CodeableConcept()))
+                            ], new CodeableConcept())
+                        ], orderer: elements =>
+                        {
+                            return elements
+                                .OrderByDescending(e =>
+                                    e.EvaluateCondition("f:preferred[@value='true']"))
+                                .ToList();
+                        }
+                    ), direction: FlexDirection.Column
+                ))
+            ),
+            new Container([
+                new ContactInformation(),
+            ]),
+            new Condition("f:type",
+                new HideableDetails(new NameValuePair(
+                    new PlainBadge(new ConstantText("Druhy zařízení")),
+                    new CommaSeparatedBuilder(
+                        "f:type",
+                        _ => [new CodeableConcept()]
+                    ), direction: FlexDirection.Column
+                ))
+            ),
+            new Optional("f:partOf",
+                new HideableDetails(new NameValuePair(
+                    new PlainBadge(new ConstantText("Součástí")),
+                    new AnyReferenceNamingWidget(), direction: FlexDirection.Column
+                ))
+            ),
+            new If(
+                _ => navigator.EvaluateCondition("f:text") && collapserTitle == null &&
+                     !showCollapser && showNarrative,
+                new NarrativeCollapser()
+            ),
+            new Condition("f:identifier",
+                new NameValuePair(
+                    new PlainBadge(new ConstantText("Identifikátory")),
+                    new ListBuilder(
+                        "f:identifier",
+                        FlexDirection.Column, _ =>
+                        [
+                            new NameValuePair([new IdentifierSystemLabel()], [new ShowIdentifier()]),
+                        ], flexContainerClasses: "gap-0"
+                    ), direction: FlexDirection.Column
+                )
+            ),
+            new Optional("f:practitioner",
+                ShowSingleReference.WithDefaultDisplayHandler(x =>
+                    [new PersonOrOrganization(x, noFormat: true, noPhoto: true)])
+            )
         ];
 
-        tree = collapserTitle != null || showCollapser
-            ?
+        Widget photoWidget =
+            new If(
+                _ => newestPhoto != null && !noPhoto,
+                new ChangeContext(newestPhoto!,
+                    new Attachment(onlyContentOrUrl: true, imageOptionalClass: "ms-auto person-photo")
+                )
+            );
+
+        List<Widget> tree;
+
+        if (noFormat)
+        {
+            tree =
+            [
+                ..innerWidgets,
+                photoWidget,
+            ];
+        }
+        else
+        {
+            tree =
+            [
+                new Row([
+                    new Row([
+                        ..innerWidgets,
+                    ], flexContainerClasses: "column-gap-6"),
+                    photoWidget,
+                ], flexWrap: false, idSource: practitionerNavigator),
+            ];
+        }
+
+        var (_, displayName) =
+            ReferenceHandler.GetFallbackDisplayName(navigator);
+
+        var (_, summaryValue) = ReferenceHandler.GetResourceSummary(navigator);
+
+        if (collapserTitle != null || showCollapser)
+        {
+            tree =
             [
                 new Collapser(
                     toggleLabelTitle:
@@ -252,14 +282,19 @@ public class PersonOrOrganization(
                                     new When("f:code",
                                         new CommaSeparatedBuilder("f:code", _ => [new CodeableConcept()])),
                                 ], new LocalNodeName()),
-                                new Optional("f:name",
-                                    new TextContainer(TextStyle.Bold,
-                                        new Choose([
-                                                new When("@value", new Text("@value"))
-                                            ],
-                                            new HumanNameCompact(".")),
-                                        optionalClass: "black ms-4")
-                                )
+                                new If(_ => summaryValue != null,
+                                    new TextContainer(TextStyle.Bold, [
+                                            summaryValue!,
+                                        ], optionalClass: "black ms-4"
+                                    )
+                                ).Else(
+                                    new If(_ => displayName != null,
+                                        new TextContainer(TextStyle.Bold, [
+                                                displayName!,
+                                            ], optionalClass: "black ms-4"
+                                        )
+                                    )
+                                ),
                             ]
                         )
                     ],
@@ -274,8 +309,8 @@ public class PersonOrOrganization(
                     iconPrefix: showNarrative ? [new NarrativeModal()] : null,
                     isCollapsed: true
                 )
-            ]
-            : tree;
+            ];
+        }
 
         var result = await tree.RenderConcatenatedResult(navigator, renderer, context);
         errors.AddRange(result.Errors);

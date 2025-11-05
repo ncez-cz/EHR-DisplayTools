@@ -57,30 +57,33 @@ public class ContractTerm : Widget
                 new Text("@value")
             )),
             new Condition("f:securityLabel",
-                new TextContainer(TextStyle.Bold, new ConstantText("Označení bezpečnosti:")),
-                new ListBuilder("f:securityLabel", FlexDirection.Row, _ =>
-                    [
-                        new Card(null, new Container([
-                            new Condition("f:number", new NameValuePair(
-                                new ConstantText("Číslo"),
-                                new CommaSeparatedBuilder("f:number", _ => new Text("@value"))
-                            )),
-                            new ChangeContext("f:classification", new NameValuePair(
-                                new ConstantText("Klasifikace"),
-                                new Coding()
-                            )),
-                            new Condition("f:category", new NameValuePair(
-                                new ConstantText("Kategorie"),
-                                new CommaSeparatedBuilder("f:category", _ => new Coding())
-                            )),
-                            new Condition("f:control", new NameValuePair(
-                                new ConstantText("Instrukce"),
-                                new CommaSeparatedBuilder("f:control", _ => new Coding())
-                            )),
-                        ]))
-                    ]
-                )),
-        ]);
+                new Container([
+                    new TextContainer(TextStyle.Bold, new ConstantText("Označení bezpečnosti:")),
+                    new ListBuilder("f:securityLabel", FlexDirection.Row, _ =>
+                        [
+                            new Card(null, new Container([
+                                new Condition("f:number", new NameValuePair(
+                                    new ConstantText("Číslo"),
+                                    new CommaSeparatedBuilder("f:number", _ => new Text("@value"))
+                                )),
+                                new ChangeContext("f:classification", new NameValuePair(
+                                    new ConstantText("Klasifikace"),
+                                    new Coding()
+                                )),
+                                new Condition("f:category", new NameValuePair(
+                                    new ConstantText("Kategorie"),
+                                    new CommaSeparatedBuilder("f:category", _ => new Coding())
+                                )),
+                                new Condition("f:control", new NameValuePair(
+                                    new ConstantText("Instrukce"),
+                                    new CommaSeparatedBuilder("f:control", _ => new Coding())
+                                )),
+                            ]))
+                        ]
+                    ),
+                ], optionalClass: "full-grid-row")),
+            
+        ], optionalClass: "name-value-pair-wrapper");
 
         var offerBadge = new PlainBadge(new ConstantText("Nabídka"));
         var offerInfo = new Container([
@@ -129,7 +132,7 @@ public class ContractTerm : Widget
             )),
             //ignore linkId
             //ignore securityLabelNumber
-        ]);
+        ], optionalClass: "name-value-pair-wrapper w-max-content");
 
         var assetInfo = new ListBuilder("f:asset", FlexDirection.Column, _ =>
         [
@@ -277,7 +280,7 @@ public class ContractTerm : Widget
                             ];
                         })
                     )
-                ])
+                ], optionalClass: "name-value-pair-wrapper")
             ]),
         ]);
 

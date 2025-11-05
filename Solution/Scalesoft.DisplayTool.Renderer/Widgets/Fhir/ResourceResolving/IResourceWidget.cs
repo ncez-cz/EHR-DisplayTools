@@ -1,4 +1,5 @@
 using JetBrains.Annotations;
+using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -18,4 +19,9 @@ public interface IResourceWidget
     /// <param name="items">Navigators, each in the context of a supported resource</param>
     /// <returns></returns>
     public static abstract List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items);
+
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator item)
+    {
+        return null;
+    }
 }
