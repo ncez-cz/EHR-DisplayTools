@@ -20,43 +20,41 @@ new Variable("code", "$socialHistorySectionCode"),
 ]), 
 ], [
 new Collapser([
-new Text("$originalNarrativeTableTitle")
-, 
+    new Text("$originalNarrativeTableTitle")
+    , 
 ], [
-], [
-new NarrativeText("n1:text", null), 
+    new NarrativeText("n1:text", null), 
 ]), 
 new LineBreak(), 
 new Collapser([
-new Text("$translatedCodedTableTitle")
-, 
+    new Text("$translatedCodedTableTitle")
+    , 
 ], [
-], [
-new Table([
-new TableBody([
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'44'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'155'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'84'"),
-]), 
-],
-TableCellType.Header), 
-]), 
-new ChangeContext("n1:entry/n1:observation", new Widget11()),  
-]), 
-], true), 
+    new Table([
+        new TableBody([
+            new TableRow([
+                new TableCell([
+                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                            new Variable("code", "'44'"),
+                        ]), 
+                    ],
+                    TableCellType.Header), 
+                new TableCell([
+                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                            new Variable("code", "'155'"),
+                        ]), 
+                    ],
+                    TableCellType.Header), 
+                new TableCell([
+                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                            new Variable("code", "'84'"),
+                        ]), 
+                    ],
+                    TableCellType.Header), 
+            ]), 
+            new ChangeContext("n1:entry/n1:observation", new Widget11()),  
+        ]), 
+    ], true), 
 ]), 
 ], titleAbbreviations: SectionTitleAbbreviations.SocialHistory),
 ]), 

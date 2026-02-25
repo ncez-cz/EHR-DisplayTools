@@ -46,15 +46,13 @@ public class SvgGraph : Widget
         ["lightblue", "pink", "orchid", "cyan", "goldenrod", "limegreen", "orangered"];
 
     private const string DefaultColor = "black";
-    private const string UpperLimitExplanationText = "Hodnota nad limitem ({0})";
-    private const string LowerLimitExplanationText = "Hodnota pod limitem ({0})";
     private const string UpperLimitColor = "purple";
     private const string LowerLimitColor = "orange";
-    private const int Width = 500;
-    private const int Height = 500;
-    private const int GraphWidth = Width - 2 * Padding;
-    private const int GraphHeight = Height - 2 * Padding;
-    private const int Padding = 80;
+    private const int InternalWidth = 500;
+    private const int InternalHeight = 500;
+    private const int InternalPadding = 80;
+    private const int GraphWidth = InternalWidth - 2 * InternalPadding;
+    private const int GraphHeight = InternalHeight - 2 * InternalPadding;
 
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -124,26 +122,28 @@ public class SvgGraph : Widget
 
         var totalTime = values.Count * m_period;
 
-        var labels = DrawLabels(m_period, minValue, maxValue, Height, Padding, zoomFactor, values, totalTime,
+        var labels = await DrawLabels(m_period, minValue, maxValue, InternalHeight, InternalPadding, zoomFactor, values,
+            totalTime,
             GraphWidth,
-            Width);
+            InternalWidth, context);
 
-        var graphData = DrawGraphData(dimensionsData, Padding, GraphWidth, Height, minValue, zoomFactor,
+        var graphData = DrawGraphData(dimensionsData, InternalPadding, GraphWidth, InternalHeight, minValue, zoomFactor,
             belowLowerLimit,
             aboveUpperLimit);
 
-        var legendX = Width - Padding;
-        var legendY = GraphHeight - Padding;
+        var legendX = InternalWidth - InternalPadding;
+        var legendY = GraphHeight - InternalPadding;
 
-        var legendEntries = DrawLegend(m_dimensions, legendX, legendY, valueOverLimit, UpperLimitColor, valueUnderLimit,
-            LowerLimitColor, m_lowerLimit, m_upperLimit, m_factor, m_origin);
+        var legendEntries = await DrawLegend(m_dimensions, legendX, legendY, valueOverLimit, UpperLimitColor,
+            valueUnderLimit,
+            LowerLimitColor, m_lowerLimit, m_upperLimit, m_factor, m_origin, context);
 
 
         var viewModel = new ViewModel
         {
-            SvgWidth = Width,
-            SvgHeight = Height,
-            SvgPadding = Padding,
+            SvgWidth = InternalWidth,
+            SvgHeight = InternalHeight,
+            SvgPadding = InternalPadding,
             Labels = labels,
             Lines = graphData.PolyLineData,
             Triangles = graphData.TriangleData,
@@ -156,7 +156,7 @@ public class SvgGraph : Widget
         return view;
     }
 
-    private static List<AxisLabel> DrawLabels(
+    private static async Task<List<AxisLabel>> DrawLabels(
         double period,
         double? minValue,
         double? maxValue,
@@ -166,7 +166,8 @@ public class SvgGraph : Widget
         List<object> values,
         double totalTime,
         int graphWidth,
-        int width
+        int width,
+        RenderContext renderContext
     )
     {
         List<AxisLabel> labels = [];
@@ -183,7 +184,6 @@ public class SvgGraph : Widget
                 X = (padding - 10).ToString(CultureInfo.InvariantCulture),
                 Y = ((yPosition ?? 0) + 4).ToString(CultureInfo.InvariantCulture),
                 Label = labelValue.ToString("G4", CultureInfo.InvariantCulture),
-                FontSize = 12
             });
         }
 
@@ -198,7 +198,6 @@ public class SvgGraph : Widget
                 X = xPosition.ToString(CultureInfo.InvariantCulture),
                 Y = (height - padding + 20).ToString(CultureInfo.InvariantCulture),
                 Label = timeLabel.ToString("G4", CultureInfo.InvariantCulture),
-                FontSize = 12
             });
         }
 
@@ -208,8 +207,7 @@ public class SvgGraph : Widget
             {
                 X = (width / 2).ToString(CultureInfo.InvariantCulture),
                 Y = (height - 10).ToString(CultureInfo.InvariantCulture),
-                Label = "Čas (ms)",
-                FontSize = 14
+                Label = await LocalizedLabel.GetTranslatedValue("graph.time", renderContext) + " (ms)"
             }
         );
 
@@ -218,8 +216,7 @@ public class SvgGraph : Widget
             {
                 X = "15",
                 Y = (height / 2).ToString(CultureInfo.InvariantCulture),
-                Label = "Hodnota",
-                FontSize = 14,
+                Label = await LocalizedLabel.GetTranslatedValue("graph.value", renderContext),
                 Attributes = new Dictionary<string, object>
                 {
                     { "transform", $"rotate(-90, 15, {(height / 2).ToString(CultureInfo.InvariantCulture)})" }
@@ -320,7 +317,7 @@ public class SvgGraph : Widget
     }
 
 
-    private static List<LegendEntry> DrawLegend(
+    private static async Task<List<LegendEntry>> DrawLegend(
         int dimensions,
         int legendX,
         int legendY,
@@ -331,7 +328,8 @@ public class SvgGraph : Widget
         double? lowerLimit,
         double? upperLimit,
         double factor,
-        double origin
+        double origin,
+        RenderContext renderContext
     )
     {
         List<LegendEntry> legendEntries = [];
@@ -343,7 +341,7 @@ public class SvgGraph : Widget
             legendEntries.Add(new LegendEntry
             {
                 Color = color,
-                Label = $"Data {i + 1}",
+                Label = $"{await LocalizedLabel.GetTranslatedValue("graph.data", renderContext)} {i + 1}",
                 X = legendX,
                 Y = legendY
             });
@@ -351,9 +349,14 @@ public class SvgGraph : Widget
             legendY += 25;
         }
 
+        var upperLimitExplanationText =
+            await LocalizedLabel.GetTranslatedValue("graph.value-above-limit", renderContext) + " ({0})";
+        var lowerLimitExplanationText =
+            await LocalizedLabel.GetTranslatedValue("graph.value-below-limit", renderContext) + " ({0})";
+
         if (lowerLimit != null && upperLimit != null)
         {
-            var x = Width - 200;
+            var x = InternalWidth - 200;
             if (valueOverLimit)
             {
                 var y = 20;
@@ -362,7 +365,7 @@ public class SvgGraph : Widget
                 {
                     Color = upperLimitColor,
                     Label =
-                        string.Format(UpperLimitExplanationText, Math.Round((double)(upperLimit * factor + origin))),
+                        string.Format(upperLimitExplanationText, Math.Round((double)(upperLimit * factor + origin))),
                     X = x,
                     Y = y
                 });
@@ -370,13 +373,13 @@ public class SvgGraph : Widget
 
             if (valueUnderLimit)
             {
-                var y = Height - 30;
+                var y = InternalHeight - 30;
 
                 legendEntries.Add(new LegendEntry
                 {
                     Color = lowerLimitColor,
                     Label =
-                        string.Format(LowerLimitExplanationText, Math.Round((double)(lowerLimit * factor + origin))),
+                        string.Format(lowerLimitExplanationText, Math.Round((double)(lowerLimit * factor + origin))),
                     X = x,
                     Y = y
                 });
@@ -403,7 +406,6 @@ public class SvgGraph : Widget
         public required string X { get; init; }
         public required string Y { get; init; }
         public required string Label { get; init; }
-        public required int FontSize { get; init; }
         public Dictionary<string, object> Attributes { get; init; } = new();
     }
 

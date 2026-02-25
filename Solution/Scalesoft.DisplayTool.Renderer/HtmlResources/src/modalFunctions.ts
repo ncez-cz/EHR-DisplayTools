@@ -1,8 +1,10 @@
+import {dtRootElement} from "./rootElementProvider";
+
 let outsideClickHandler: ((event: MouseEvent) => void) | null = null;
 let backdropEl: HTMLDivElement | null = null;
 
 export function hidePrintCollapsers() {
-    document
+    dtRootElement
         .querySelectorAll<HTMLLabelElement>('.narrative-print-collapser')
         .forEach(collapser => {
             collapser.classList.add('narrative-print-collapser-hidden');
@@ -11,10 +13,10 @@ export function hidePrintCollapsers() {
 
 export function initModals() {
     hidePrintCollapsers();
-
-    document.querySelectorAll<HTMLElement>('.modal').forEach(modalEl => {
+    
+    dtRootElement.querySelectorAll<HTMLElement>('.modal').forEach(modalEl => {
         const id = modalEl.id.replace("modal-", "");
-        const button = document.getElementById(`button-${id}`) as HTMLButtonElement | null;
+        const button = dtRootElement.querySelector(`#button-${id}`) as HTMLButtonElement | null;
 
         if (!button) {
             console.warn(`Button with id button-${id} not found`);
@@ -39,19 +41,18 @@ function openModal(button: HTMLElement, modalEl: HTMLElement) {
     modalEl.classList.add('show');
     modalEl.style.display = 'block';
 
-    const body = document.querySelector<HTMLBodyElement>('body');
-    if (body) {
-        body.classList.add('modal-open');
-
+    if (dtRootElement) {
+        dtRootElement.classList.add('modal-open');
+        
         const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-        document.documentElement.style.paddingRight = `${scrollbarWidth}px`;
-        document.documentElement.style.overflow = 'hidden';
+        dtRootElement.style.paddingRight = `${scrollbarWidth}px`;
+        dtRootElement.style.overflow = 'hidden';
 
         if (!backdropEl) {
             backdropEl = document.createElement('div');
             backdropEl.classList.add('modal-backdrop', 'fade', 'show');
         }
-        body.appendChild(backdropEl);
+        dtRootElement.appendChild(backdropEl);
     }
 
     const dialog = modalEl.querySelector<HTMLDivElement>(".modal-dialog");
@@ -61,25 +62,22 @@ function openModal(button: HTMLElement, modalEl: HTMLElement) {
                 closeModal(modalEl);
             }
         };
-        document.addEventListener('click', outsideClickHandler);
+        dtRootElement.addEventListener('click', outsideClickHandler);
     }
 }
 
 function closeModal(modalEl: HTMLElement) {
     modalEl.classList.remove('show');
     modalEl.style.display = 'none';
-
-    const body = document.querySelector<HTMLBodyElement>('body');
-    if (body) {
-        body.classList.remove('modal-open');
-        backdropEl?.remove();
-    }
-
+    
+    dtRootElement.classList.remove('modal-open');
+    backdropEl?.remove();
+    
     if (outsideClickHandler) {
-        document.removeEventListener('click', outsideClickHandler);
+        dtRootElement.removeEventListener('click', outsideClickHandler);
         outsideClickHandler = null;
     }
 
-    document.documentElement.style.removeProperty('padding-right');
-    document.documentElement.style.removeProperty('overflow');
+    dtRootElement.style.removeProperty('padding-right');
+    dtRootElement.style.removeProperty('overflow');
 }

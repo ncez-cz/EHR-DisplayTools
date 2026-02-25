@@ -20,7 +20,6 @@ public class Chronometry(string? prefix, bool showFromPrefix = false, string? pa
         RenderContext context
     )
     {
-
         if (m_path != null)
         {
             m_path += "/";
@@ -32,7 +31,7 @@ public class Chronometry(string? prefix, bool showFromPrefix = false, string? pa
                 new If(_ => showFromPrefix,
                     new Condition(
                         $"{m_path}f:{prefix}DateTime/@value",
-                        new DisplayLabel(LabelCodes.From),
+                        new EhdsiDisplayLabel(LabelCodes.From),
                         new ConstantText(" ")
                     )
                 ),
@@ -42,7 +41,9 @@ public class Chronometry(string? prefix, bool showFromPrefix = false, string? pa
             new When($"{m_path}f:{prefix}Period", new ShowPeriod($"{m_path}f:{prefix}Period")),
             new When($"{m_path}f:{prefix}Duration", new ShowDuration($"{m_path}f:{prefix}Duration")),
             new When($"{m_path}f:{prefix}Range", new ShowRange($"{m_path}f:{prefix}Range")),
-            new When($"{m_path}f:{prefix}Timing", new ShowTiming($"{m_path}f:{prefix}Timing")),
+            new When($"{m_path}f:{prefix}Timing",
+                new ShowTiming($"{m_path}f:{prefix}Timing",
+                    nameValuePairStyle: NameValuePair.NameValuePairStyle.Initial)),
             new When($"{m_path}f:{prefix}Date", new ShowDateTime($"{m_path}f:{prefix}Date")),
             new When($"{m_path}f:{prefix}String", new AbsentDataTextCheck($"{m_path}f:{prefix}String", new Text())),
         ]);

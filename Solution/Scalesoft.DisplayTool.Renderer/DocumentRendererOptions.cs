@@ -8,6 +8,7 @@ public class DocumentRendererOptions
     public ILoggerFactory? LoggerFactory { get; init; }
     public PdfRendererOptions? PdfRenderer { get; init; }
     public required ExternalServicesConfiguration ExternalServicesConfiguration { get; init; }
+    public KnownOidsConfiguration? KnownOidMappings { get; init; }
 }
 
 public class PdfRendererOptions

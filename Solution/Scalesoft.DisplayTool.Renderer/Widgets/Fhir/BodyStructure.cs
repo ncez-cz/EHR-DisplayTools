@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
+﻿using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -11,6 +11,8 @@ public class BodyStructure(
 ) : Widget, IResourceWidget
 {
     public static string ResourceType => "BodyStructure";
+
+    public static bool HasBorderedContainer(Widget widget) => false;
 
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {
@@ -32,20 +34,20 @@ public class BodyStructure(
                         "f:morphology or f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-BodyStructure.includedStructure.laterality']/f:valueCodeableConcept or f:location",
                         new Optional(
                             "f:morphology",
-                            new NameValuePair([new ConstantText("Morfologie")],
+                            new NameValuePair([new LocalizedLabel("body-structure.morphology")],
                             [
                                 new CodeableConcept()
                             ], style: nameValuePairStyle)
                         ),
                         new Optional(
                             "f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-BodyStructure.includedStructure.laterality']/f:valueCodeableConcept",
-                            new NameValuePair([new ConstantText("Lateralita")],
+                            new NameValuePair([new LocalizedLabel("body-structure.laterality")],
                             [
                                 new CodeableConcept()
                             ], style: nameValuePairStyle)),
                         new Condition(
                             "f:location",
-                            new NameValuePair([new ConstantText("Lokalizace")],
+                            new NameValuePair([new LocalizedLabel("body-structure.location")],
                             [
                                 new ConcatBuilder("f:locationQualifier", _ => [new CodeableConcept()], " "),
                                 new ConstantText(" "),

@@ -64,7 +64,14 @@
     }
 }
 
+.render-mode-documentation {
+    .btn-outline {
+        color: #fff;
+    }
+}
+
 .collapse-all-btn {
+    display: flex;
     margin: 0;
     height: fit-content;
 }
@@ -83,8 +90,8 @@
 }
 
 .narrative-modal-button {
-    height: $spacing05;
-    width: $spacing05;
+    height: var(--#{$prefix}button-border-size);
+    width: var(--#{$prefix}button-border-size);
 }
 
 .show {
@@ -92,6 +99,8 @@
 }
 
 .toggle-details-container {
+    display: flex;
+
     .checked-label, .unchecked-label {
         height: 100%;
     }
@@ -113,7 +122,10 @@
 .document-header .btn {
     height: auto;
     width: auto;
-    display: flex;
     align-items: center;
     padding: 0.275rem 0.55rem;
-} 
+}
+
+.btn-toggle-details {
+    display: flex;
+}

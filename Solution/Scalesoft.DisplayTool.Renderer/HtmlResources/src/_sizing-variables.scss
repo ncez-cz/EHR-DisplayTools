@@ -1,7 +1,7 @@
 ﻿@use "sass:math";
 @use "theme-variables" as *;
 
-body {
+.display-tool-body {
 
     // Font default
     --#{$prefix}font-size: 0.45rem;
@@ -117,7 +117,7 @@ body {
     }
 
     // Font tooltip icon
-    --#{$prefix}tooltip-icon-font-size: 0.7rem;
+    --#{$prefix}tooltip-icon-font-size: 0.6rem;
     @include media-breakpoint-up(sm) {
         --#{$prefix}tooltip-icon-font-size: 0.75rem;
     }
@@ -130,4 +130,29 @@ body {
 
     --#{$prefix}border-radius-sm: 0.25rem;
     --#{$prefix}border-radius: 0.25rem;
+
+    // Button border size
+    --#{$prefix}button-border-size: 0.85rem;
+    @include media-breakpoint-up(sm) {
+        --#{$prefix}button-border-size: 0.9rem;
+    }
+    @include media-breakpoint-up(md) {
+        --#{$prefix}button-border-size: 1rem;
+    }
+    @include media-breakpoint-up(lg) {
+        --#{$prefix}button-border-size: 1.25rem;
+    }
+
+    // Graph scaling
+    --#{$prefix}graph-scaling: 250px;
+
+    @include media-breakpoint-up(sm) {
+        --#{$prefix}graph-scaling: 350px;
+    }
+    @include media-breakpoint-up(md) {
+        --#{$prefix}graph-scaling: 400px;
+    }
+    @include media-breakpoint-up(lg) {
+        --#{$prefix}graph-scaling: 500px;
+    }
 }

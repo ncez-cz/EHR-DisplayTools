@@ -1,4 +1,3 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -43,58 +42,76 @@ public class TimelineCard : DateSortableWidget
         RenderContext context
     )
     {
-        // Pre-render content if provided
-        string? content = null;
-        var contentResult = await m_content.RenderConcatenatedResult(navigator, renderer, context);
-        if (contentResult.HasValue)
-        {
-            content = contentResult.Content;
-        }
-        else if (contentResult.IsNullResult)
+        if (m_content.All(x => x.IsNullWidget))
         {
             return RenderResult.NullResult;
         }
 
-        // Pre-render title if provided
-        string? title = null;
-        if (m_title != null)
-        {
-            var titleResult = await m_title.Render(navigator, renderer, context);
-            if (titleResult.HasValue)
-            {
-                title = titleResult.Content;
-            }
-        }
-
-        // Pre-render group items if provided
-        var groupItems = await m_groupItems.Cast<Widget>().ToList()
-            .RenderConcatenatedResult(navigator, renderer, context);
-
         var timeWidgets = DateTimeFormats.GetTimeWidget(SortDate, context.Language, DateFormatType.DayMonthYear);
 
-        var time = await timeWidgets.RenderConcatenatedResult(navigator, renderer, context);
         var viewModel = new ViewModel
         {
-            Content = content,
-            Time = time.Content,
-            Title = title,
-            GroupItems = groupItems.Content,
+            Content = m_content,
+            Time = timeWidgets,
+            Title = m_title,
+            GroupItems = m_groupItems.ToList<Widget>(),
             CssClass = CssClass,
             IsGroupContainer = m_isGroupContainer,
-            IsNested = m_isNested
+            IsNested = m_isNested,
         };
 
-        return await renderer.RenderTimelineCard(viewModel);
+        var widget = new CareplanTimelineItemWidget(viewModel);
+
+        return await widget.Render(navigator, renderer, context);
     }
 
-    public class ViewModel
+    private class ViewModel
     {
-        public string Content { get; init; }
-        public string? Time { get; init; }
-        public string? Title { get; init; }
+        public required IList<Widget> Content { get; init; }
+        public required IList<Widget> Time { get; init; }
+        public Widget? Title { get; init; }
         public string? CssClass { get; init; }
-        public string? GroupItems { get; init; }
+        public required IList<Widget> GroupItems { get; init; }
         public bool IsGroupContainer { get; init; }
         public bool IsNested { get; init; }
+    }
+
+    private class CareplanTimelineItemWidget(ViewModel model) : Widget
+    {
+        public override Task<RenderResult> Render(
+            XmlDocumentNavigator navigator,
+            IWidgetRenderer renderer,
+            RenderContext context
+        )
+        {
+            var resultWidget = new Container([
+                    new Container([
+                            new Container([
+                                new If(_ => model.Title != null,
+                                    new Container([model.Title!], optionalClass: "timeline-title")),
+                                new If(_ => model.Time.Any() && !model.IsNested,
+                                    new Container(model.Time, optionalClass: "timeline-time")),
+                                new Container([
+                                    ..model.Content,
+                                    new If(
+                                        _ => model.IsGroupContainer && model.GroupItems.Any(), new Container([
+                                            new Container([
+                                                new Container([
+                                                    new Container(model.GroupItems,
+                                                        optionalClass: "timeline-body")
+                                                ], optionalClass: "timeline-group-content")
+                                            ], optionalClass: "timeline-group-item")
+                                        ], optionalClass: "timeline-group-container")),
+                                ], optionalClass: "timeline-body"),
+                            ], optionalClass: ""),
+                        ],
+                        optionalClass: model.CssClass + " " + (model.IsNested ? "nested" : "timeline-item")),
+                ],
+                optionalClass: model.IsNested && model.Time.Any()
+                    ? "nested-timeline-card-container"
+                    : "timeline-card-container");
+
+            return resultWidget.Render(navigator, renderer, context);
+        }
     }
 }

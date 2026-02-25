@@ -12,9 +12,11 @@ public interface IResourceWidget
     [UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
     public static bool RequiresExternalTitle => false;
 
+    public static abstract bool HasBorderedContainer(Widget resourceWidget);
+
     /// <summary>
-    /// Takes a List of nodes and returns instantiated widgets arranged in a renderable way
-    /// (for example, in a table or striped column).
+    ///     Takes a List of nodes and returns instantiated widgets arranged in a renderable way
+    ///     (for example, in a table or striped column).
     /// </summary>
     /// <param name="items">Navigators, each in the context of a supported resource</param>
     /// <returns></returns>

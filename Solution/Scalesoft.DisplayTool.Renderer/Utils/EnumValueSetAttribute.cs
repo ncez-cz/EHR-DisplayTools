@@ -42,6 +42,7 @@ public class EnumValueSetAttribute : InfrequentPropertyNegativeAttribute
         // codeable concept/coding case
         if (item.EvaluateCondition("f:coding"))
         {
+            //TODO we will change the way we handle coding nodes in the future
             foreach (var coding in item.SelectAllNodes("f:coding"))
             {
                 var code = coding.SelectSingleNode("f:code/@value").Node?.Value ?? string.Empty;

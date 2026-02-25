@@ -1,4 +1,4 @@
-namespace Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
+﻿namespace Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 
 public class ReferenceNamingWidgetModel
 {

@@ -126,7 +126,8 @@ public abstract class Widget : IEquatable<Widget>
         RenderedResourceAddFailReason? failReason = null;
         if (ResourceIdentifier.TryFromNavigator(navigator, out var id))
         {
-            if (context.AddRenderedResource(navigator, id, out var resourceAddFailReason, navigator.IsInHideableContext))
+            if (context.AddRenderedResource(navigator, id, out var resourceAddFailReason,
+                    navigator.IsInHideableContext))
             {
                 viewModel.Id = id.BuildId();
             }

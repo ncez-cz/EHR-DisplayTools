@@ -19,13 +19,25 @@ public class FhirFooter : Widget
         RenderContext context
     )
     {
-        Widget authorResourceTitle = new DisplayLabel(LabelCodes.Author);
+        Widget authorResourceTitle = new EhdsiDisplayLabel(LabelCodes.Author);
 
         if (context.DocumentType is DocumentType.ImagingOrder
             or DocumentType.LaboratoryOrder)
         {
-            authorResourceTitle = new ConstantText("Žadatel");
+            authorResourceTitle = new LocalizedLabel("general.requester");
         }
+
+        var bundle = navigator.SelectSingleNode("ancestor::f:Bundle[1]");
+        var bundleSignorNav = ReferenceHandler.GetSingleNodeNavigatorFromReference(bundle, "f:signature/f:who", ".");
+        Widget? summaryValue = null;
+        if (bundleSignorNav != null)
+        {
+            var summary = ReferenceHandler.GetResourceSummary(bundleSignorNav);
+            summaryValue = summary?.Value;
+        }
+
+        var signatureData = bundle.SelectSingleNode("f:signature/f:data/@value").Node?.Value;
+        var signatureMimeType = bundle.SelectSingleNode("f:signature/f:sigFormat/@value").Node?.Value;
 
         var widget = new Container(
             content:
@@ -54,10 +66,9 @@ public class FhirFooter : Widget
                                 [
                                     new Collapser(
                                         [authorResourceTitle],
-                                        [],
                                         x.ToList(),
                                         isCollapsed: true
-                                    )
+                                    ),
                                 ])
                         ),
 
@@ -72,16 +83,15 @@ public class FhirFooter : Widget
                                 "/f:Bundle/f:entry/f:resource/f:Composition/f:custodian",
                                 (items, _) => items.Select(Widget (x) => new Container([
                                     new PersonOrOrganization(x, skipWhenInactive: true,
-                                        collapserTitle: new DisplayLabel(LabelCodes.Custodian)),
+                                        collapserTitle: new EhdsiDisplayLabel(LabelCodes.Custodian)),
                                 ], idSource: x)).ToList(),
                                 x =>
                                 [
                                     new Collapser(
-                                        [new DisplayLabel(LabelCodes.Custodian)],
-                                        [],
+                                        [new EhdsiDisplayLabel(LabelCodes.Custodian)],
                                         x.ToList(),
                                         isCollapsed: true
-                                    )
+                                    ),
                                 ]
                             )
                         ),
@@ -95,16 +105,15 @@ public class FhirFooter : Widget
                                 "f:managingOrganization",
                                 (items, _) => items.Select(Widget (x) => new Container([
                                     new PersonOrOrganization(x, skipWhenInactive: true,
-                                        collapserTitle: new DisplayLabel(LabelCodes.RepresentedOrganization)),
+                                        collapserTitle: new EhdsiDisplayLabel(LabelCodes.RepresentedOrganization)),
                                 ], idSource: x)).ToList(),
                                 x =>
                                 [
                                     new Collapser(
-                                        [new DisplayLabel(LabelCodes.RepresentedOrganization)],
-                                        [],
+                                        [new EhdsiDisplayLabel(LabelCodes.RepresentedOrganization)],
                                         x.ToList(),
                                         isCollapsed: true
-                                    )
+                                    ),
                                 ]
                             )),
 
@@ -122,7 +131,7 @@ public class FhirFooter : Widget
                                 var tree = new Container([
                                         new Collapser(
                                             [
-                                                new ConstantText("Ověřitel pravosti dokumentu"),
+                                                new LocalizedLabel("composition.attester"),
 
                                                 ShowSingleReference.WithDefaultDisplayHandler(
                                                     nav =>
@@ -131,25 +140,27 @@ public class FhirFooter : Widget
                                                             new TextContainer(TextStyle.Bold,
                                                                 new Choose([
                                                                         new When("@value",
-                                                                            new Text("@value"))
+                                                                            new Text("@value")),
                                                                     ],
                                                                     new HumanNameCompact(".")),
                                                                 optionalClass: "black ms-4", idSource: nav
                                                             )
-                                                        )
+                                                        ),
                                                     ],
                                                     "f:party"),
-                                            ], [], [
+                                            ], [
                                                 new HideableDetails(
                                                     new Row([
-                                                        new NameValuePair([new ConstantText("Režim ověření")],
-                                                        [
-                                                            new EnumLabel("f:mode",
-                                                                "http://hl7.org/fhir/ValueSet/composition-attestation-mode"),
-                                                        ]),
+                                                        new NameValuePair(
+                                                            [new LocalizedLabel("composition.attester.mode")],
+                                                            [
+                                                                new EnumLabel("f:mode",
+                                                                    "http://hl7.org/fhir/ValueSet/composition-attestation-mode"),
+                                                            ]),
                                                         new Choose([
                                                             new When("f:time",
-                                                                new NameValuePair([new ConstantText("Datum ověření")],
+                                                                new NameValuePair(
+                                                                    [new LocalizedLabel("composition.attester.time")],
                                                                     [new ShowDateTime("f:time")])
                                                             ),
                                                         ]),
@@ -170,23 +181,20 @@ public class FhirFooter : Widget
                                                             "f:party"),
                                                     ])),
                                                 ]),
-                                            ],
-                                            footer: attesterNarrative != null
+                                            ], isCollapsed: true, footer: attesterNarrative != null
                                                 ?
                                                 [
                                                     new NarrativeCollapser(attesterNarrative.GetFullPath()),
                                                 ]
-                                                : null,
-                                            iconPrefix:
+                                                : null, iconPrefix:
                                             [
                                                 new If(_ => attesterNarrative != null,
                                                     new NarrativeModal(attesterNarrative?.GetFullPath()!)
                                                 ),
-                                            ], isCollapsed: true
-                                        ),
+                                            ]),
                                     ],
                                     optionalClass: !x.EvaluateCondition("f:party/f:reference")
-                                        ? "optional-detail"
+                                        ? HideableDetails.HideableDetailsClass
                                         : string.Empty);
 
 
@@ -201,18 +209,19 @@ public class FhirFooter : Widget
                         new Optional(
                             "f:encounter",
                             // multireference widget is used only for customising broken references builder, semantically the reference is x..1
-                            new ShowMultiReference(
-                                ".",
-                                (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
-                                x =>
-                                [
-                                    new Collapser(
-                                        [new ConstantText(Labels.Encounter)],
-                                        [],
-                                        x.ToList(),
-                                        isCollapsed: true
-                                    )
-                                ]
+                            new If(x => !context.IsResourceRendered(x),
+                                new ShowMultiReference(
+                                    ".",
+                                    (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
+                                    x =>
+                                    [
+                                        new Collapser(
+                                            [new LocalizedLabel("node-names.Encounter")],
+                                            x.ToList(),
+                                            isCollapsed: true
+                                        ),
+                                    ]
+                                )
                             )
                         ),
 
@@ -223,13 +232,12 @@ public class FhirFooter : Widget
                         new Condition(
                             "f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
                             new Collapser(
-                                [new ConstantText("Jiné formy dokumentu")],
-                                [],
+                                [new LocalizedLabel("composition.presented-form")],
                                 [
                                     new CommaSeparatedBuilder(
                                         "f:extension[@url='http://hl7.eu/fhir/StructureDefinition/presentedForm']",
                                         _ => [new OpenTypeElement(null)]
-                                    )
+                                    ),
                                 ],
                                 customClass: "no-print"
                             )
@@ -237,9 +245,68 @@ public class FhirFooter : Widget
 
                         #endregion
 
+                        #region Bundle signature
+
+                        new ChangeContext(bundle, new Optional(
+                            "f:signature",
+                            new Collapser(
+                                [
+                                    new LocalizedLabel("bundle.signature"), new If(_ => summaryValue != null,
+                                        new TextContainer(TextStyle.Bold, [
+                                                summaryValue!,
+                                            ], optionalClass: "black ms-4"
+                                        )
+                                    ),
+                                ],
+                                [
+                                    new Row(
+                                        [
+                                            new NameValuePair(
+                                                new LocalizedLabel("bundle.signature.type"),
+                                                new CommaSeparatedBuilder("f:type", _ => new Coding()),
+                                                direction: FlexDirection.Column,
+                                                style: NameValuePair.NameValuePairStyle.Primary
+                                            ),
+                                            new NameValuePair(
+                                                new LocalizedLabel("bundle.signature.when"),
+                                                new ShowInstant("f:when"),
+                                                direction: FlexDirection.Column,
+                                                style: NameValuePair.NameValuePairStyle.Primary
+                                            ),
+                                            new AnyReferenceNamingWidget("f:who",
+                                                widgetModel: new ReferenceNamingWidgetModel
+                                                {
+                                                    Type = ReferenceNamingWidgetType.NameValuePair,
+                                                    LabelOverride = new LocalizedLabel("bundle.signature.who"),
+                                                    Direction = FlexDirection.Column,
+                                                    Style = NameValuePair.NameValuePairStyle.Primary,
+                                                }
+                                            ),
+                                            new NameValuePair(
+                                                new LocalizedLabel("bundle.signature.data"),
+                                                new If(_ => signatureMimeType?.StartsWith("image/") == true, new Image(
+                                                        $"data:{signatureMimeType};base64,{signatureData}",
+                                                        optionalClass: "bundle-signature-img"))
+                                                    .Else(new Link(
+                                                        new LocalizedLabel("general.download-link"),
+                                                        $"data:{signatureMimeType};base64,{signatureData}",
+                                                        contentType: signatureMimeType, downloadInfo: string.Empty)),
+                                                direction: FlexDirection.Column,
+                                                style: NameValuePair.NameValuePairStyle.Primary
+                                            ),
+                                        ],
+                                        flexContainerClasses: "column-gap-6 row-gap-1"
+                                    ),
+                                ],
+                                isCollapsed: true
+                            )
+                        )),
+
+                        #endregion
+
                         new UnrenderedResourcesSection(),
                     ],
-                    title: [new ConstantText("Další informace o dokumentu")],
+                    title: [new LocalizedLabel("general.other-document-information")],
                     severity: Severity.Gray
                 ),
             ],

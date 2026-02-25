@@ -1,6 +1,7 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
+using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -23,13 +24,13 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             [
                 new TableHead([
                     new TableRow([
-                        new TableCell([new ConstantText("Metoda")], TableCellType.Header),
-                        new TableCell([new ConstantText("Výsledek")], TableCellType.Header,
+                        new TableCell([new LocalizedLabel("observation.test")], TableCellType.Header),
+                        new TableCell([new LocalizedLabel("observation.value")], TableCellType.Header,
                             containerClass: "border-end-0"),
                         new TableCell([new NullWidget()], TableCellType.Header, containerClass: "border-start-0"),
-                        new TableCell([new ConstantText("Jednotka")], TableCellType.Header),
-                        new TableCell([new ConstantText("Ref. meze")], TableCellType.Header),
-                        new TableCell([new ConstantText("Hodnocení")], TableCellType.Header,
+                        new TableCell([new LocalizedLabel("observation.value.unit")], TableCellType.Header),
+                        new TableCell([new LocalizedLabel("observation.referenceRange-short")], TableCellType.Header),
+                        new TableCell([new LocalizedLabel("observation.interpretation")], TableCellType.Header,
                             containerClass: "border-end-0"),
                         new TableCell([new NullWidget()], TableCellType.Header, containerClass: "border-start-0"),
                     ])
@@ -57,7 +58,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             ];
 
             var infrequentProperties =
-                InfrequentProperties.Evaluate<CzLabObservationInfrequentProperties>([item]);
+                InfrequentProperties.Evaluate<CzLabObservationInfrequentProperties>(item);
 
             // first sub-row
             var rowDetailsChildren = new List<Widget>();
@@ -65,7 +66,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                     out var certRefMatCodedPath))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new ConstantText("Certifikováná referenční látka")), new LineBreak(),
+                    new PlainBadge(new LocalizedLabel("observation.certifiedRefMaterialCodeable")), new LineBreak(),
                     new ListBuilder(
                         certRefMatCodedPath,
                         FlexDirection.Column,
@@ -83,7 +84,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                     out var certRefMatIdPath))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new ConstantText("Identifikátor certifikováné referenční látky")), new LineBreak(),
+                    new PlainBadge(new LocalizedLabel("observation.certifiedRefMaterialIdentifier")), new LineBreak(),
                     new ListBuilder(
                         certRefMatIdPath,
                         FlexDirection.Column,
@@ -97,7 +98,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             if (item.EvaluateCondition("f:category"))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new ConstantText("Klasifikace")), new LineBreak(),
+                    new PlainBadge(new LocalizedLabel("observation.category")), new LineBreak(),
                     new CommaSeparatedBuilder("f:category",
                         _ =>
                         [
@@ -111,21 +112,21 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.Focus, out var focusPath))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new ConstantText("Zaměřeno na")), new LineBreak(),
+                    new PlainBadge(new LocalizedLabel("observation.focus")), new LineBreak(),
                     new CommaSeparatedBuilder(focusPath,
                         _ => [new AnyReferenceNamingWidget()])
                 ]));
             }
 
             rowDetailsChildren.Add(new Container([
-                new PlainBadge(new ConstantText("Čas")), new LineBreak(),
+                new PlainBadge(new LocalizedLabel("observation.effective")), new LineBreak(),
                 new Chronometry("effective")
             ]));
 
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.Issued, out var issuedPath))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new ConstantText("Zpřístupněno")), new LineBreak(),
+                    new PlainBadge(new LocalizedLabel("observation.issued")), new LineBreak(),
                     new ShowInstant(issuedPath)
                 ]));
             }
@@ -133,7 +134,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.BodySite, out var bodySiteXpath))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new DisplayLabel(LabelCodes.BodySite)), new LineBreak(),
+                    new PlainBadge(new EhdsiDisplayLabel(LabelCodes.BodySite)), new LineBreak(),
                     new ChangeContext(bodySiteXpath, new CodeableConcept())
                 ]));
             }
@@ -141,7 +142,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.Method, out var methodXpath))
             {
                 rowDetailsChildren.Add(new Container([
-                    new PlainBadge(new ConstantText("Způsob")), new LineBreak(),
+                    new PlainBadge(new LocalizedLabel("observation.method")), new LineBreak(),
                     new ChangeContext(methodXpath, new CodeableConcept())
                 ]));
             }
@@ -154,7 +155,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                     out var triggeredByXpath))
             {
                 cardsRow.Add(new Container([
-                    new PlainBadge(new ConstantText("Vyvoláno")),
+                    new PlainBadge(new LocalizedLabel("observation.triggeredBy")),
                     new ListBuilder(triggeredByXpath,
                         FlexDirection.Column,
                         (_, supportInfoNav) =>
@@ -164,7 +165,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                             {
                                 supportedSubExtensions.Add(
                                     new NameValuePair(
-                                        new ConstantText("Typ"),
+                                        new LocalizedLabel("observation.triggeredBy.type"),
                                         new CommaSeparatedBuilder("f:extension[@url='type']", _ =>
                                         [
                                             new EnumLabel("f:valueCode",
@@ -178,7 +179,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                             {
                                 supportedSubExtensions.Add(
                                     new NameValuePair(
-                                        new ConstantText("Důvod"),
+                                        new LocalizedLabel("observation.triggeredBy.reason"),
                                         new CommaSeparatedBuilder("f:extension[@url='reason']", _ =>
                                         [
                                             new Text("f:valueString/@value"),
@@ -197,7 +198,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                             }
 
                             return supportedSubExtensions;
-                        }, separator: new LineBreak(), flexContainerClasses: string.Empty)
+                        }, separator: new LineBreak(), flexContainerClasses: string.Empty), // Overrides the default class
                 ]));
             }
 
@@ -207,7 +208,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.LabTestKitExtension,
                     out var labTestKitPath))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Laboratorní testovací sada"),
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.labTestKit"),
                     new CommaSeparatedBuilder(
                         labTestKitPath,
                         _ =>
@@ -219,67 +220,72 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
 
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.Specimen, out var specimenXpath))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Vzorek"),
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.specimen"),
                     new AnyReferenceNamingWidget(specimenXpath))
                 );
             }
 
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.PartOf, out var partOfPath))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Součástí"), new CommaSeparatedBuilder(
-                    partOfPath,
-                    _ =>
-                    [
-                        new AnyReferenceNamingWidget(),
-                    ]))
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.partOf"),
+                    new CommaSeparatedBuilder(
+                        partOfPath,
+                        _ =>
+                        [
+                            new AnyReferenceNamingWidget(),
+                        ]))
                 );
             }
 
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.Device, out var deviceXpath))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Zařízení"),
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.device"),
                     new AnyReferenceNamingWidget(deviceXpath))
                 );
             }
 
             if (item.EvaluateCondition("f:encounter"))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText(Labels.Encounter),
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("node-names.Encounter"),
                     new AnyReferenceNamingWidget("f:encounter"))
                 );
             }
 
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.BasedOn, out var basedOnPath))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Na základě"), new CommaSeparatedBuilder(
-                    basedOnPath,
-                    _ =>
-                    [
-                        new AnyReferenceNamingWidget(),
-                    ]))
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.basedOn"),
+                    new CommaSeparatedBuilder(
+                        basedOnPath,
+                        _ =>
+                        [
+                            new AnyReferenceNamingWidget(),
+                        ]))
                 );
             }
 
 
-            referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Provedl"), new CommaSeparatedBuilder(
-                "f:performer",
-                _ =>
-                [
-                    new AnyReferenceNamingWidget(),
-                    new Optional(
-                        "f:extension[@url='http://hl7.org/fhir/StructureDefinition/event-performerFunction']",
-                        new HideableDetails(new ConstantText(" (Funkce "),
-                            new ChangeContext("f:valueCodeableConcept", new CodeableConcept()),
-                            new ConstantText(")"))
-                    ),
-                ])));
+            referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.performer"),
+                new CommaSeparatedBuilder(
+                    "f:performer",
+                    _ =>
+                    [
+                        new AnyReferenceNamingWidget(),
+                        new Optional(
+                            "f:extension[@url='http://hl7.org/fhir/StructureDefinition/event-performerFunction']",
+                            new HideableDetails(
+                                new ConstantText(" ( "),
+                                new LocalizedLabel("observation.performer.function"),
+                                new ChangeContext("f:valueCodeableConcept", new CodeableConcept()),
+                                new ConstantText(")"))
+                        ),
+                    ])));
 
             // ignore note
 
             if (infrequentProperties.TryGet(CzLabObservationInfrequentProperties.SupportingInfoExtension,
                     out var supportInfoXpath))
             {
-                referenceLinksRow.Add(new NameValuePairDetail(new ConstantText("Podpůrné údaje"),
+                referenceLinksRow.Add(new NameValuePairDetail(new LocalizedLabel("observation.supportingInfo"),
                     new CommaSeparatedBuilder(
                         supportInfoXpath,
                         _ =>
@@ -292,7 +298,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             {
                 referenceLinksRow.Add(
                     new NameValuePairDetail(
-                        new ConstantText("Podzáznamy"),
+                        new LocalizedLabel("observation.hasMember"),
                         new CommaSeparatedBuilder(hasMemberXpath, _ =>
                             [new AnyReferenceNamingWidget()])
                     )
@@ -303,7 +309,7 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             {
                 referenceLinksRow.Add(
                     new NameValuePairDetail(
-                        new ConstantText("Odvozeno z"),
+                        new LocalizedLabel("observation.derivedFrom"),
                         new CommaSeparatedBuilder(derivedFromXpath, _ =>
                             [new AnyReferenceNamingWidget()])
                     )
@@ -313,7 +319,12 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
 
             if (item.EvaluateCondition("f:text"))
             {
-                rowDetails.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
+                rowDetails.Add(
+                    new CollapsibleDetail(
+                        new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
+                        new Narrative("f:text")
+                    )
+                );
             }
 
             if (rowDetailsChildren.Count != 0)
@@ -369,13 +380,24 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             var interpretationCodingVal =
                 navigator.SelectAllNodes("f:interpretation/f:coding/f:code/@value").Select(x => x.Node).ToList()
                     .WhereNotNull()
-                    .Select(x => x.Value)
                     .ToList();
-            var trendIcons = interpretationCodingVal.Select(GetTrendIcon).ToList().WhereNotNull().ToList();
-            var normalityClasses = interpretationCodingVal.Select(GetNormalityClass).WhereNotNull().ToList();
+
+            var trendIconNavigator = navigator
+                .SelectAllNodes("f:interpretation")
+                .FirstOrDefault(interpNav => interpNav
+                    .SelectAllNodes("f:coding/f:code/@value")
+                    .Any(node =>
+                    {
+                        var code = node.Node?.Value.ToLower().ToEnum<SupportedCodes>();
+                        return code != null && EnumIconTooltip.TryGetIcon(code.Value, "", out _);
+                    }));
+
+            var normalityClasses = interpretationCodingVal.Select(x => x.Value)
+                .Select(GetNormalityClass).WhereNotNull()
+                .ToList();
 
             var statusIcon = new EnumIconTooltip("f:status", "http://hl7.org/fhir/observation-status",
-                new DisplayLabel(LabelCodes.Status));
+                new EhdsiDisplayLabel(LabelCodes.Status));
 
             Widget[] widgetTree =
             [
@@ -392,8 +414,10 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                     )
                 ], optionalClass: "text-center", containerClass: "border-end-0"),
                 new TableCell([
-                    new If(_ => trendIcons.Count == 1,
-                        new LazyWidget(() => [trendIcons.First()])), // displaying multiple trend icons makes no sense
+                    new If(_ => trendIconNavigator != null,
+                        new ChangeContext(trendIconNavigator!,
+                            new CodeableConceptIconTooltip(new LocalizedLabel("observation.interpretation")))
+                    )
                 ], containerClass: "border-start-0"),
                 new TableCell([new ShowQuantityUnit("f:valueQuantity")]),
                 new TableCell([
@@ -406,12 +430,14 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                                 new When(
                                     "f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation' and (f:code/@value='LL' or f:code/@value='LU' or f:code/@value='L' or f:code/@value='N' or f:code/@value='H' or f:code/@value='HU' or f:code/@value='HH')]",
                                     new Container([new ShowInterpretationScale()],
-                                        optionalClass: "fixed-aligned-content justify-content-center")),
+                                        optionalClass: context.RenderMode != RenderMode.Documentation
+                                            ? "fixed-aligned-content justify-content-center"
+                                            : "")),
                                 new When(
                                     "f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/v3-ObservationInterpretation' and (f:code/@value='B' or f:code/@value='D' or f:code/@value='U' or f:code/@value='W')]", // trends are being displayed in a neighboring cell
                                     new NullWidget()),
-                            ], new CodeableConcept())
-                        ], new LineBreak())
+                            ], new CodeableConcept()),
+                        ], new LineBreak()),
                     ],
                     containerClass: "border-end-0"),
                 new TableCell([new Container([statusIcon], optionalClass: "fixed-aligned-content")],
@@ -438,25 +464,6 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
                 case "HU":
                 case "LU":
                     return "critical";
-                default:
-                    return null;
-            }
-        }
-
-        private Icon? GetTrendIcon(string? value)
-        {
-            switch (value)
-            {
-                case null:
-                    return null;
-                case "B":
-                    return new Icon(SupportedIcons.FaceSmile, "text-success-400");
-                case "D":
-                    return new Icon(SupportedIcons.StackedChevronDown, "text-info-400");
-                case "U":
-                    return new Icon(SupportedIcons.StackedChevronUp, "text-info-400");
-                case "W":
-                    return new Icon(SupportedIcons.FaceFrown, "text-alert-600");
                 default:
                     return null;
             }
@@ -518,18 +525,21 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
             Widget[] widgetTree =
             [
                 new Condition("f:low and not(f:high)", new ConstantText(" ≥ ")),
-                new Optional("f:low", new ShowQuantity()),
+                new Optional("f:low", new ShowQuantity(showUnit: false)),
                 new Condition("f:low and f:high", new ConstantText(" - ")),
                 new Condition("not(f:low) and f:high", new ConstantText(" ≤ ")),
-                new Optional("f:high", new ShowQuantity()),
+                new Optional("f:high", new ShowQuantity(showUnit: false)),
                 new Condition("f:low or f:high", new LineBreak()),
-                new Optional("f:type", new NameValuePair([new ConstantText("Typ")], [new CodeableConcept()])),
+                new Optional("f:type",
+                    new NameValuePair([new LocalizedLabel("observation.referenceRange.type")],
+                        [new CodeableConcept()])),
                 new Condition("f:appliesTo",
-                    new NameValuePair([new ConstantText("Aplikovatelné pro")],
+                    new NameValuePair([new LocalizedLabel("observation.referenceRange.appliesTo")],
                         [new ConcatBuilder("f:appliesTo", _ => [new CodeableConcept()], ", ")])),
-                new Optional("f:age", new NameValuePair([new ConstantText("Věk")], [new ShowRange()])),
+                new Optional("f:age",
+                    new NameValuePair([new LocalizedLabel("observation.referenceRange.age")], [new ShowRange()])),
                 new Optional("f:text",
-                    new NameValuePair([new ConstantText("Textová reprezentace")], [new Text("@value")])),
+                    new NameValuePair([new LocalizedLabel("observation.referenceRange.text")], [new Text("@value")])),
             ];
 
             return widgetTree.RenderConcatenatedResult(navigator, renderer, context);
@@ -545,6 +555,11 @@ public class CzLaboratoryObservation(List<XmlDocumentNavigator> items) : Widget
         )
         {
             var value = navigator.SelectSingleNode("f:coding/f:code/@value").Node?.Value;
+
+            if (context.RenderMode == RenderMode.Documentation)
+            {
+                return new ConstantText(navigator.GetFullPath()).Render(navigator, renderer, context);
+            }
 
             const string template = "•|••|•|••|•";
             var targetIndex = -1;

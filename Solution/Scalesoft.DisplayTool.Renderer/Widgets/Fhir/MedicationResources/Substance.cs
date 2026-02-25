@@ -12,26 +12,33 @@ public class Substance : SequentialResourceBase<Substance>, IResourceWidget
     public static string ResourceType => "Substance";
     [UsedImplicitly] public static bool RequiresExternalTitle => true;
 
+    public static bool HasBorderedContainer(Widget widget) => false;
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
-        RenderContext context)
+        RenderContext context
+    )
     {
         List<Widget> tree =
         [
             new Optional("f:code", new CodeableConcept()),
             new Condition("f:ingredient", new ConstantText(" - ")),
-            new CommaSeparatedBuilder("f:ingredient", _ => [
+            new CommaSeparatedBuilder("f:ingredient", _ =>
+            [
                 new Optional("f:quantity", new ShowRatio()),
                 new Choose([
-                    new When("f:substanceCodeableConcept", new Optional("f:itemCodeableConcept", new CodeableConcept())),
+                    new When("f:substanceCodeableConcept",
+                        new Optional("f:itemCodeableConcept", new CodeableConcept())),
                     new When("f:substanceReference",
-                        ShowSingleReference.WithDefaultDisplayHandler(x => [new ChangeContext(x, new Container([new Substance()], idSource: x))], "f:substanceReference")
+                        ShowSingleReference.WithDefaultDisplayHandler(
+                            x => [new ChangeContext(x, new Container([new Substance()], idSource: x))],
+                            "f:substanceReference")
                     ),
                 ]),
             ]),
         ];
-        
-        return tree.RenderConcatenatedResult(navigator, renderer, context);  
+
+        return tree.RenderConcatenatedResult(navigator, renderer, context);
     }
 }

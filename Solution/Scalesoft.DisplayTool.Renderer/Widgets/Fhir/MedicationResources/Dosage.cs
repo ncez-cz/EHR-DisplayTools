@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -21,7 +21,7 @@ public class Dosage(XmlDocumentNavigator item, string xpath = "f:dosageInstructi
         Widget dosageInstructionsTableCell = new ConcatBuilder(xpath, (_, _, nav) =>
         {
             var infrequentOptions =
-                InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([nav]);
+                InfrequentProperties.Evaluate<InfrequentPropertiesPaths>(nav);
 
             List<Widget> widgets =
             [
@@ -34,13 +34,17 @@ public class Dosage(XmlDocumentNavigator item, string xpath = "f:dosageInstructi
                             ),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Route),
                                 new NameValuePair(
-                                    new DisplayLabel(LabelCodes.AdministrationRoute),
+                                    new EhdsiDisplayLabel(LabelCodes.AdministrationRoute),
                                     new ChangeContext("f:route", new CodeableConcept())
                                 )),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Timing),
                                 new NameValuePair(
-                                    new ConstantText("Dávkování"),
-                                    new CommaSeparatedBuilder("f:timing", _ => [new ShowTiming()])
+                                    new LocalizedLabel("dosage"),
+                                    new CommaSeparatedBuilder("f:timing",
+                                        _ =>
+                                        [
+                                            new ShowTiming(nameValuePairStyle: NameValuePair.NameValuePairStyle.Initial)
+                                        ])
                                 )),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.AsNeeded),
                                 children:
@@ -48,13 +52,14 @@ public class Dosage(XmlDocumentNavigator item, string xpath = "f:dosageInstructi
                                     new TextContainer(TextStyle.Bold,
                                         [
                                             new Optional("f:asNeededCodeableConcept",
-                                                new ConstantText("Brát dle potřeby - "), new CodeableConcept()),
+                                                new LocalizedLabel("dosage.asNeededCodeableConcept"),
+                                                new CodeableConcept()),
                                             new Optional("f:asNeededBoolean",
                                                 children:
                                                 [
                                                     new ShowBoolean(
-                                                        onFalse: new ConstantText("Brát dle instrukcí"),
-                                                        onTrue: new ConstantText("Brát dle potřeby")
+                                                        onFalse: new LocalizedLabel("dosage.asNeededBoolean.false"),
+                                                        onTrue: new LocalizedLabel("dosage.asNeededBoolean.true")
                                                     ),
                                                 ]
                                             ),
@@ -66,17 +71,17 @@ public class Dosage(XmlDocumentNavigator item, string xpath = "f:dosageInstructi
                         new Concat([
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.DoseAndRate),
                                 new NameValuePair(
-                                    new ConstantText("Podané množství"),
+                                    new LocalizedLabel("dosage.doseAndRate"),
                                     new DoseAndRate()
                                 )),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Sequence),
                                 new NameValuePair(
-                                    new ConstantText("Pořadí"),
+                                    new LocalizedLabel("dosage.sequence"),
                                     new Text("f:sequence/@value")
                                 )),
                             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.AdditionalInstruction),
                                 new NameValuePair(
-                                    new ConstantText("Doplňující informace"),
+                                    new LocalizedLabel("dosage.additionalInstruction"),
                                     new CommaSeparatedBuilder("f:additionalInstruction",
                                         _ => [new CodeableConcept()])
                                 )),
@@ -94,7 +99,7 @@ public class Dosage(XmlDocumentNavigator item, string xpath = "f:dosageInstructi
         if (globalInfrequentProperties.Count == 0)
         {
             dosageInstructionsTableCell =
-                new TextContainer(TextStyle.Muted, [new ConstantText("Informace nejsou k dispozici")]);
+                new TextContainer(TextStyle.Muted, [new LocalizedLabel("general.information-unavailable")]);
         }
 
         return dosageInstructionsTableCell.Render(item, renderer, context);

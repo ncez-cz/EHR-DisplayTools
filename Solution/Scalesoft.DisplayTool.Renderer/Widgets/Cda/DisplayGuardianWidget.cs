@@ -2,22 +2,24 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Cda;
 
 public class DisplayGuardianWidget : Widget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         List<Widget> widgetTree =
         [
             new Collapser([
-               new DisplayLabel(LabelCodes.Guardian)
-            ], [], [
-                new ConcatBuilder("$patientGuardian", (i) =>
+                new EhdsiDisplayLabel(LabelCodes.Guardian)
+            ], [
+                new ConcatBuilder("$patientGuardian", i =>
                 [
                     new WidgetWithVariables(new DisplayAssignedPersonWidget(), [
                         new Variable("assignedPerson", "n1:guardianPerson"),

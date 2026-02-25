@@ -29,54 +29,69 @@ public class ImmunizationRow(
         if (navigator.EvaluateCondition(
                 "f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-Immunization.basedOn']/f:valueReference"))
         {
-            collapsibleRow.AddCollapser(new ConstantText("Dle doporučení"), new Container([
-                    new ChangeContext(
-                        "f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-Immunization.basedOn']/f:valueReference",
-                        ShowSingleReference.WithDefaultDisplayHandler(nav =>
-                            [new Container([new ImmunizationRecommendation()], idSource: nav)]))
-                ],
-                idSource: navigator.SelectSingleNode(
-                    "f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-Immunization.basedOn']")));
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("immunization.basedOn"),
+                    new Container([
+                            new ChangeContext(
+                                "f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-Immunization.basedOn']/f:valueReference",
+                                ShowSingleReference.WithDefaultDisplayHandler(nav =>
+                                    [new Container([new ImmunizationRecommendation()], idSource: nav)]))
+                        ],
+                        idSource: navigator.SelectSingleNode(
+                            "f:extension[@url='http://hl7.org/fhir/5.0/StructureDefinition/extension-Immunization.basedOn']"))
+                )
+            );
         }
 
         if (navigator.EvaluateCondition(
                 "f:extension[@url='http://hl7.eu/fhir/hdr/StructureDefinition/immunization-administeredProduct']"))
         {
-            collapsibleRow.AddCollapser(new ConstantText("Podaný přípravek"), new Container([
-                    new ChangeContext(
-                        "f:extension[@url='http://hl7.eu/fhir/hdr/StructureDefinition/immunization-administeredProduct']",
-                        new Optional("f:extension[@url='concept']/f:valueCodeableConcept",
-                            new Container([new CodeableConcept()],
-                                idSource: navigator.SelectSingleNode("f:extension[@url='concept']"))),
-                        new Optional("f:extension[@url='reference']/f:valueReference", new Container([
-                            ShowSingleReference.WithDefaultDisplayHandler(nav =>
-                            [
-                                new Container([
-                                    new Medication(),
-                                ], idSource: nav)
-                            ])
-                        ], idSource: navigator.SelectSingleNode("f:extension[@url='reference']"))))
-                ],
-                idSource: navigator.SelectSingleNode(
-                    "f:extension[@url='http://hl7.eu/fhir/hdr/StructureDefinition/immunization-administeredProduct']")));
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("immunization.administeredProduct"),
+                    new Container([
+                            new ChangeContext(
+                                "f:extension[@url='http://hl7.eu/fhir/hdr/StructureDefinition/immunization-administeredProduct']",
+                                new Optional("f:extension[@url='concept']/f:valueCodeableConcept",
+                                    new Container([new CodeableConcept()],
+                                        idSource: navigator.SelectSingleNode("f:extension[@url='concept']"))),
+                                new Optional("f:extension[@url='reference']/f:valueReference", new Container([
+                                    ShowSingleReference.WithDefaultDisplayHandler(nav =>
+                                    [
+                                        new Container([
+                                            new Medication(),
+                                        ], idSource: nav)
+                                    ])
+                                ], idSource: navigator.SelectSingleNode("f:extension[@url='reference']"))))
+                        ],
+                        idSource: navigator.SelectSingleNode(
+                            "f:extension[@url='http://hl7.eu/fhir/hdr/StructureDefinition/immunization-administeredProduct']"))
+                )
+            );
         }
 
         if (navigator.EvaluateCondition("f:manufacturer"))
         {
-            collapsibleRow.AddCollapser(new ConstantText("Výrobce"), new Container([
-                new ChangeContext("f:manufacturer", new ShowSingleReference(x =>
-                {
-                    if (x.ResourceReferencePresent)
-                    {
-                        return
-                        [
-                            new Container([new PersonOrOrganization(x.Navigator)], idSource: x.Navigator)
-                        ];
-                    }
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("immunization.manufacturer"),
+                    new Container([
+                        new ChangeContext("f:manufacturer", new ShowSingleReference(x =>
+                        {
+                            if (x.ResourceReferencePresent)
+                            {
+                                return
+                                [
+                                    new Container([new PersonOrOrganization(x.Navigator)], idSource: x.Navigator)
+                                ];
+                            }
 
-                    return [new ConstantText(x.ReferenceDisplay)];
-                }))
-            ]));
+                            return [new ConstantText(x.ReferenceDisplay)];
+                        }))
+                    ])
+                )
+            );
         }
 
         if (navigator.EvaluateCondition("f:encounter"))
@@ -84,24 +99,32 @@ public class ImmunizationRow(
             var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator,
                 "f:encounter", "f:text");
 
-            collapsibleRow.AddCollapser(new ConstantText(Labels.Encounter),
-                ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
-                    "f:encounter"),
-                encounterNarrative != null
-                    ?
-                    [
-                        new NarrativeCollapser(encounterNarrative.GetFullPath())
-                    ]
-                    : null,
-                encounterNarrative != null
-                    ? new NarrativeModal(encounterNarrative.GetFullPath())
-                    : null
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("node-names.Encounter"),
+                    ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
+                        "f:encounter"),
+                    encounterNarrative != null
+                        ?
+                        [
+                            new NarrativeCollapser(encounterNarrative.GetFullPath())
+                        ]
+                        : null,
+                    encounterNarrative != null
+                        ? new NarrativeModal(encounterNarrative.GetFullPath())
+                        : null
+                )
             );
         }
 
         if (navigator.EvaluateCondition("f:text"))
         {
-            collapsibleRow.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
+                    new Narrative("f:text")
+                )
+            );
         }
 
         var protocolNav = navigator.SelectSingleNode("$protocolApplied");
@@ -167,14 +190,14 @@ public class ImmunizationRow(
                 ),
                 new If(_ => infrequentOptions.Contains(Immunizations.InfrequentPropertiesPaths.IsSubpotent),
                     new TableCell([
-                        new ShowBoolean(new DisplayLabel(LabelCodes.No), new DisplayLabel(LabelCodes.Yes),
+                        new ShowBoolean(new EhdsiDisplayLabel(LabelCodes.No), new EhdsiDisplayLabel(LabelCodes.Yes),
                             "f:isSubpotent"),
                     ])
                 ),
                 new If(_ => infrequentOptions.Contains(Immunizations.InfrequentPropertiesPaths.Status),
                     new TableCell([
                         new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/immunization-status",
-                            new DisplayLabel(LabelCodes.Administered))
+                            new EhdsiDisplayLabel(LabelCodes.Administered))
                     ])
                 ),
                 new If(_ => infrequentOptions.Contains(Immunizations.InfrequentPropertiesPaths.Text),

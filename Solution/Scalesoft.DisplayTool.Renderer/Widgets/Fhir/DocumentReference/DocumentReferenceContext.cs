@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -23,13 +23,18 @@ public class DocumentReferenceContext(List<XmlDocumentNavigator> items) : Widget
                 new TableHead([
                     new TableRow([
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Event),
-                            new HideableDetails(new TableCell([new ConstantText("Událost")], TableCellType.Header))),
+                            new HideableDetails(new TableCell([new LocalizedLabel("document-reference.context.event")],
+                                TableCellType.Header))),
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Period),
-                            new TableCell([new ConstantText("Období")], TableCellType.Header)),
+                            new TableCell([new LocalizedLabel("document-reference.context.period")],
+                                TableCellType.Header)),
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.PracticeSetting),
-                            new HideableDetails(new TableCell([new ConstantText("Pracoviště")], TableCellType.Header))),
+                            new HideableDetails(new TableCell(
+                                [new LocalizedLabel("document-reference.context.practiceSetting")],
+                                TableCellType.Header))),
                         new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.FacilityType),
-                            new HideableDetails(new TableCell([new ConstantText("Typ zařízení")],
+                            new HideableDetails(new TableCell(
+                                [new LocalizedLabel("document-reference.context.facilityType")],
                                 TableCellType.Header))),
                     ])
                 ]),
@@ -58,18 +63,21 @@ public class DocumentReferenceContext(List<XmlDocumentNavigator> items) : Widget
                 var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(item,
                     "f:encounter", "f:text");
 
-                rowDetails.AddCollapser(new ConstantText(Labels.Encounter),
-                    ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
-                        "f:encounter"),
-                    encounterNarrative != null
-                        ?
-                        [
-                            new NarrativeCollapser(encounterNarrative.GetFullPath())
-                        ]
-                        : null,
-                    encounterNarrative != null
-                        ? new NarrativeModal(encounterNarrative.GetFullPath())
-                        : null
+                rowDetails.Add(
+                    new CollapsibleDetail(
+                        new LocalizedLabel("node-names.Encounter"),
+                        ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
+                            "f:encounter"),
+                        encounterNarrative != null
+                            ?
+                            [
+                                new NarrativeCollapser(encounterNarrative.GetFullPath())
+                            ]
+                            : null,
+                        encounterNarrative != null
+                            ? new NarrativeModal(encounterNarrative.GetFullPath())
+                            : null
+                    )
                 );
             }
 
@@ -79,8 +87,8 @@ public class DocumentReferenceContext(List<XmlDocumentNavigator> items) : Widget
                     new TableCell([
                         new Optional("f:event", new ItemListBuilder(".", ItemListType.Unordered, _ =>
                         [
-                            new CodeableConcept()
-                        ]))
+                            new CodeableConcept(),
+                        ])),
                     ]))),
                 new If(_ => infrequentOptionsColumn.Contains(InfrequentPropertiesPaths.Period), new TableCell([
                     new Optional("f:period", new ShowPeriod())

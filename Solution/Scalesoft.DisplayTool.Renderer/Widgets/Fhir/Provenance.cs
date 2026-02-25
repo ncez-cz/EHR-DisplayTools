@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -13,6 +13,8 @@ public class Provenance : RowResourceBase<Provenance>, IResourceWidget
 {
     public static string ResourceType => "Provenance";
 
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -20,109 +22,112 @@ public class Provenance : RowResourceBase<Provenance>, IResourceWidget
     )
     {
         var infrequentOptions =
-            InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([navigator]);
+            InfrequentProperties.Evaluate<InfrequentPropertiesPaths>(navigator);
 
         var agentNav = navigator.SelectSingleNode("f:agent");
         var agentsInfrequentOptions =
-            InfrequentProperties.Evaluate<AgentInfrequentPropertiesPaths>([agentNav]);
+            InfrequentProperties.Evaluate<AgentInfrequentPropertiesPaths>(agentNav);
 
         var card = new Card(
                 new Row(
-                    [new ConstantText("Provenance"), new NarrativeModal()],
+                    [new LocalizedLabel("provenance"), new NarrativeModal()],
                     flexContainerClasses: "align-items-center"
                 ),
                 new Container(
                     [
                         new ChangeContext(
                             agentNav,
-                            new PlainBadge(new DisplayLabel(LabelCodes.Author)),
-                            new If(
-                                _ => agentsInfrequentOptions.Contains(AgentInfrequentPropertiesPaths.Who),
-                                new Heading(
-                                    [new AnyReferenceNamingWidget("f:who", showOptionalDetails: false)],
-                                    HeadingSize.H5
+                            new PlainBadge(new EhdsiDisplayLabel(LabelCodes.Author)),
+                            agentsInfrequentOptions.Optional(AgentInfrequentPropertiesPaths.Who,
+                                new Heading([new AnyReferenceNamingWidget()], HeadingSize.H5)
+                            ),
+                            new If(_ => agentsInfrequentOptions.Contains(AgentInfrequentPropertiesPaths.Role),
+                                new NameValuePair(
+                                    new LocalizedLabel("provenance.agent.role"),
+                                    new CommaSeparatedBuilder("f:role", _ => new CodeableConcept())
                                 )
                             ),
-                            new If(
-                                _ => agentsInfrequentOptions.Contains(AgentInfrequentPropertiesPaths.Role),
+                            agentsInfrequentOptions.Optional(AgentInfrequentPropertiesPaths.Type,
                                 new NameValuePair(
-                                    [new ConstantText("Role")],
-                                    [new CommaSeparatedBuilder("f:role", _ => new CodeableConcept())]
+                                    new LocalizedLabel("provenance.agent.type"),
+                                    new CodeableConcept()
                                 )
                             ),
-                            new If(
-                                _ => agentsInfrequentOptions.Contains(AgentInfrequentPropertiesPaths.Type),
-                                new NameValuePair(
-                                    [new ConstantText("Typ")],
-                                    [new Optional("f:type", new CodeableConcept())]
-                                )
-                            ),
-                            new If(
-                                _ => agentsInfrequentOptions.Contains(AgentInfrequentPropertiesPaths.OnBehalfOf),
-                                new NameValuePair(
-                                    [new ConstantText("Na základě")],
-                                    [new AnyReferenceNamingWidget("f:onBehalfOf")]
+                            agentsInfrequentOptions.Optional(AgentInfrequentPropertiesPaths.OnBehalfOf,
+                                new AnyReferenceNamingWidget(
+                                    widgetModel: new ReferenceNamingWidgetModel
+                                    {
+                                        Type = ReferenceNamingWidgetType.NameValuePair,
+                                        LabelOverride = new LocalizedLabel("provenance.agent.onBehalfOf"),
+                                    }
                                 )
                             )
                         ),
-                        new ThematicBreak(),
+                        new If(
+                            _ => agentsInfrequentOptions.ContainsAnyOf(AgentInfrequentPropertiesPaths.Who,
+                                AgentInfrequentPropertiesPaths.Role, AgentInfrequentPropertiesPaths.Type,
+                                AgentInfrequentPropertiesPaths.OnBehalfOf) && infrequentOptions.ContainsAnyOf(
+                                InfrequentPropertiesPaths.Target, InfrequentPropertiesPaths.Occurred,
+                                InfrequentPropertiesPaths.Recorded, InfrequentPropertiesPaths.Reason,
+                                InfrequentPropertiesPaths.Activity, InfrequentPropertiesPaths.Signature),
+                            new ThematicBreak()
+                        ),
+
                         //Basic Info
-                        new PlainBadge(new DisplayLabel(LabelCodes.Description)),
-                        new If(
-                            _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Target),
-                            new NameValuePair(
-                                [new ConstantText("Ověřovaný záznam")],
-                                [new AnyReferenceNamingWidget("f:target", showOptionalDetails: false)]
+                        new PlainBadge(new EhdsiDisplayLabel(LabelCodes.Description)),
+                        infrequentOptions.Optional(InfrequentPropertiesPaths.Target,
+                            new AnyReferenceNamingWidget(
+                                widgetModel: new ReferenceNamingWidgetModel
+                                {
+                                    Type = ReferenceNamingWidgetType.NameValuePair,
+                                    LabelOverride = new LocalizedLabel("provenance.target"),
+                                }
                             )
                         ),
-                        new If(
-                            _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Occurred),
+                        new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Occurred),
                             new NameValuePair(
-                                [new ConstantText("Datum vzniku")],
-                                [new OpenTypeElement(null, "occurred")]
+                                new LocalizedLabel("provenance.occured"),
+                                new OpenTypeElement(null, "occurred")
                             )
                         ), // Period | dateTime
-                        new If(
-                            _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Recorded),
+                        infrequentOptions.Optional(InfrequentPropertiesPaths.Recorded,
                             new NameValuePair(
-                                [new ConstantText("Datum zaznamenání")],
-                                [new ShowDateTime("f:recorded")]
+                                new LocalizedLabel("provenance.recorded"),
+                                new ShowDateTime()
                             )
                         ),
-                        new If(
-                            _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Reason),
+                        new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Reason),
                             new NameValuePair(
-                                [new ConstantText("Důvod")],
-                                [
-                                    new ItemListBuilder(
-                                        "f:reason",
-                                        ItemListType.Unordered,
-                                        _ => [new CodeableConcept()]
-                                    ),
-                                ]
+                                new LocalizedLabel("provenance.reason"),
+                                new ItemListBuilder("f:reason", ItemListType.Unordered, _ => [new CodeableConcept()])
                             )
                         ),
-                        new If(
-                            _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Activity),
+                        infrequentOptions.Optional(InfrequentPropertiesPaths.Activity,
                             new NameValuePair(
-                                [new ConstantText("Událost")],
-                                [new Optional("f:reason", new CodeableConcept())]
+                                new LocalizedLabel("provenance.activity"),
+                                new CodeableConcept()
                             )
                         ),
                         //Signature
                         new If(
+                            _ => infrequentOptions.ContainsAnyOf(
+                                     InfrequentPropertiesPaths.Target, InfrequentPropertiesPaths.Occurred,
+                                     InfrequentPropertiesPaths.Recorded, InfrequentPropertiesPaths.Reason,
+                                     InfrequentPropertiesPaths.Activity) &&
+                                 infrequentOptions.Contains(InfrequentPropertiesPaths.Signature),
+                            new ThematicBreak()
+                        ),
+                        new If(
                             _ => infrequentOptions.Contains(InfrequentPropertiesPaths.Signature),
-                            new ThematicBreak(),
-                            new PlainBadge(new ConstantText("Podpis")),
+                            new PlainBadge(new LocalizedLabel("provenance.signature")),
                             new ShowSignature("f:signature")
                         ),
                     ]
                 ),
+                optionalClass: context.RenderMode == RenderMode.Documentation ? null : "provenance-container",
                 footer: navigator.EvaluateCondition("f:text")
                     ? new NarrativeCollapser()
-                    : null,
-                optionalClass: context.RenderMode == RenderMode.Documentation ? null : "provenance-container"
-            )
+                    : null)
             ;
 
         return card.Render(navigator, renderer, context);

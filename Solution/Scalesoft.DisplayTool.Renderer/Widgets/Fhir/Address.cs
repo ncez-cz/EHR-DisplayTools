@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -33,21 +33,30 @@ public class Address(string addressPath = ".", bool showLabel = true) : Widget
     {
         var addresses = new ConcatBuilder(addressPath, (_, _, nav) =>
         {
-            var label = new Choose([
-                new When($"f:extension[@url='{PermanentResidenceExtensionUrl}']",
-                    new ConstantText("Trvalé bydliště"),
-                    new HideableDetails(new Optional(
-                        $"f:extension[@url='{PermanentResidenceExtensionUrl}']/f:valueCodeableConcept",
-                        new ConstantText(" ("),
-                        new CodeableConcept(),
-                        new ConstantText(")")
-                    ))
-                )
-            ], new ConstantText("Adresa"));
+            var useWidget = new Condition("f:use", new TextContainer(TextStyle.Muted, [
+                new ConstantText(" ("),
+                new EnumLabel("f:use", "http://hl7.org/fhir/address-use"),
+                new ConstantText(")"),
+            ]));
+            Widget[] label =
+            [
+                new Choose([
+                    new When($"f:extension[@url='{PermanentResidenceExtensionUrl}']",
+                        new LocalizedLabel("address.permanent-residence"),
+                        new HideableDetails(new Optional(
+                            $"f:extension[@url='{PermanentResidenceExtensionUrl}']/f:valueCodeableConcept",
+                            new ConstantText(" ("),
+                            new CodeableConcept(),
+                            new ConstantText(")")
+                        ))
+                    ),
+                ], new LocalizedLabel("address")),
+                useWidget,
+            ];
             Widget[] value =
             [
                 new Optional($"f:extension[@url='{AddressPointExtensionUrl}']",
-                    new HideableDetails(new NameValuePair([new ConstantText("RÚIAN")],
+                    new HideableDetails(new NameValuePair([new LocalizedLabel("address.ruian")],
                         [new ShowIdentifier("f:valueIdentifier")],
                         size: NameValuePair.NameValuePairSize.Small))
                 ),
@@ -68,8 +77,8 @@ public class Address(string addressPath = ".", bool showLabel = true) : Widget
                                 ),
                                 new ConcatBuilder($"f:extension[@url='{PostBoxExtensionUrl}']", _ =>
                                         [new Text("f:valueString/@value")], " "
-                                )
-                            ])
+                                ),
+                            ]),
                         ], new LineBreak()),
                         new Condition("f:line",
                             new LineBreak()
@@ -77,7 +86,7 @@ public class Address(string addressPath = ".", bool showLabel = true) : Widget
                     ).Else(
                         new ConcatBuilder("f:line/@value", _ =>
                         [
-                            new Text()
+                            new Text(),
                         ], new LineBreak()),
                         new LineBreak()
                     ),
@@ -104,10 +113,11 @@ public class Address(string addressPath = ".", bool showLabel = true) : Widget
                                     new Coding())
                             ),
                         ], new Text("@value"))
-                    )
+                    ),
+                    new If(_ => !showLabel, useWidget)
                 ),
             ];
-            var tree = showLabel ? [new NameValuePair([label], value)] : value;
+            var tree = showLabel ? [new NameValuePair(label, value)] : value;
 
             return tree;
         }, new Concat([new LineBreak(), new LineBreak()]));

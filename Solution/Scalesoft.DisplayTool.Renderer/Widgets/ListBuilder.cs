@@ -10,7 +10,7 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets;
 public class ListBuilder : Widget
 {
     private readonly FlexDirection m_direction;
-    private readonly Func<int, XmlDocumentNavigator, IList<Widget>> m_itemBuilder;
+    private readonly Func<int, int, XmlDocumentNavigator, XmlDocumentNavigator?, IList<Widget>> m_itemBuilder;
     private readonly string? m_childContainerClasses;
     private readonly string? m_flexContainerClasses;
     private readonly bool? m_wrapChildren;
@@ -19,6 +19,29 @@ public class ListBuilder : Widget
     private readonly Widget? m_separator;
     private readonly List<XmlDocumentNavigator>? m_items;
     private readonly string? m_itemsPath;
+
+    public ListBuilder(
+        List<XmlDocumentNavigator> items,
+        FlexDirection direction,
+        Func<int, int, XmlDocumentNavigator, XmlDocumentNavigator?, IList<Widget>> itemBuilder,
+        string? childContainerClasses = null,
+        string? flexContainerClasses = null,
+        bool? wrapChildren = false,
+        IdentifierSource? idSource = null,
+        IdentifierSource? visualIdSource = null,
+        Widget? separator = null
+    )
+    {
+        m_direction = direction;
+        m_itemBuilder = itemBuilder;
+        m_childContainerClasses = childContainerClasses;
+        m_flexContainerClasses = flexContainerClasses;
+        m_wrapChildren = wrapChildren;
+        m_idSource = idSource;
+        m_visualIdSource = visualIdSource ?? idSource;
+        m_separator = separator;
+        m_items = items;
+    }
 
     public ListBuilder(
         List<XmlDocumentNavigator> items,
@@ -33,7 +56,7 @@ public class ListBuilder : Widget
     )
     {
         m_direction = direction;
-        m_itemBuilder = itemBuilder;
+        m_itemBuilder = (x, _, y, _) => itemBuilder(x, y);
         m_childContainerClasses = childContainerClasses;
         m_flexContainerClasses = flexContainerClasses;
         m_wrapChildren = wrapChildren;
@@ -56,7 +79,7 @@ public class ListBuilder : Widget
     )
     {
         m_direction = direction;
-        m_itemBuilder = (x, _) => itemBuilder(x);
+        m_itemBuilder = (x, _, _, _) => itemBuilder(x);
         m_childContainerClasses = childContainerClasses;
         m_flexContainerClasses = flexContainerClasses;
         m_wrapChildren = wrapChildren;
@@ -70,6 +93,29 @@ public class ListBuilder : Widget
         string itemsPath,
         FlexDirection direction,
         Func<int, XmlDocumentNavigator, IList<Widget>> itemBuilder,
+        string? childContainerClasses = null,
+        string? flexContainerClasses = null,
+        bool? wrapChildren = false,
+        IdentifierSource? idSource = null,
+        IdentifierSource? visualIdSource = null,
+        Widget? separator = null
+    )
+    {
+        m_direction = direction;
+        m_itemBuilder = (x, _, y, _) => itemBuilder(x, y);
+        m_childContainerClasses = childContainerClasses;
+        m_flexContainerClasses = flexContainerClasses;
+        m_wrapChildren = wrapChildren;
+        m_idSource = idSource;
+        m_visualIdSource = visualIdSource ?? idSource;
+        m_separator = separator;
+        m_itemsPath = itemsPath;
+    }
+
+    public ListBuilder(
+        string itemsPath,
+        FlexDirection direction,
+        Func<int, int, XmlDocumentNavigator, XmlDocumentNavigator?, IList<Widget>> itemBuilder,
         string? childContainerClasses = null,
         string? flexContainerClasses = null,
         bool? wrapChildren = false,
@@ -104,13 +150,16 @@ public class ListBuilder : Widget
         }
 
         var elements = m_items ?? navigator.SelectAllNodes(m_itemsPath!).ToList();
+        var elementsCount = elements.Count;
 
         List<RenderResult> children = [];
-        for (var i = 0; i < elements.Count; i++)
+        for (var i = 0; i < elementsCount; i++)
         {
             var element = elements[i];
-            children.Add(await m_itemBuilder(i, element).RenderConcatenatedResult(element, renderer, context));
-            if (m_separator != null && i < elements.Count - 1)
+            var nextNav = elements.ElementAtOrDefault(i + 1);
+            children.Add(await m_itemBuilder(i, elementsCount, element, nextNav)
+                .RenderConcatenatedResult(element, renderer, context));
+            if (m_separator != null && i < elementsCount - 1)
             {
                 children.Add(await m_separator.Render(navigator, renderer, context));
             }

@@ -14,6 +14,10 @@ namespace Scalesoft.DisplayTool.Renderer.Utils;
 
 public static partial class ReferenceHandler
 {
+    // Allowed entity types are taken from https://hl7.org/fhir/R5/references.html#literal
+    private const string ParentResourceXpath =
+        "ancestor-or-self::*[contains('|Account|ActivityDefinition|AdverseEvent|AllergyIntolerance|Appointment|AppointmentResponse|AuditEvent|Basic|Binary|BiologicallyDerivedProduct|BodyStructure|Bundle|CapabilityStatement|CarePlan|CareTeam|CatalogEntry|ChargeItem|ChargeItemDefinition|Claim|ClaimResponse|ClinicalImpression|CodeSystem|Communication|CommunicationRequest|CompartmentDefinition|Composition|ConceptMap|Condition|Consent|Contract|Coverage|CoverageEligibilityRequest|CoverageEligibilityResponse|DetectedIssue|Device|DeviceDefinition|DeviceMetric|DeviceRequest|DeviceUseStatement|DiagnosticReport|DocumentManifest|DocumentReference|EffectEvidenceSynthesis|Encounter|Endpoint|EnrollmentRequest|EnrollmentResponse|EpisodeOfCare|EventDefinition|Evidence|EvidenceVariable|ExampleScenario|ExplanationOfBenefit|FamilyMemberHistory|Flag|Goal|GraphDefinition|Group|GuidanceResponse|HealthcareService|ImagingStudy|Immunization|ImmunizationEvaluation|ImmunizationRecommendation|ImplementationGuide|InsurancePlan|Invoice|Library|Linkage|List|Location|Measure|MeasureReport|Media|Medication|MedicationAdministration|MedicationDispense|MedicationKnowledge|MedicationRequest|MedicationStatement|MedicinalProduct|MedicinalProductAuthorization|MedicinalProductContraindication|MedicinalProductIndication|MedicinalProductIngredient|MedicinalProductInteraction|MedicinalProductManufactured|MedicinalProductPackaged|MedicinalProductPharmaceutical|MedicinalProductUndesirableEffect|MessageDefinition|MessageHeader|MolecularSequence|NamingSystem|NutritionOrder|Observation|ObservationDefinition|OperationDefinition|OperationOutcome|Organization|OrganizationAffiliation|Patient|PaymentNotice|PaymentReconciliation|Person|PlanDefinition|Practitioner|PractitionerRole|Procedure|Provenance|Questionnaire|QuestionnaireResponse|RelatedPerson|RequestGroup|ResearchDefinition|ResearchElementDefinition|ResearchStudy|ResearchSubject|RiskAssessment|RiskEvidenceSynthesis|Schedule|SearchParameter|ServiceRequest|Slot|Specimen|SpecimenDefinition|StructureDefinition|StructureMap|Subscription|Substance|SubstanceNucleicAcid|SubstancePolymer|SubstanceProtein|SubstanceReferenceInformation|SubstanceSourceMaterial|SubstanceSpecification|SupplyDelivery|SupplyRequest|Task|TerminologyCapabilities|TestReport|TestScript|ValueSet|VerificationResult|VisionPrescription|', concat('|', local-name(), '|'))]";
+    
     /// <summary>
     ///     Generates a collapsible content structure for references found at the given path, using the specified content
     ///     builder.
@@ -30,7 +34,7 @@ public static partial class ReferenceHandler
         Func<List<XmlDocumentNavigator>, Widget> contentBuilder,
         XmlDocumentNavigator navigator,
         string referencePath,
-        string referenceTitle,
+        Widget referenceTitle,
         RenderContext context
     )
     {
@@ -48,7 +52,7 @@ public static partial class ReferenceHandler
         {
             collapsibleRow.Add(
                 new CollapsibleDetail(
-                    new ConstantText(referenceTitle),
+                    referenceTitle,
                     new MultiReference(contentBuilder, $"{referencePath}/f:reference")
                 )
             );
@@ -65,7 +69,7 @@ public static partial class ReferenceHandler
         XmlDocumentNavigator navigator,
         RenderContext context,
         string referencePath,
-        string referenceTitle
+        Widget referenceTitle
     )
     {
         if (context.RenderMode == RenderMode.Documentation)
@@ -88,7 +92,7 @@ public static partial class ReferenceHandler
         {
             collapsibleRow.Add(
                 new CollapsibleDetail(
-                    new ConstantText(referenceTitle),
+                    referenceTitle,
                     new MultiReference(
                         navs => contentBuilder(navs.Select(y => new ReferenceNavigatorOrDisplay(y))
                             .ToList()),
@@ -104,7 +108,12 @@ public static partial class ReferenceHandler
             var referenceData = displayValues.Select(x => new ReferenceNavigatorOrDisplay(x)).ToList();
             collapsibleRow.Add(
                 new CollapsibleDetail(
-                    new ConstantText($"{referenceTitle} - text"),
+                    new Concat(
+                        [
+                            referenceTitle, new ConstantText(" - "),
+                            new LocalizedLabel("general.text"),
+                        ]
+                    ),
                     contentBuilder(referenceData)
                 )
             );
@@ -246,7 +255,7 @@ public static partial class ReferenceHandler
                 [
                     new ConstantText(" "),
                     new Tooltip([], [
-                        new ConstantText("Reference na chybějící obsah"),
+                        new LocalizedLabel("errors.missing-reference-target"),
                     ], icon: new Icon(SupportedIcons.Gear)),
                 ]),
             ]);
@@ -341,7 +350,7 @@ public static partial class ReferenceHandler
         if (referenceUri.StartsWith('#'))
         {
             var id = referenceUri[1..];
-            xpath = $"ancestor::f:resource[position() = 1]/descendant::f:contained/*[f:id/@value='{id}']";
+            xpath = $"{ParentResourceXpath}/descendant::f:contained/*[f:id/@value='{id}']";
             return true;
         }
 
@@ -388,7 +397,7 @@ public static partial class ReferenceHandler
         else
         {
             path.Append(
-                $"/f:Bundle/f:entry[f:resource/f:{resourceType}/f:id/@value='{resourceId}'or f:fullUrl/@value='{versionlessUrl}']"
+                $"/f:Bundle/f:entry[f:resource/f:{resourceType}/f:id/@value='{resourceId}' or f:fullUrl/@value='{versionlessUrl}']"
             );
         }
 
@@ -447,13 +456,13 @@ public static partial class ReferenceHandler
             return BuildReferenceNameWidget(referencesWithoutContent[0], context, false);
         }
 
-        return new TextContainer(TextStyle.Muted, [new ConstantText("Neznámé jméno")]);
+        return new TextContainer(TextStyle.Muted, [new LocalizedLabel("errors.name-unknown")]);
     }
 
     private static void AddNoContent(
         List<XmlDocumentNavigator> referencesWithoutContent,
         StructuredDetails collapsibleRow,
-        string referenceTitle,
+        Widget referenceTitle,
         RenderContext context
     )
     {
@@ -471,7 +480,12 @@ public static partial class ReferenceHandler
 
         collapsibleRow.Add(
             new CollapsibleDetail(
-                new ConstantText($"{referenceTitle} s chybějícím obsahem"),
+                new Concat(
+                    [
+                        referenceTitle, new ConstantText(" "),
+                        new LocalizedLabel("general.with-missing-content"),
+                    ]
+                ),
                 new Table(textList)
             )
         );
@@ -531,6 +545,16 @@ public static partial class ReferenceHandler
             string.Empty;
     }
 
+    private static Widget HideRedundantSubject(string text, XmlDocumentNavigator nav)
+    {
+        return HideRedundantSubject(new ConstantText(text), nav);
+    }
+
+    private static Widget HideRedundantSubject(Widget widget, XmlDocumentNavigator nav)
+    {
+        return nav.IsSubjectFromComposition() ? new HideableDetails(widget) : widget;
+    }
+
     /// <summary>
     ///     Builds a list of reference widgets, both with and without embedded content.
     ///     Handles:
@@ -543,6 +567,10 @@ public static partial class ReferenceHandler
     /// </summary>
     /// <param name="customFallbackName">Fallback name widget to use if regular fallback fails, before identifier  fallback</param>
     /// <param name="widgetModel">Specify how the result should be rendered.</param>
+    /// <param name="resolvedNavFilter">
+    ///     Optional filter to apply to resolved resources, return false to skip it in the result
+    ///     list
+    /// </param>
     /// <returns>
     ///     A list of <see cref="Widget" /> elements, each wrapped in a <see cref="Container" /> to represent
     ///     a semantically separated reference group suitable for rendering.
@@ -553,21 +581,28 @@ public static partial class ReferenceHandler
         RenderContext context,
         IWidgetRenderer renderer,
         bool showOptionalDetails = false,
+        bool showInlineType = true,
         Widget? customFallbackName = null,
-        ReferenceNamingWidgetModel? widgetModel = null
+        ReferenceNamingWidgetModel? widgetModel = null,
+        Func<XmlDocumentNavigator, bool>? resolvedNavFilter = null
     )
     {
         if (context.RenderMode == RenderMode.Documentation)
         {
-            List<string> namePathsForDocumentation = [];
+            List<Widget> namePathsForDocumentation = [];
 
             var withContentDocumentation = GetReferencesWithContent(navigator, path);
             foreach (var (originalNav, reference) in withContentDocumentation)
             {
+                if (resolvedNavFilter != null && !resolvedNavFilter(reference))
+                {
+                    continue;
+                }
+
                 var displayNameNav = originalNav.SelectSingleNode("f:display/@value");
                 if (displayNameNav.Node != null)
                 {
-                    namePathsForDocumentation.Add(displayNameNav.GetFullPath());
+                    namePathsForDocumentation.Add(HideRedundantSubject(displayNameNav.GetFullPath(), originalNav));
                     continue;
                 }
 
@@ -575,7 +610,7 @@ public static partial class ReferenceHandler
 
                 if (fallback.Navigator != null)
                 {
-                    namePathsForDocumentation.Add(fallback.Navigator.GetFullPath());
+                    namePathsForDocumentation.Add(HideRedundantSubject(fallback.Navigator.GetFullPath(), originalNav));
                 }
             }
 
@@ -586,19 +621,19 @@ public static partial class ReferenceHandler
                 var displayNav = reference.SelectSingleNode("f:display/@value");
                 if (displayNav.Node != null)
                 {
-                    namePathsForDocumentation.Add(displayNav.GetFullPath());
+                    namePathsForDocumentation.Add(HideRedundantSubject(displayNav.GetFullPath(), reference));
                     continue;
                 }
 
                 var fallback = GetFallbackDisplayName(reference, showKind: showOptionalDetails);
                 if (fallback.Navigator != null)
                 {
-                    namePathsForDocumentation.Add(fallback.Navigator.GetFullPath());
+                    namePathsForDocumentation.Add(HideRedundantSubject(fallback.Navigator.GetFullPath(), reference));
                 }
             }
 
             return namePathsForDocumentation.Count > 0
-                ? new ConstantText(string.Join(", ", namePathsForDocumentation))
+                ? new Concat(namePathsForDocumentation, ", ")
                 : new ConstantText(navigator.GetFullPath());
         }
 
@@ -609,6 +644,11 @@ public static partial class ReferenceHandler
 
         foreach (var (originalNav, reference) in withContent)
         {
+            if (resolvedNavFilter != null && !resolvedNavFilter(reference))
+            {
+                continue;
+            }
+
             var refTypeWidget = BuildMutedWidget(new ChangeContext(reference, new LocalNodeName())
                 .Render(navigator, renderer, context).Result.Content);
             List<Widget> resultAltogether = [];
@@ -645,13 +685,13 @@ public static partial class ReferenceHandler
             {
                 resourceSummaryLabel = new LocalNodeName(nodeName);
 
-                var (summaryLabel, summaryValue) = GetResourceSummary(reference);
-                if (summaryLabel != null)
+                var summary = GetResourceSummary(reference);
+                if (summary?.Label != null)
                 {
-                    resourceSummaryLabel = summaryLabel;
+                    resourceSummaryLabel = summary.Label;
                 }
 
-                resourceSummaryValue = summaryValue;
+                resourceSummaryValue = summary?.Value;
             }
 
             if (!string.IsNullOrEmpty(displayName))
@@ -660,10 +700,6 @@ public static partial class ReferenceHandler
                 if (resourceHref == null)
                 {
                     resultAltogether.Add(refTypeWidget);
-                    if (hrefErrorMessage != null)
-                    {
-                        resultAltogether.Add(hrefErrorMessage);
-                    }
                 }
             }
             else if (resourceSummaryValue != null)
@@ -679,20 +715,24 @@ public static partial class ReferenceHandler
                 {
                     resultAltogether.Add(fallbackName);
                 }
-
-                if (hrefErrorMessage != null)
-                {
-                    resultAltogether.Add(hrefErrorMessage);
-                }
             }
 
+            if (hrefErrorMessage != null)
+            {
+                resultAltogether.Add(hrefErrorMessage);
+            }
 
             Widget result;
             if (resourceHref == null)
             {
                 result = new Concat(resultAltogether);
             }
-            else if (widgetModel?.Type == ReferenceNamingWidgetType.NameValuePair)
+            else
+            {
+                result = new Link(new Concat(resultAltogether), resourceHref, optionalClass: "d-inline-block");
+            }
+
+            if (widgetModel?.Type == ReferenceNamingWidgetType.NameValuePair)
             {
                 if (widgetModel.LabelOverride != null)
                 {
@@ -701,29 +741,25 @@ public static partial class ReferenceHandler
 
                 result = new NameValuePair(
                     resourceSummaryLabel ?? new NullWidget(),
-                    new Link(new Concat(resultAltogether), resourceHref, optionalClass: "d-inline-block"),
+                    result,
                     direction: widgetModel.Direction,
                     size: widgetModel.Size,
                     style: widgetModel.Style
                 );
             }
-            else
-            {
-                result = new Link(new Concat(resultAltogether), resourceHref, optionalClass: "d-inline-block");
-            }
 
-            resultSeparatedSemantically.Add(result);
+            resultSeparatedSemantically.Add(HideRedundantSubject(result, originalNav));
         }
 
         List<XmlDocumentNavigator> noContentTotal = [..withoutContent, ..withoutContentWithDisplayName];
         foreach (var reference in noContentTotal)
         {
-            var idType = reference.SelectSingleNode("f:reference/@value")?.Node?.InnerXml.Split('/')[0];
+            var idType = reference.SelectSingleNode("f:reference/@value").Node?.InnerXml.Split('/')[0];
             var localizedType = new LocalNodeName(idType);
             var refTypeWidget = BuildMutedWidget(localizedType);
             List<Widget> resultAltogether = [];
 
-            var displayVal = reference.SelectSingleNode("f:display/@value")?.Node?.InnerXml;
+            var displayVal = reference.SelectSingleNode("f:display/@value").Node?.InnerXml;
 
             var display = reference.EvaluateCondition("f:display")
                 ? displayVal != null ? new ConstantText($"{displayVal} ") : null
@@ -735,20 +771,20 @@ public static partial class ReferenceHandler
 
             if (contentToDisplay != null)
             {
-                resultAltogether.Add(new Container([contentToDisplay], ContainerType.Span));
-                if (display != null && idType != null)
+                var fallBackContent = new List<Widget> { contentToDisplay };
+                if (showInlineType && display != null && idType != null)
                 {
-                    resultAltogether.Add(refTypeWidget);
+                    fallBackContent.Add(new ConstantText(" "));
+                    fallBackContent.Add(refTypeWidget);
                 }
 
-                resultAltogether.Add(
-                    new Concat([
-                        new ConstantText(" "),
-                        new Tooltip([], [
-                            new TextContainer(TextStyle.Muted, new ConstantText("Reference na chybějící obsah")),
-                        ], icon: new Icon(SupportedIcons.Gear)),
-                    ])
-                );
+                fallBackContent.AddRange([
+                    new ConstantText(" "),
+                    new Tooltip([], [
+                        new TextContainer(TextStyle.Muted, new LocalizedLabel("errors.missing-reference-target")),
+                    ], icon: new Icon(SupportedIcons.Gear)),
+                ]);
+                resultAltogether.Add(new Concat(fallBackContent));
             }
             else
             {
@@ -756,23 +792,48 @@ public static partial class ReferenceHandler
                 resultAltogether.Add(fallbackName);
             }
 
-            resultSeparatedSemantically.Add(new Container(resultAltogether,
-                optionalClass: "d-inline-flex flex-wrap column-gap-1 align-items-center"));
+            Widget wrappedResult;
+
+            if (widgetModel?.Type == ReferenceNamingWidgetType.NameValuePair)
+            {
+                wrappedResult = new NameValuePair(
+                    [widgetModel.LabelOverride ?? localizedType],
+                    resultAltogether,
+                    direction: widgetModel.Direction,
+                    size: widgetModel.Size,
+                    style: widgetModel.Style
+                );
+            }
+            else
+            {
+                wrappedResult = new Container(resultAltogether,
+                    optionalClass: "d-inline-flex flex-wrap column-gap-1 align-items-center", type: ContainerType.Auto);
+            }
+
+            resultSeparatedSemantically.Add(HideRedundantSubject(wrappedResult, reference));
         }
 
-        return new Concat(resultSeparatedSemantically, ", ");
+        return new Concat(resultSeparatedSemantically,
+            widgetModel?.Type == ReferenceNamingWidgetType.NameValuePair ? string.Empty : ", ");
     }
 
-    public static (Widget? Label, Widget? Value) GetResourceSummary(XmlDocumentNavigator resource)
+    public static ResourceSummaryModel? GetResourceSummary(XmlDocumentNavigator resource)
     {
         var nodeName = resource.Node?.Name;
         if (nodeName == null || !SupportedResourceProvider.SupportedResources.TryGetValue(nodeName, out var descriptor))
         {
-            return (null, null);
+            return null;
         }
 
         var summaryModel = descriptor.RenderSummary(resource);
-        return (summaryModel?.Label, summaryModel?.Value);
+        if (summaryModel == null)
+        {
+            return null;
+        }
+
+        var label = summaryModel.Label != null ? new ChangeContext(resource, summaryModel.Label) : null;
+        var value = new ChangeContext(resource, summaryModel.Value);
+        return new ResourceSummaryModel(label, value);
     }
 
     private static Widget BuildMutedWidget(string? typeName) =>
@@ -822,7 +883,10 @@ public static partial class ReferenceHandler
                 ? new TextContainer(TextStyle.Regular,
                 [
                     new If(_ => showKind,
-                        new TextContainer(TextStyle.Muted, [new ConstantText("(URL)")])
+                        new TextContainer(
+                            TextStyle.Muted,
+                            [new ConstantText("("), new LocalizedLabel("general.url"), new ConstantText(")")]
+                        )
                     ),
 
                     new TextContainer(TextStyle.Regular, [new ConstantText(url)]),
@@ -853,7 +917,13 @@ public static partial class ReferenceHandler
                 (idNode,
                     new TextContainer(TextStyle.Regular, [
                         new If(_ => showKind,
-                            new TextContainer(TextStyle.Muted, [new ConstantText("(Technický identifikátor)")]),
+                            new TextContainer(
+                                TextStyle.Muted,
+                                [
+                                    new ConstantText("("), new LocalizedLabel("hints.technical-identifier"),
+                                    new ConstantText(")")
+                                ]
+                            ),
                             new ConstantText(" ")
                         ),
                         new TextContainer(TextStyle.Regular, [new ConstantText($"{typeName}/{id}")]),
@@ -871,7 +941,13 @@ public static partial class ReferenceHandler
                 idNode,
                 new TextContainer(TextStyle.Regular, [
                     new If(_ => showKind,
-                        new TextContainer(TextStyle.Muted, [new ConstantText("(Technický identifikátor)")]),
+                        new TextContainer(
+                            TextStyle.Muted,
+                            [
+                                new ConstantText("("), new LocalizedLabel("hints.technical-identifier"),
+                                new ConstantText(")"),
+                            ]
+                        ),
                         new ConstantText(" ")
                     ),
                     new TextContainer(TextStyle.Regular, [new ConstantText($"{id}")]),
@@ -924,18 +1000,15 @@ public static partial class ReferenceHandler
     public static List<XmlDocumentNavigator>? GetNodeNavigatorsFromReferences(
         XmlDocumentNavigator navigator,
         string referencePath,
-        string nodePath
+        string? nodePath = null
     )
     {
-        var result = new List<XmlDocumentNavigator>();
         var referencesWithContent = GetContentFromReferences(navigator, referencePath);
 
-
-        foreach (var nodes in referencesWithContent.Select(referencedResourceNavigator =>
-                     referencedResourceNavigator.SelectAllNodes(nodePath).ToList()))
-        {
-            result.AddRange(nodes);
-        }
+        var result = nodePath == null
+            ? referencesWithContent
+            : referencesWithContent.SelectMany(referencedResourceNavigator =>
+                referencedResourceNavigator.SelectAllNodes(nodePath)).ToList();
 
         return result.Count == 0 ? null : result;
     }

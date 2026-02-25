@@ -22,7 +22,7 @@ public class PrimitiveType(string? prefix = "value", string? suffix = "") : Widg
             new When($"f:{prefix}Url", new Text($"f:{prefix}Uri/@value")),
             new When($"f:{prefix}String", new Text($"f:{prefix}String/@value")),
             new When($"f:{prefix}Boolean",
-                new ShowBoolean(new DisplayLabel(LabelCodes.No), new DisplayLabel(LabelCodes.Yes), $"f:{prefix}Boolean")),
+                new ShowBoolean(new EhdsiDisplayLabel(LabelCodes.No), new EhdsiDisplayLabel(LabelCodes.Yes), $"f:{prefix}Boolean")),
             new When($"f:{prefix}Decimal", new ShowDecimal($"f:{prefix}Decimal")),
             new When($"f:{prefix}Integer", new Text($"f:{prefix}Integer/@value")),
             new When($"f:{prefix}Integer64", new Text($"f:{prefix}Integer64/@value")),
@@ -38,7 +38,7 @@ public class PrimitiveType(string? prefix = "value", string? suffix = "") : Widg
             new When($"f:{prefix}UnsignedInt", new Text($"f:{prefix}UnsignedInt/@value")),
             new When($"f:{prefix}Uuid", new Text($"f:{prefix}Uuid/@value")),
         ], new TextContainer(TextStyle.Regular, [
-            new ConstantText("Nepodporovaný kódovaný obsah"),
+            new LocalizedLabel("errors.unsupported-coded-content"),
             new ConstantText(": "),
             new TextContainer(TextStyle.Small,
             [

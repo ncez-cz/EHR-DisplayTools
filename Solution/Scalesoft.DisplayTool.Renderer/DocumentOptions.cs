@@ -11,6 +11,8 @@ public class DocumentOptions
     /// </summary>
     public bool ValidateCodeValues { get; set; }
 
+    public object? WarningsAndErrors { get; set; }
+
     public bool ValidateDigitalSignature { get; set; }
 
     public LanguageOptions? LanguageOption { get; set; }

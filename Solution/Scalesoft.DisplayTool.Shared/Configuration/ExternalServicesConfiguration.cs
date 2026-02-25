@@ -7,7 +7,7 @@ public class ExternalServicesConfiguration
     public required TranslationSourceConfiguration TranslationSource { get; init; }
     public required DocumentConverterConfiguration DocumentConverter { get; init; }
     public required DocumentValidationConfiguration DocumentValidation { get; init; }
-    public required DocumentSignatureValidationConfiguration DocumentSignatureValidation { get; init; }
+    public required DocumentSignatureConfiguration DocumentSignature { get; init; }
 }
 
 public class TranslationSourceConfiguration
@@ -28,12 +28,24 @@ public class DocumentValidationConfiguration
     public string? CdaBaseUrl { get; init; }
 }
 
-public class DocumentSignatureValidationConfiguration
+public class DocumentSignatureConfiguration
 {
-    // If no url is specified, disable signing / signature validation
-    [Required] public string? EZCAIIBaseUrl { get; init; }
-    [Required] public string? ApiCallerName { get; init; }
-    [Required] public Guid? CertificateId { get; init; }
+    public required SignatureProvider PdfSigningProvider { get; init; }
+    public required SignatureProvider FhirDocumentProvider { get; init; }
+    public EZCAIIDocumentSignatureConfiguration? EZCAIIConfiguration { get; init; }
+    public PoCSigningAuthorityDocumentSignatureConfiguration? PoCSigningAuthorityConfiguration { get; init; }
+}
+
+public class EZCAIIDocumentSignatureConfiguration
+{
+    [Required] public required string BaseUrl { get; init; }
+    [Required] public required string ApiCallerName { get; init; }
+    [Required] public Guid CertificateId { get; init; }
     public string? EncryptedCertificatePassword { get; init; }
-    [Required] public Guid? StorageId { get; init; }
+    [Required] public Guid StorageId { get; init; }
+}
+
+public class PoCSigningAuthorityDocumentSignatureConfiguration
+{
+    [Required] public required string BaseUrl { get; init; }
 }

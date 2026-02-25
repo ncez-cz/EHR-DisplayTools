@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Scalesoft.DisplayTool.Renderer.Models;
+using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -9,17 +10,17 @@ public class Link : Widget
 {
     private readonly IdentifierSource? m_idSource;
     private readonly IdentifierSource? m_visualIdSource;
-    private Widget Content { get; }
-    private string? HrefSimple { get; }
-    private Widget? HrefWidget { get; }
+    private Widget Content { get; set; }
+    private string HrefSimple { get; }
 
     [MemberNotNullWhen(true, nameof(HrefSimple))]
-    [MemberNotNullWhen(false, nameof(HrefWidget))]
     private bool BySimpleValue { get; }
 
     private string? DownloadInfo { get; }
 
     private string? OptionalClass { get; }
+
+    private string? ContentType { get; }
 
     public Link(
         Widget content,
@@ -27,7 +28,8 @@ public class Link : Widget
         IdentifierSource? idSource = null,
         IdentifierSource? visualIdSource = null,
         string? downloadInfo = null,
-        string? optionalClass = null
+        string? optionalClass = null,
+        string? contentType = null
     )
     {
         m_idSource = idSource;
@@ -37,24 +39,7 @@ public class Link : Widget
         BySimpleValue = true;
         DownloadInfo = downloadInfo;
         OptionalClass = optionalClass;
-    }
-
-    public Link(
-        Widget content,
-        Widget hrefSimple,
-        IdentifierSource? idSource = null,
-        IdentifierSource? visualIdSource = null,
-        string? downloadInfo = null,
-        string? optionalClass = null
-    )
-    {
-        m_idSource = idSource;
-        m_visualIdSource = visualIdSource ?? idSource;
-        Content = content;
-        HrefWidget = hrefSimple;
-        BySimpleValue = false;
-        DownloadInfo = downloadInfo;
-        OptionalClass = optionalClass;
+        ContentType = contentType;
     }
 
     public override async Task<RenderResult> Render(
@@ -63,15 +48,12 @@ public class Link : Widget
         RenderContext context
     )
     {
-        Widget[] content;
-        if (BySimpleValue)
+        if (context.RenderMode == RenderMode.Documentation)
         {
-            content = [Content];
+            Content = new ConstantText(navigator.GetFullPath());
         }
-        else
-        {
-            content = [Content, HrefWidget];
-        }
+
+        Widget[] content = [Content];
 
         var renderResult = await RenderInternal(navigator, renderer, context, content);
         if (renderResult.IsFatal)
@@ -81,27 +63,14 @@ public class Link : Widget
 
         var text = renderResult.GetContent(Content) ?? string.Empty;
 
-        ViewModel viewModel;
-        if (BySimpleValue)
+        var viewModel = new ViewModel
         {
-            viewModel = new ViewModel
-            {
-                Text = text,
-                Href = HrefSimple,
-                Download = DownloadInfo,
-                CustomClass = OptionalClass,
-            };
-        }
-        else
-        {
-            viewModel = new ViewModel
-            {
-                Text = text,
-                Href = renderResult.GetContent(HrefWidget) ?? string.Empty,
-                Download = DownloadInfo,
-                CustomClass = OptionalClass,
-            };
-        }
+            Text = text,
+            Href = HrefSimple,
+            Download = DownloadInfo,
+            CustomClass = OptionalClass,
+            ContentType = ContentType,
+        };
 
         HandleIds(context, navigator, viewModel, m_idSource, m_visualIdSource);
 
@@ -115,5 +84,7 @@ public class Link : Widget
         public required string Href { get; set; }
 
         public string? Download { get; set; }
+
+        public string? ContentType { get; set; }
     }
 }

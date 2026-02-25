@@ -29,13 +29,11 @@ public class CodedResultsWidget : Widget
                         new Collapser([
                             new Text("$originalNarrativeTableTitle"),
                         ], [
-                        ], [
                             new NarrativeText("n1:text", null),
                         ]),
                         new LineBreak(),
                         new Collapser([
                             new Text("$translatedCodedTableTitle"),
-                        ], [
                         ], [
                             new Table([
                                 new TableHead([

@@ -31,7 +31,7 @@ public class Patient(XmlDocumentNavigator navigator) : Widget
 
         List<Widget> tree =
         [
-            new Section(".", null, [new DisplayLabel(LabelCodes.Patient)], sectionContent,
+            new Section(".", null, [new EhdsiDisplayLabel(LabelCodes.Patient)], sectionContent,
                 [
                     new Concat([
                         new HumanName("f:name", unformattedName: true),

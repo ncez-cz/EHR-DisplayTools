@@ -1,5 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -12,6 +11,8 @@ public class TaskResource : ColumnResourceBase<TaskResource>, IResourceWidget
 {
     public static string ResourceType => "Task";
 
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -19,142 +20,155 @@ public class TaskResource : ColumnResourceBase<TaskResource>, IResourceWidget
     )
     {
         var infrequentProperties =
-            InfrequentProperties.Evaluate<TaskResourceInfrequentProperties>([navigator]);
+            InfrequentProperties.Evaluate<TaskResourceInfrequentProperties>(navigator);
 
         var headerInfo = new Container([
             new Container([
-                new ConstantText("Úkol"),
-                new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Code),
+                new LocalizedLabel("task"),
+                infrequentProperties.Optional(TaskResourceInfrequentProperties.Code,
                     new ConstantText(" ("),
-                    new ChangeContext("f:code", new CodeableConcept()),
+                    new CodeableConcept(),
                     new ConstantText(")")
                 ),
             ], ContainerType.Span),
             new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/task-status",
-                new ConstantText("Stav žádosti"))
+                new LocalizedLabel("task.status"))
         ], ContainerType.Div, "d-flex align-items-center gap-1");
 
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
         var basicInfo = new Container([
             new NameValuePair(
-                new ConstantText("Záměr"),
+                new LocalizedLabel("task.intent"),
                 new EnumLabel("f:intent", "http://hl7.org/fhir/ValueSet/request-intent")
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.BusinessStatus),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.BusinessStatus,
                 new NameValuePair(
-                    new ConstantText("Obchodní stav"),
-                    new ChangeContext("f:businessStatus", new CodeableConcept())
+                    new LocalizedLabel("task.businessStatus"),
+                    new CodeableConcept()
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Priority),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Priority,
                 new NameValuePair(
-                    new ConstantText("Priorita"),
-                    new EnumLabel("f:priority", "http://hl7.org/fhir/ValueSet/request-priority")
+                    new LocalizedLabel("task.priority"),
+                    new EnumLabel(".", "http://hl7.org/fhir/ValueSet/request-priority")
                 )
             ),
-            new If(
-                _ => infrequentProperties.Contains(TaskResourceInfrequentProperties.DoNotPerform) &&
-                     navigator.EvaluateCondition("f:doNotPerform[@value='true']"),
-                new NameValuePair(
-                    new ConstantText("Zákaz"),
-                    new ShowDoNotPerform()
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.DoNotPerform,
+                new ShowBoolean(
+                    new NullWidget(),
+                    new NameValuePair(
+                        new LocalizedLabel("task.doNotPerform"),
+                        new ShowDoNotPerform()
+                    )
                 )
             ),
         ]);
 
-        var timeInfoBadge = new PlainBadge(new ConstantText("Časové údaje"));
+        var timeInfoBadge = new PlainBadge(new LocalizedLabel("task.chronometric-data"));
         var timeInfo = new Container([
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.ExecutionPeriod),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.ExecutionPeriod,
                 new NameValuePair(
-                    new ConstantText("Doba provedení"),
-                    new ShowPeriod("f:executionPeriod")
+                    new LocalizedLabel("task.executionPeriod"),
+                    new ShowPeriod()
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.AuthoredOn),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.AuthoredOn,
                 new NameValuePair(
-                    new ConstantText("Vytvořeno"),
-                    new ShowDateTime("f:authoredOn")
+                    new LocalizedLabel("task.authoredOn"),
+                    new ShowDateTime()
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.LastModified),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.LastModified,
                 new NameValuePair(
-                    new ConstantText("Upraveno"),
-                    new ShowDateTime("f:lastModified")
+                    new LocalizedLabel("task.lastModified"),
+                    new ShowDateTime()
                 )
             ),
         ]);
 
-        var taskBadge = new PlainBadge(new ConstantText("Detail úkolu"));
+        var taskBadge = new PlainBadge(new LocalizedLabel("task.task-details"));
         var taskDetail = new Container([
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Code),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Code,
                 new NameValuePair(
-                    new ConstantText("Typ"),
-                    new ChangeContext("f:code", new CodeableConcept())
+                    new LocalizedLabel("task.description"),
+                    new CodeableConcept()
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Description),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Description,
                 new NameValuePair(
-                    new ConstantText("Popis"),
-                    new Text("f:description/@value")
+                    new LocalizedLabel("task.description"),
+                    new Text("@value")
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.ReasonCode),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.ReasonCode,
                 new NameValuePair(
-                    new ConstantText("Důvod"),
-                    new ChangeContext("f:reasonCode", new CodeableConcept())
+                    new LocalizedLabel("task.reasonCode"),
+                    new CodeableConcept()
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Note),
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Note,
                 new NameValuePair(
-                    new ConstantText("Poznámka"),
-                    new ChangeContext("f:note", new ShowAnnotationCompact())
+                    new LocalizedLabel("task.note"),
+                    new ShowAnnotationCompact()
                 )
             ),
         ]);
 
-        var participantsBadge = new PlainBadge(new ConstantText("Zainteresované strany"));
+        var participantsBadge = new PlainBadge(new LocalizedLabel("general.involvedParties"));
         var participants = new Container([
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.BasedOn),
+            infrequentProperties.Condition(TaskResourceInfrequentProperties.BasedOn,
                 new NameValuePair(
-                    new ConstantText("Na základě"),
+                    new LocalizedLabel("task.basedOn"),
                     new ListBuilder("f:basedOn", FlexDirection.Column, _ => [new AnyReferenceNamingWidget()])
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.PartOf),
+            infrequentProperties.Condition(TaskResourceInfrequentProperties.PartOf,
                 new NameValuePair(
-                    new ConstantText("Na základě"),
+                    new LocalizedLabel("task.partOf"),
                     new ListBuilder("f:partOf", FlexDirection.Column, _ => [new AnyReferenceNamingWidget()])
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Focus),
-                new NameValuePair(
-                    new ConstantText("Zaměření"),
-                    new AnyReferenceNamingWidget("f:focus")
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Focus,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("task.focus"),
+                    }
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.For),
-                new NameValuePair(
-                    new ConstantText("Pro subjekt"),
-                    new AnyReferenceNamingWidget("f:for")
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.For,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("task.for"),
+                    }
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Requester),
-                new NameValuePair(
-                    new ConstantText("Žadatel"),
-                    new AnyReferenceNamingWidget("f:requester")
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Requester,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("task.requester"),
+                    }
                 )
             ),
-            new If(_ => infrequentProperties.Contains(TaskResourceInfrequentProperties.Owner),
-                new NameValuePair(
-                    new ConstantText("Owner"),
-                    new AnyReferenceNamingWidget("f:owner")
+            infrequentProperties.Optional(TaskResourceInfrequentProperties.Owner,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("task.owner"),
+                    }
                 )
             ),
         ]);
 
         var complete =
-            new Collapser([headerInfo], [], [
+            new Collapser([headerInfo], [
                     badge,
                     basicInfo,
                     new If(_ =>
@@ -190,8 +204,8 @@ public class TaskResource : ColumnResourceBase<TaskResource>, IResourceWidget
                                 (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                                 x =>
                                 [
-                                    new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                                        isCollapsed: true)
+                                    new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
+                                        isCollapsed: true),
                                 ]
                             )
                         ),

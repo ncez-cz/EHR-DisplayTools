@@ -62,6 +62,11 @@
     {
         classes += " capitalize-first";
     }
+
+    if (Model.Style.HasFlag(TextStyle.Lowercase))
+    {
+        classes += " text-lowercase";
+    }
 }
 
 <span id="@Model.Id" data-id="@Model.VisualId" class="@classes @Model.CustomClass">

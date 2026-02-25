@@ -1,27 +1,52 @@
 ﻿@using Scalesoft.DisplayTool.Renderer.Models
-<!DOCTYPE html>
-
-<html lang="">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Display Tool</title>
-    @foreach (var style in DocumentInfo.Styles)
-    {
-        <style>@((MarkupString)style)</style>
-    }
-</head>
-<body class="render-mode-@DocumentInfo.RenderMode.ToString()?.ToLower()">
-
-@((MarkupString)DocumentInfo.Content)
-
-@foreach (var script in DocumentInfo.Scripts)
+ 
+@if (DocumentInfo.IsEmbeddable)
 {
-    @* ReSharper disable once OtherTagsInsideScript1 *@
-    <script>@((MarkupString)script)</script>
+    <div class="dt-shadow-root-host">
+        <template shadowrootmode="open">
+            @foreach (var style in DocumentInfo.Styles)
+            {
+                <style>@((MarkupString)style)</style>
+            }
+
+            <div class="display-tool-body render-mode-@DocumentInfo.RenderMode.ToString()?.ToLower()">
+                @((MarkupString)DocumentInfo.Content)
+            </div>
+
+            @foreach (var script in DocumentInfo.Scripts)
+            {
+                @* ReSharper disable once OtherTagsInsideScript1 *@
+                <script>@((MarkupString)script)</script>
+            }
+        </template>
+    </div>
 }
-</body>
-</html>
+else
+{
+    <!DOCTYPE html>
+    <html lang="">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Display Tool</title>
+        @foreach (var style in DocumentInfo.Styles)
+        {
+            <style>@((MarkupString)style)</style>
+        }
+    </head>
+    <body class="display-tool-body render-mode-@DocumentInfo.RenderMode.ToString()?.ToLower()">
+
+    @((MarkupString)DocumentInfo.Content)
+
+    @foreach (var script in DocumentInfo.Scripts)
+    {
+        @* ReSharper disable once OtherTagsInsideScript1 *@
+        <script>@((MarkupString)script)</script>
+    }
+
+    </body>
+    </html>
+}
 
 @code {
     [Parameter] public required HtmlDocumentInfo DocumentInfo { get; set; }

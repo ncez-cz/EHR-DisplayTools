@@ -1,5 +1,4 @@
-﻿using JetBrains.Annotations;
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -9,148 +8,150 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.MedicalDevice;
 
-public class DeviceUseStatement(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
+public class DeviceUseStatement(bool skipIdPopulation = true)
+    : AlternatingBackgroundColumnResourceBase<DeviceUseStatement>, IResourceWidget
 {
     public static string ResourceType => "DeviceUseStatement";
-    [UsedImplicitly]
-    public static bool RequiresExternalTitle => true;
 
-    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
+    public static bool HasBorderedContainer(Widget widget) => false;
+
+    public DeviceUseStatement() : this(true)
     {
-        return [new DeviceUseStatement(items)];
     }
-    
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
         RenderContext context
     )
     {
-        var infrequentOptions = InfrequentProperties.Evaluate<InfrequentPropertiesPaths>(items);
+        var infrequentProperties =
+            InfrequentProperties.Evaluate<DeviceUseInfrequentProperties>(navigator);
 
-        List<Widget> headerRow =
-        [
-            new TableCell([new ConstantText("Četnost použití")], TableCellType.Header),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.BodySite),
-                new TableCell([new DisplayLabel(LabelCodes.BodySite)], TableCellType.Header)),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode) ||
-                        infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonReference),
-                new TableCell([new ConstantText("Důvod")], TableCellType.Header)),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                new TableCell([new DisplayLabel(LabelCodes.Status)], TableCellType.Header)
-            ),
-            new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Text),
-                new NarrativeCell(false, TableCellType.Header)
-            )
-        ];
-
-        var table = new Table(
-            [
-                new TableHead([
-                    new TableRow(headerRow)
-                ]),
-                ..items.Select(x => new TableBody([new DeviceUseStatementRow(x, infrequentOptions)])),
-            ],
-            true
-        );
-
-        return table.Render(navigator, renderer, context);
-    }
-
-    private class DeviceUseStatementRow(
-        XmlDocumentNavigator item,
-        InfrequentPropertiesData<InfrequentPropertiesPaths> parentInfrequentOptions
-    ) : Widget
-    {
-        public override async Task<RenderResult> Render(
-            XmlDocumentNavigator navigator,
-            IWidgetRenderer renderer,
-            RenderContext context
-        )
-        {
-            var infrequentOptions =
-                InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
-
-            var collapsibleRow = new StructuredDetails();
-
-            if (item.EvaluateCondition("f:text"))
-            {
-                collapsibleRow.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
-            }
-
-            if (item.EvaluateCondition("f:device"))
-            {
-                collapsibleRow.AddCollapser(new ConstantText("Informace o zařízení"),
-                    ShowSingleReference.WithDefaultDisplayHandler(x => [new ShowDevice([x])], "f:device"));
-            }
-
-            var tableCells = new List<Widget>
-            {
-                new TableCell([new OpenTypeElement(null, "timing")]), // Timing | Period | dateTime
-                new If(_ => parentInfrequentOptions.Contains(InfrequentPropertiesPaths.BodySite),
-                    new TableCell([
-                        new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.BodySite),
-                            new Optional("f:bodySite", new CodeableConcept()), new LineBreak())
-                    ])),
-                new If(_ => parentInfrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode) ||
-                            parentInfrequentOptions.Contains(InfrequentPropertiesPaths.ReasonReference),
-                    new TableCell([
-                        new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode),
-                            new ItemListBuilder("f:reasonCode",
-                                ItemListType.Unordered,
-                                _ => [new CodeableConcept()]), new LineBreak()),
-                        new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonReference),
-                            new NameValuePair([new ConstantText("Odkaz na důvod")],
-                            [
-                                new ItemListBuilder("f:reasonReference", ItemListType.Unordered,
-                                    _ => [new AnyReferenceNamingWidget()])
-                            ]))
-                    ])),
-                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                    new TableCell([
-                            new EnumIconTooltip("f:status", "http://hl7.org/fhir/device-use-statement-status",
-                                new DisplayLabel(LabelCodes.Status))
-                        ]
-                    )),
-                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Text),
-                    new NarrativeCell()
+        var nameValuePairs = new FlexList([
+            infrequentProperties.Optional(DeviceUseInfrequentProperties.Device,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        Direction = FlexDirection.Column,
+                        Style = NameValuePair.NameValuePairStyle.Primary,
+                        LabelOverride = new LocalizedLabel("device-use-statement.device"),
+                    }
                 )
-            };
+            ),
+            infrequentProperties.Condition(DeviceUseInfrequentProperties.Timing,
+                new NameValuePair(
+                    new LocalizedLabel("device-use-statement.timing"),
+                    new OpenTypeElement(null, "timing"),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                )), // Timing | Period | dateTime
+            new If(_ => infrequentProperties.Contains(DeviceUseInfrequentProperties.BasedOn),
+                new HideableDetails(
+                    new NameValuePair(
+                        new LocalizedLabel("device-use-statement.basedOn"),
+                        new CommaSeparatedBuilder("f:basedOn", _ => [new AnyReferenceNamingWidget()]),
+                        style: NameValuePair.NameValuePairStyle.Primary,
+                        direction: FlexDirection.Column
+                    ))
+            ),
+            new If(_ => infrequentProperties.Contains(DeviceUseInfrequentProperties.DerivedFrom),
+                new HideableDetails(
+                    new NameValuePair(
+                        new LocalizedLabel("device-use-statement.derivedFrom"),
+                        new CommaSeparatedBuilder("f:derivedFrom", _ => [new AnyReferenceNamingWidget()]),
+                        style: NameValuePair.NameValuePairStyle.Primary,
+                        direction: FlexDirection.Column
+                    ))
+            ),
+            infrequentProperties.Optional(DeviceUseInfrequentProperties.BodySite,
+                new NameValuePair(
+                    new EhdsiDisplayLabel(LabelCodes.BodySite),
+                    new CodeableConcept(),
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                )),
+            new If(_ => infrequentProperties.ContainsAnyOf(
+                    DeviceUseInfrequentProperties.ReasonCode,
+                    DeviceUseInfrequentProperties.ReasonReference
+                ),
+                new NameValuePair(
+                    [new LocalizedLabel("device-use-statement.reason")],
+                    [
+                        new CommaSeparatedBuilder("f:reasonCode", _ => [new CodeableConcept()]),
+                        new Condition("f:reasonCode and f:reasonReference", new ConstantText(", ")),
+                        new CommaSeparatedBuilder("f:reasonReference", _ => [new AnyReferenceNamingWidget()]),
+                    ],
+                    style: NameValuePair.NameValuePairStyle.Primary,
+                    direction: FlexDirection.Column
+                )
+            ),
+        ], FlexDirection.Row, flexContainerClasses: "column-gap-6 row-gap-1");
 
-            var result = await new TableRow(tableCells, collapsibleRow, idSource: item).Render(item, renderer, context);
-
-            var isStatus = item.EvaluateCondition("f:status");
-            if (!isStatus)
-            {
-                result.Errors.Add(ParseError.MissingValue(item.SelectSingleNode("f:status").GetFullPath()));
-            }
-
-            var isDevice = item.EvaluateCondition("f:device");
-            if (!isDevice)
-            {
-                result.Errors.Add(ParseError.MissingValue(item.SelectSingleNode("f:device").GetFullPath()));
-            }
-
-            var isTiming = item.EvaluateCondition("f:*[starts-with(name(), 'timing')]");
-            if (!isTiming)
-            {
-                result.Errors.Add(
-                    ParseError.MissingValue(item.SelectSingleNode("*[starts-with(local-name(), 'timing')]")
-                        .GetFullPath()));
-            }
-
-            return result;
+        ResourceSummaryModel? summary = null;
+        var deviceNav = ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator, "f:device", ".");
+        if (deviceNav != null)
+        {
+            summary = ReferenceHandler.GetResourceSummary(deviceNav);
         }
+
+        var title = summary?.Value ?? new LocalizedLabel("device-use-statement");
+        var resultWidget = new Concat([
+            new Row([
+                    new Heading([
+                        new Container([
+                            title,
+                            infrequentProperties.Condition(DeviceUseInfrequentProperties.Timing,
+                                new Container([new ConstantText("  ")], ContainerType.Span, optionalClass: "pre"),
+                                new TextContainer(TextStyle.Light, new Chronometry("timing"))),
+                            new EnumIconTooltip("f:status", "http://hl7.org/fhir/device-statement-status",
+                                new EhdsiDisplayLabel(LabelCodes.Status))
+                        ], optionalClass: "blue-color d-flex align-items-center"),
+                    ], HeadingSize.H5, customClass: "m-0"),
+                    new NarrativeModal(alignRight: false),
+                ], flexContainerClasses: "gap-1 align-items-center", flexWrap: false,
+                idSource: skipIdPopulation ? null : new IdentifierSource(navigator)),
+            new FlexList([
+                nameValuePairs,
+                ThematicBreak.SurroundedThematicBreak(
+                    infrequentProperties, [
+                        DeviceUseInfrequentProperties.Device,
+                        DeviceUseInfrequentProperties.Timing,
+                        DeviceUseInfrequentProperties.BasedOn,
+                        DeviceUseInfrequentProperties.DerivedFrom,
+                        DeviceUseInfrequentProperties.BodySite,
+                        DeviceUseInfrequentProperties.ReasonCode,
+                        DeviceUseInfrequentProperties.ReasonReference,
+                    ], [
+                        DeviceUseInfrequentProperties.Note,
+                        DeviceUseInfrequentProperties.Text,
+                    ]
+                ),
+                new Condition("f:note",
+                    new NameValuePair(
+                        new LocalizedLabel("device-use-statement.notes"),
+                        new CommaSeparatedBuilder("f:note", _ => [new ShowAnnotationCompact()]),
+                        style: NameValuePair.NameValuePairStyle.Secondary
+                    )
+                ),
+                new Condition("f:text", new NarrativeCollapser()),
+            ], FlexDirection.Column, flexContainerClasses: "px-2 gap-1"),
+        ]);
+
+        return resultWidget.Render(navigator, renderer, context);
     }
 
-    private enum InfrequentPropertiesPaths
+    public enum DeviceUseInfrequentProperties
     {
+        [HiddenInSimpleMode] BasedOn,
         ReasonCode,
         ReasonReference,
         BodySite,
-        Text,
-
-        [EnumValueSet("http://hl7.org/fhir/device-use-statement-status")]
-        Status
+        [HiddenInSimpleMode] DerivedFrom,
+        [NarrativeDisplayType] Text,
+        Note,
+        Device,
+        [OpenType("timing")] Timing,
     }
 }

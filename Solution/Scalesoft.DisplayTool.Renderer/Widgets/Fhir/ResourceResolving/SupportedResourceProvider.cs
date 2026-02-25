@@ -27,8 +27,10 @@ public static class SupportedResourceProvider
 
             var instantiateDelegate = GetMethod<InstantiateDelegate>(type, nameof(IResourceWidget.InstantiateMultiple));
             var renderSummaryDelegate = GetMethod<RenderSummaryDelegate>(type, nameof(IResourceWidget.RenderSummary));
+            var hasBorderedContainerDelegate =
+                GetMethod<HasBorderedContainerDelegate>(type, nameof(IResourceWidget.HasBorderedContainer));
 
-            if (instantiateDelegate == null || renderSummaryDelegate == null)
+            if (instantiateDelegate == null || renderSummaryDelegate == null || hasBorderedContainerDelegate == null)
             {
                 continue;
             }
@@ -38,6 +40,7 @@ public static class SupportedResourceProvider
                 new ResourceWidgetDescriptor
                 {
                     RequiresExternalTitle = requiresTitle,
+                    HasBorderedContainer = hasBorderedContainerDelegate,
                     Instantiate = instantiateDelegate,
                     RenderSummary = renderSummaryDelegate,
                 }

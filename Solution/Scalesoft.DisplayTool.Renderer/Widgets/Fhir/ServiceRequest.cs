@@ -21,10 +21,9 @@ public class ServiceRequest(
         RenderContext context
     )
     {
-        var infrequentProperties =
-            InfrequentProperties.Evaluate<ServiceRequestProperties>([navigator]);
+        var infrequentProperties = InfrequentProperties.Evaluate<ServiceRequestProperties>(navigator);
 
-        var resultWidget = new Concat([
+        var resultWidget = new Container([
             new If(
                 _ => displayableProperties.ContainsAny(ServiceRequestProperties.Code, ServiceRequestProperties.Status,
                     ServiceRequestProperties.Text, ServiceRequestProperties.Occurrence), new Row([
@@ -36,7 +35,7 @@ public class ServiceRequest(
                                     new If(_ => infrequentProperties.Contains(ServiceRequestProperties.Code),
                                             new TextContainer(TextStyle.Bold,
                                                 [new ChangeContext("f:code", new CodeableConcept())]))
-                                        .Else(new ConstantText("Žádost o službu"))
+                                        .Else(new LocalizedLabel("service-request"))
                                 ),
                                 new If(
                                     _ => displayableProperties.Contains(ServiceRequestProperties.Occurrence) &&
@@ -51,17 +50,17 @@ public class ServiceRequest(
                                 new If(_ => displayableProperties.Contains(ServiceRequestProperties.Status),
                                     new HideableDetails(new EnumIconTooltip("f:status",
                                         "http://hl7.org/fhir/ValueSet/observation-status",
-                                        new DisplayLabel(LabelCodes.Status)))),
+                                        new EhdsiDisplayLabel(LabelCodes.Status)))),
                             ], optionalClass: "h5 m-0 blue-color")),
                         new If(_ => displayableProperties.Contains(ServiceRequestProperties.Text),
                             new NarrativeModal(alignRight: false)),
-                    ], flexContainerClasses: "gap-1 align-items-center",
+                    ], flexContainerClasses: "gap-1 align-items-center", flexWrap: false,
                     idSource: skipIdPopulation ? null : new IdentifierSource(navigator))),
             new FlexList([
                 new FlexList([
                     new If(_ => displayableProperties.Contains(ServiceRequestProperties.Intent), new HideableDetails(
                         new NameValuePair(
-                            new ConstantText("Záměr"),
+                            new LocalizedLabel("service-request.intent"),
                             new EnumLabel("f:intent", "http://hl7.org/fhir/ValueSet/request-intent"),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -70,7 +69,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Category) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Category),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Kategorie"),
+                            new LocalizedLabel("service-request.category"),
                             new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()]),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -80,7 +79,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Priority) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Priority),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Priorita"),
+                            new LocalizedLabel("service-request.priority"),
                             new EnumLabel("f:priority", "http://hl7.org/fhir/ValueSet/request-priority"),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -90,7 +89,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.BodySite) &&
                              infrequentProperties.Contains(ServiceRequestProperties.BodySite),
                         new HideableDetails(new NameValuePair(
-                            new DisplayLabel(LabelCodes.BodySite),
+                            new EhdsiDisplayLabel(LabelCodes.BodySite),
                             new CommaSeparatedBuilder("f:bodySite", _ => new CodeableConcept()),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -100,7 +99,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.AuthoredOn) &&
                              infrequentProperties.Contains(ServiceRequestProperties.AuthoredOn),
                         new NameValuePair(
-                            new ConstantText("Datum a čas žádosti"),
+                            new LocalizedLabel("service-request.authoredOn"),
                             new ShowDateTime("f:authoredOn"),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -111,25 +110,31 @@ public class ServiceRequest(
                              infrequentProperties.Contains(ServiceRequestProperties.DoNotPerform) &&
                              navigator.EvaluateCondition("f:doNotPerform[@value='true']"),
                         new NameValuePair(
-                            new ConstantText("Zákaz"),
+                            new LocalizedLabel("service-request.doNotPerform"),
                             new ShowDoNotPerform(),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
                         )
                     ),
-                    new If(_ => displayableProperties.Contains(ServiceRequestProperties.Subject), new HideableDetails(
-                        new NameValuePair(
-                            new ConstantText("Předmět"),
-                            new AnyReferenceNamingWidget("f:subject"),
-                            style: nameValuePairStyle,
-                            direction: FlexDirection.Column
-                        ))),
+                    new If(_ => displayableProperties.Contains(ServiceRequestProperties.Subject),
+                        new AnyReferenceNamingWidget(
+                            "f:subject",
+                            showOptionalDetails: false,
+                            widgetModel: new ReferenceNamingWidgetModel
+                            {
+                                Type = ReferenceNamingWidgetType.NameValuePair,
+                                Direction = FlexDirection.Column,
+                                Style = NameValuePair.NameValuePairStyle.Primary,
+                                LabelOverride = new LocalizedLabel("service-request.subject"),
+                            }
+                        )
+                    ),
                     //additional
                     new If(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Replaces) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Replaces),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Nahrazuje"),
+                            new LocalizedLabel("service-request.replaces"),
                             new CommaSeparatedBuilder("f:replaces",
                                 _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
                             style: nameValuePairStyle,
@@ -140,7 +145,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.BasedOn) &&
                              infrequentProperties.Contains(ServiceRequestProperties.BasedOn),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Založeno na"),
+                            new LocalizedLabel("service-request.basedOn"),
                             new CommaSeparatedBuilder("f:basedOn",
                                 _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
                             style: nameValuePairStyle,
@@ -151,7 +156,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.OrderDetail) &&
                              infrequentProperties.Contains(ServiceRequestProperties.OrderDetail),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Podrobnosti objednávky"),
+                            new LocalizedLabel("service-request.orderDetail"),
                             new CommaSeparatedBuilder("f:orderDetail", _ => [new CodeableConcept()]),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -161,7 +166,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Quantity) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Quantity),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Množství"),
+                            new LocalizedLabel("service-request.doquantity"),
                             new OpenTypeElement(null, "quantity"), // Quantity | Ratio | Range
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -171,7 +176,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.AsNeeded) &&
                              infrequentProperties.Contains(ServiceRequestProperties.AsNeeded),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Dle potřeby"),
+                            new LocalizedLabel("service-request.asNeeded"),
                             new OpenTypeElement(null, "asNeeded"), // 	boolean | CodeableConcept
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -191,7 +196,7 @@ public class ServiceRequest(
                                             Type = ReferenceNamingWidgetType.NameValuePair,
                                             Direction = FlexDirection.Column,
                                             Style = NameValuePair.NameValuePairStyle.Primary,
-                                            LabelOverride = new ConstantText("Úhrada"),
+                                            LabelOverride = new LocalizedLabel("service-request.insurance"),
                                         }
                                     ),
                                 ]
@@ -202,7 +207,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.SupportingInfo) &&
                              infrequentProperties.Contains(ServiceRequestProperties.SupportingInfo),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Podpůrné informace"),
+                            new LocalizedLabel("service-request.supportingInfo"),
                             new CommaSeparatedBuilder("f:supportingInfo",
                                 _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
                             style: nameValuePairStyle,
@@ -213,7 +218,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Specimen) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Specimen),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Vzorky"),
+                            new LocalizedLabel("service-request.specimen"),
                             new CommaSeparatedBuilder("f:specimen",
                                 _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
                             style: nameValuePairStyle,
@@ -224,7 +229,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.PatientInstruction) &&
                              infrequentProperties.Contains(ServiceRequestProperties.PatientInstruction),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Pokyny pro pacienta"),
+                            new LocalizedLabel("service-request.patientInstruction"),
                             new Text("f:patientInstruction/@value"),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -234,7 +239,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.RelevantHistory) &&
                              infrequentProperties.Contains(ServiceRequestProperties.RelevantHistory),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Relevantní historie"),
+                            new LocalizedLabel("service-request.relevantHistory"),
                             new CommaSeparatedBuilder("f:relevantHistory",
                                 _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
                             style: nameValuePairStyle,
@@ -251,7 +256,7 @@ public class ServiceRequest(
                             displayableProperties.Contains(ServiceRequestProperties.ReasonReference) &&
                             infrequentProperties.Contains(ServiceRequestProperties.ReasonReference)),
                         new NameValuePair(
-                            new ConstantText("Důvod žádosti"),
+                            new LocalizedLabel("service-request.reason"),
                             new CommaSeparatedBuilder("f:reasonCode|f:reasonReference",
                                 (_, _, x) =>
                                 {
@@ -283,7 +288,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Requester) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Requester),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Žadatel"),
+                            new LocalizedLabel("service-request.requester"),
                             new AnyReferenceNamingWidget("f:requester"),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -293,7 +298,7 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.PerformerType) &&
                              infrequentProperties.Contains(ServiceRequestProperties.PerformerType),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Typ požadovaného zpracovatele"),
+                            new LocalizedLabel("service-request.performerType"),
                             new ChangeContext("f:performerType", new CodeableConcept()),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
@@ -303,9 +308,9 @@ public class ServiceRequest(
                         _ => displayableProperties.Contains(ServiceRequestProperties.Performer) &&
                              infrequentProperties.Contains(ServiceRequestProperties.Performer),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Požadovaný zpracovatel"),
+                            new LocalizedLabel("service-request.performer"),
                             new ListBuilder("f:performer", FlexDirection.Column,
-                                _ => [new AnyReferenceNamingWidget(showOptionalDetails: false)]),
+                                _ => [new Container([new AnyReferenceNamingWidget(showOptionalDetails: false)])]),
                             style: nameValuePairStyle,
                             direction: FlexDirection.Column
                         ))
@@ -318,7 +323,7 @@ public class ServiceRequest(
                                 ServiceRequestProperties.LocationReference) &&
                             infrequentProperties.Contains(ServiceRequestProperties.LocationReference)),
                         new HideableDetails(new NameValuePair(
-                            new ConstantText("Místo"),
+                            new LocalizedLabel("service-request.location"),
                             new CommaSeparatedBuilder("f:locationCode|f:locationReference",
                                 (_, _, x) =>
                                 {
@@ -335,9 +340,9 @@ public class ServiceRequest(
                                         [
                                             new If(
                                                 _ => displayableProperties.Contains(ServiceRequestProperties
-                                                    .LocationReference), new AnyReferenceNamingWidget())
+                                                    .LocationReference), new AnyReferenceNamingWidget()),
                                         ],
-                                        _ => throw new InvalidOperationException()
+                                        _ => throw new InvalidOperationException(),
                                     };
                                 }
                             ),
@@ -349,7 +354,7 @@ public class ServiceRequest(
                     new If(_ => infrequentProperties.Contains(ServiceRequestProperties.Note),
                         new HideableDetails(
                             new NameValuePair(
-                                new ConstantText("Poznámky"),
+                                new LocalizedLabel("service-request.note"),
                                 new ListBuilder("f:note",
                                     FlexDirection.Column, _ => [new ShowAnnotationCompact()],
                                     flexContainerClasses: "gap-0"),
@@ -366,8 +371,8 @@ public class ServiceRequest(
                         (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                         x =>
                         [
-                            new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                                isCollapsed: true)
+                            new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
+                                isCollapsed: true),
                         ]
                     ))
                 ),
@@ -376,7 +381,7 @@ public class ServiceRequest(
                          infrequentProperties.Contains(ServiceRequestProperties.Text),
                     new NarrativeCollapser()
                 ),
-            ], FlexDirection.Column, flexContainerClasses: "px-2 gap-1"),
+            ], FlexDirection.Column, flexContainerClasses: "px-2 gap-0"),
         ]);
 
         return await resultWidget.Render(navigator, renderer, context);

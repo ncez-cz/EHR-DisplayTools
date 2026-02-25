@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
@@ -12,63 +12,79 @@ public class List : ColumnResourceBase<List>, IResourceWidget
 {
     public static string ResourceType => "List";
 
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
         RenderContext context
     )
     {
-        var basicBadge = new PlainBadge(new ConstantText("Základní informace"));
+        var infrequentProperties = InfrequentProperties.Evaluate<ListInfrequentProperties>(navigator);
+
+        var basicBadge = new PlainBadge(new LocalizedLabel("general.basic-information"));
         var basicInfo = new Container([
             new NameValuePair(
-                new ConstantText("Mód"),
+                new LocalizedLabel("list.mode"),
                 new EnumLabel("f:mode", "http://hl7.org/fhir/ValueSet/list-mode")
             ),
-            new Optional("f:title",
+            infrequentProperties.Optional(ListInfrequentProperties.Title,
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.Name),
+                    new EhdsiDisplayLabel(LabelCodes.Name),
                     new Text("@value")
                 )
             ),
-            new Optional("f:code",
+            infrequentProperties.Optional(ListInfrequentProperties.Code,
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.Code),
+                    new EhdsiDisplayLabel(LabelCodes.Code),
                     new CodeableConcept()
                 )
             ),
-            new Optional("f:subject",
-                new NameValuePair(
-                    new ConstantText("Předmět"),
-                    new AnyReferenceNamingWidget()
+            infrequentProperties.Optional(ListInfrequentProperties.Subject,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("list.subject"),
+                    }
                 )
             ),
-            new Optional("f:encounter",
-                new NameValuePair(
-                    new ConstantText("Setkání"),
-                    new AnyReferenceNamingWidget()
+            infrequentProperties.Optional(ListInfrequentProperties.Encounter,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("list.encounter"),
+                    }
                 )
             ),
-            new Optional("f:date",
+            infrequentProperties.Optional(ListInfrequentProperties.Date,
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.Date),
+                    new EhdsiDisplayLabel(LabelCodes.Date),
                     new ShowDateTime()
                 )
             ),
-            new Optional("f:source",
-                new NameValuePair(
-                    new DisplayLabel(LabelCodes.Author),
-                    new AnyReferenceNamingWidget()
+            infrequentProperties.Optional(ListInfrequentProperties.Source,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new EhdsiDisplayLabel(LabelCodes.Author),
+                    }
                 )
             ),
-            new Optional("f:orderedBy",
-                new NameValuePair(
-                    new ConstantText("Seřazeno podle"),
-                    new AnyReferenceNamingWidget()
+            infrequentProperties.Optional(ListInfrequentProperties.OrderedBy,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("list.orderedBy"),
+                    }
                 )
             ),
         ]);
 
-        var entriesBadge = new PlainBadge(new ConstantText("Položky seznamu"));
+        var entriesBadge = new PlainBadge(new LocalizedLabel("list.entry-plural"));
 
         var entries = navigator.SelectAllNodes("f:entry").ToList();
         var complex = entries.Where(x => x.EvaluateCondition("f:flag or f:date")).ToList();
@@ -82,7 +98,7 @@ public class List : ColumnResourceBase<List>, IResourceWidget
                                 "f:deleted[@value='true']",
                                 new ConstantText(" "),
                                 new Tooltip([], [
-                                    new ConstantText("Položka byla odstraněna"),
+                                    new LocalizedLabel("list.entry.deleted"),
                                 ], icon: new Icon(SupportedIcons.Trash))
                             )
                         )
@@ -103,7 +119,7 @@ public class List : ColumnResourceBase<List>, IResourceWidget
                             ),
                             new If(_ => deleted,
                                 new Tooltip([], [
-                                    new ConstantText("Položka byla odstraněna")
+                                    new LocalizedLabel("list.entry.deleted")
                                 ], icon: new Icon(SupportedIcons.Trash))
                             )
                         ]);
@@ -113,30 +129,31 @@ public class List : ColumnResourceBase<List>, IResourceWidget
                                 new Container([
                                     new Optional("f:flag",
                                         new NameValuePair(
-                                            new ConstantText("Značka"),
+                                            new LocalizedLabel("list.entry.flag"),
                                             new CodeableConcept()
                                         )
                                     ),
                                     new Optional("f:date",
                                         new NameValuePair(
-                                            new DisplayLabel(LabelCodes.Date),
+                                            new EhdsiDisplayLabel(LabelCodes.Date),
                                             new ShowDateTime()
                                         )
-                                    )
-                                ]), deleted ? "deleted-list-item" : null
+                                    ),
+                                ]), optionalClass: deleted ? "deleted-list-item" : null
                             );
 
                         return [card];
                     }, flexContainerClasses: "gap-2"),
                 new If(_ => simple.Count > 0,
                     new If(_ => complex.Count > 0,
-                            new Card(new ConstantText("Proste neco / ostatni ponozky"), simpleWidgets, "mt-2"))
+                            new Card(new LocalizedLabel("list.other-items"), simpleWidgets,
+                                optionalClass: "mt-2"))
                         .Else(new Container([simpleWidgets], ContainerType.Div, "mt-2"))
                 ),
             ], FlexDirection.Row),
             new Optional("f:emptyReason",
                 new NameValuePair(
-                    new ConstantText("Důvod prázdného seznamu"),
+                    new LocalizedLabel("list.emptyReason"),
                     new CodeableConcept()
                 )
             ),
@@ -147,11 +164,11 @@ public class List : ColumnResourceBase<List>, IResourceWidget
             new Collapser(
                 [
                     new Container([
-                        new ConstantText("Seznam"),
+                        new LocalizedLabel("list"),
                         new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/list-status",
-                            new DisplayLabel(LabelCodes.Status))
-                    ], ContainerType.Div, "d-flex align-items-center gap-1")
-                ], [], [
+                            new EhdsiDisplayLabel(LabelCodes.Status)),
+                    ], ContainerType.Div, "d-flex align-items-center gap-1"),
+                ], [
                     basicBadge,
                     basicInfo,
                     new Condition("f:entry or f:emptyReason",
@@ -161,9 +178,9 @@ public class List : ColumnResourceBase<List>, IResourceWidget
                     ),
                     new Condition("f:note",
                         new ThematicBreak(),
-                        new PlainBadge(new ConstantText("Poznámky")),
+                        new PlainBadge(new LocalizedLabel("list.note")),
                         new ListBuilder("f:note", FlexDirection.Column, _ => [new ShowAnnotationCompact()],
-                            flexContainerClasses: "")
+                            flexContainerClasses: "") // Overrides the default class
                     ),
                 ], footer: navigator.EvaluateCondition("f:text") || navigator.EvaluateCondition("f:encounter")
                     ?
@@ -173,12 +190,12 @@ public class List : ColumnResourceBase<List>, IResourceWidget
                                 (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                                 x =>
                                 [
-                                    new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                                        isCollapsed: true)
+                                    new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
+                                        isCollapsed: true),
                                 ]
                             )
                         ),
-                        new Optional("f:text",
+                        new Condition("f:text",
                             new NarrativeCollapser()
                         ),
                     ]
@@ -188,5 +205,16 @@ public class List : ColumnResourceBase<List>, IResourceWidget
 
 
         return complete.Render(navigator, renderer, context);
+    }
+
+    public enum ListInfrequentProperties
+    {
+        Subject,
+        Encounter,
+        Date,
+        Source,
+        OrderedBy,
+        Title,
+        Code,
     }
 }

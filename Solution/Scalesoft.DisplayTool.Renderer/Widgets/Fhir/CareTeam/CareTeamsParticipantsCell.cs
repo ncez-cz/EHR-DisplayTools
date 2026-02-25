@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -19,7 +19,7 @@ public class CareTeamsParticipantsCell(XmlDocumentNavigator item) : Widget
             new ItemListBuilder("f:participant", ItemListType.Unordered, (_, x) =>
             {
                 var infrequentOptions =
-                    InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([x]);
+                    InfrequentProperties.Evaluate<InfrequentPropertiesPaths>(x);
 
                 return
                 [
@@ -29,24 +29,24 @@ public class CareTeamsParticipantsCell(XmlDocumentNavigator item) : Widget
                         : new NullWidget(),
                     new Container([
                         infrequentOptions.Contains(InfrequentPropertiesPaths.Role)
-                            ? new NameValuePair([new ConstantText("Role")],
+                            ? new NameValuePair([new LocalizedLabel("care-team.participant.role")],
                             [
                                 new Optional("f:role", new CodeableConcept()),
                             ])
                             : new NullWidget(),
                         infrequentOptions.Contains(InfrequentPropertiesPaths.Period)
-                            ? new NameValuePair([new DisplayLabel(LabelCodes.Duration)],
+                            ? new NameValuePair([new EhdsiDisplayLabel(LabelCodes.Duration)],
                             [
                                 new ShowPeriod("f:period")
                             ])
                             : new NullWidget(),
                         infrequentOptions.Contains(InfrequentPropertiesPaths.OnBehalfOf)
-                            ? new NameValuePair([new ConstantText("Organizace")],
+                            ? new NameValuePair([new LocalizedLabel("care-team.participant.onBehalfOf")],
                             [
                                 new Optional("f:onBehalfOf", new AnyReferenceNamingWidget())
                             ])
                             : new NullWidget()
-                    ], optionalClass: "name-value-pair-wrapper"),
+                    ], optionalClass: "name-value-pair-wrapper mb-1"),
                 ];
             }),
         ]);
@@ -54,7 +54,7 @@ public class CareTeamsParticipantsCell(XmlDocumentNavigator item) : Widget
         if (!item.EvaluateCondition("f:participant"))
         {
             participantTableCell = new TableCell([
-                new TextContainer(TextStyle.Muted, [new ConstantText("Informace nejsou k dispozici")])
+                new TextContainer(TextStyle.Muted, [new LocalizedLabel("general.information-unavailable")])
             ]);
         }
 

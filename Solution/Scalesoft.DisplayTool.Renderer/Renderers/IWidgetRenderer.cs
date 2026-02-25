@@ -41,9 +41,9 @@ public interface IWidgetRenderer
 
     public Task<string> RenderTooltip(Tooltip.ViewModel viewModel);
 
-    public Task<string> RenderCollapser(Collapser.ViewModel viewModel);
-
     public Task<string> RenderContainer(Container.ViewModel viewModel);
+
+    public Task<string> RenderNarrativeContainer(NarrativeContainer.ViewModel viewModel);
 
     public Task<string> RenderTextContainer(TextContainer.ViewModel viewModel);
 
@@ -54,16 +54,13 @@ public interface IWidgetRenderer
     public Task<string> WrapWithLayout(
         string? htmlContent,
         string? htmlValidationContent,
-        RenderMode? renderMode = RenderMode.Standard
+        RenderMode? renderMode = RenderMode.Standard,
+        bool isEmbeddable = false
     );
 
     public Task<string> RenderSection(Section.ViewModel viewModel);
 
     public Task<string> RenderButton(Button.ViewModel viewModel);
-
-    public Task<string> RenderTimeline(Timeline.ViewModel viewModel);
-
-    public Task<string> RenderTimelineCard(TimelineCard.ViewModel viewModel);
 
     public Task<string> RenderThematicBreak(ThematicBreak.ViewModel viewModel);
 

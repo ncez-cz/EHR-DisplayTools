@@ -154,8 +154,10 @@ public class NarrativeText(string? select, string? paramName) : Widget
                         result.Add(new TableBody(innerWidgetsWithErrors.Widgets));
                         break;
                     case "colgroup":
+                        // TODO mostly used for styling, consider rendering #DT-111
                         break;
                     case "col":
+                        // TODO mostly used for styling, consider rendering #DT-111
                         break;
                     case "tr":
                         result.Add(new TableRow(innerWidgetsWithErrors.Widgets));

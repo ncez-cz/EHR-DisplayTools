@@ -2,7 +2,6 @@
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -22,8 +21,8 @@ public class DastaPatientInfoWidget : Widget
             [
                 new Section($"/ds:dasta/ds:is/dsip:ip[{i + 1}]", null,
                     [
-                        new ConstantText("Osobní údaje pacienta")
-                    ],
+                        new ConstantText("Osobní údaje pacienta"),
+                    ], // TODO no suitable eHDSI labels found, maybe tweak text #DT-175
                     [
                         new Row([
                             new Choose([
@@ -101,7 +100,7 @@ public class DastaPatientInfoWidget : Widget
                                             new PlainBadge(new ConstantText("Stát, který cestovní pas vydal"),
                                                 Severity.Primary), new Heading([
                                                 new DastaCodedValue("dsip:passport/dsip:stat",
-                                                    "ISO_3166-1_alpha-3")
+                                                    "ISO_3166-1_alpha-3"), // TODO finalize code list value - custom value is used #DT-176
                                             ], HeadingSize.H6))
                                     ]),
                                     new Choose([
@@ -124,7 +123,7 @@ public class DastaPatientInfoWidget : Widget
                                         Severity.Primary),
                                     new Heading([
                                         new DastaCodedValue("dsip:stat_pris",
-                                            "ISO_3166-1_alpha-3")
+                                            "ISO_3166-1_alpha-3"), // TODO finalize code list value - custom value is used #DT-176
                                     ], HeadingSize.H6),
                                 ]))
                             ]),
@@ -174,8 +173,8 @@ public class DastaPatientInfoWidget : Widget
                                         i =>
                                         [
                                             new Heading([
-                                                new DastaCodedValue("@jazyk_klic", "1.3.6.1.4.1.12559.11.10.1.3.1.42.6",
-                                                    "epSOSLanguage"),
+                                                new DastaCodedValue("@jazyk_klic",
+                                                    "1.3.6.1.4.1.12559.11.10.1.3.1.42.6"),
                                             ], HeadingSize.H6),
                                             new Choose([new When("@pref = 'P'", new ConstantText(" (preferovaný)"))]),
                                             // ignore a - interpreter's contact
@@ -188,8 +187,7 @@ public class DastaPatientInfoWidget : Widget
                                         ]))
                                 ], new Heading([
                                     new DastaCodedValue(context.Language.Primary.Code,
-                                        "1.3.6.1.4.1.12559.11.10.1.3.1.42.6",
-                                        "epSOSLanguage"), // if communication language is not specified, cs-CZ is used
+                                        "1.3.6.1.4.1.12559.11.10.1.3.1.42.6"), // if communication language is not specified, cs-CZ is used
                                 ], HeadingSize.H6)),
                             ]),
                             // ignore ipi_o
@@ -218,8 +216,8 @@ public class DastaPatientInfoWidget : Widget
                         new ListBuilder("ds:a[not(@typ = '1' or @typ = '2')]", FlexDirection.Row, i =>
                         [
                             new Collapser([
-                                new DastaCodedValue("@typ", "TAB_TA"),
-                            ], [], DisplayRelatedPersonsAndCompanies()),
+                                new DastaCodedValue("@typ", "TAB_TA"), // TODO verify DASTA-specific code list #DT-176
+                            ], DisplayRelatedPersonsAndCompanies()),
                         ], null, "patient-cards-layout"),
                     ], titleAbbreviations: ("OÚ", "PD")
                 ),
@@ -266,7 +264,7 @@ public class DastaPatientInfoWidget : Widget
                     ], connectionTextWidget),
                     new LineBreak(),
                 ]),
-            ], "@poradi", orderAscending: false)
+            ], "@poradi", orderAscending: false) // TODO what should be done if no order is provided #DT-175
             ;
     }
 
@@ -275,7 +273,7 @@ public class DastaPatientInfoWidget : Widget
         const string ownPersonDataTypeValue = "(@typ = '1' or @typ = '2')";
         return new Container([
             new PlainBadge(new TextContainer(TextStyle.Regular, [
-                new DisplayLabel(LabelCodes.ContactInformation),
+                new EhdsiDisplayLabel(LabelCodes.ContactInformation),
                 new Choose([
                     new When($"{ownPersonDataTypeValue} and @ind_kont = 'K'", new ConstantText(" (korespondenční)"))
                 ]),
@@ -338,8 +336,7 @@ public class DastaPatientInfoWidget : Widget
                     new When("ds:k_osoba_klic", new Container([
                         new PlainBadge(new ConstantText("Osobní vztah"), Severity.Primary),
                         new Heading([
-                            new DastaCodedValue("ds:k_osoba_klic", "1.3.6.1.4.1.12559.11.10.1.3.1.42.38",
-                                "epSOSPersonalRelationship"),
+                            new DastaCodedValue("ds:k_osoba_klic", "1.3.6.1.4.1.12559.11.10.1.3.1.42.38"),
                         ], HeadingSize.H6),
                         // ignore k_osoba_text
                     ]))

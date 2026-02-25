@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
+﻿using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -18,13 +18,13 @@ public class AnimalDetails : Widget
         [
             new ChangeContext("f:extension[@url='species']/f:valueCodeableConcept",
                 new NameValuePair(
-                    new PlainBadge(new ConstantText("Druh zvířete")),
+                    new PlainBadge(new LocalizedLabel("patient-animal.species")),
                     new Heading([new CodeableConcept()], HeadingSize.H6)
                 )
             ),
             new Optional("f:extension[@url='breed']/f:valueCodeableConcept",
                 new NameValuePair(
-                    new PlainBadge(new ConstantText("Plemeno")),
+                    new PlainBadge(new LocalizedLabel("patient-animal.breed")),
                     new Heading([new CodeableConcept()], HeadingSize.H6)
                 )
             ),

@@ -35,6 +35,7 @@ public class DastaFhirDocumentConverterClient
             DocumentType.ImagingOrder => throw new NotImplementedException("Imaging order is not supported yet"),
             DocumentType.ImagingReport => throw new NotImplementedException("Imaging report is not supported yet"),
             DocumentType.LaboratoryOrder => "dasta2fhir_laboratoryOrder_EU",
+            DocumentType.AnyBundle => throw new NotImplementedException("General bundles are only applicable to FHIR."),
             _ => throw new ArgumentOutOfRangeException(nameof(documentType), documentType, null),
         };
     }

@@ -1,4 +1,5 @@
 ﻿using Scalesoft.DisplayTool.Renderer.Constants;
+using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -12,11 +13,34 @@ public class Immunizations(List<XmlDocumentNavigator> items, bool skipIdPopulati
 {
     public static string ResourceType => "Immunization";
 
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {
         return [new Immunizations(items)];
     }
-    
+
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator item)
+    {
+        var summaryItems = new List<Widget>();
+        if (item.EvaluateCondition("f:vaccineCode"))
+        {
+            summaryItems.Add(new ChangeContext(item, "f:vaccineCode", new CodeableConcept()));
+        }
+
+        if (summaryItems.Count == 0)
+        {
+            return null;
+        }
+
+        var result = summaryItems.Intersperse(new ConstantText(", ")).ToArray();
+
+        return new ResourceSummaryModel
+        {
+            Value = new Container(result, ContainerType.Span),
+        };
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -38,42 +62,42 @@ public class Immunizations(List<XmlDocumentNavigator> items, bool skipIdPopulati
 
         List<Widget> headerRow =
         [
-            new TableCell([new DisplayLabel(LabelCodes.Vaccination)], TableCellType.Header),
-            new TableCell([new DisplayLabel(LabelCodes.VaccinationDate)],
+            new TableCell([new EhdsiDisplayLabel(LabelCodes.Vaccination)], TableCellType.Header),
+            new TableCell([new EhdsiDisplayLabel(LabelCodes.VaccinationDate)],
                 TableCellType.Header),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.ExpirationDate),
-                new TableCell([new ConstantText("Datum expirace")],
+                new TableCell([new LocalizedLabel("immunization.expirationDate")],
                     TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Route),
-                new TableCell([new DisplayLabel(LabelCodes.AdministrationRoute)], TableCellType.Header)
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.AdministrationRoute)], TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Site),
-                new TableCell([new DisplayLabel(LabelCodes.BodySite)], TableCellType.Header)
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.BodySite)], TableCellType.Header)
             ),
             new If(_ => infrequentProtocolOptions.Contains(InfrequentProtocolPropertiesPaths.TargetDisease),
-                new TableCell([new DisplayLabel(LabelCodes.Agent)],
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.Agent)],
                     TableCellType.Header)
             ),
             new If(_ => infrequentProtocolOptions.Contains(InfrequentProtocolPropertiesPaths.DoseNumber),
-                new TableCell([new DisplayLabel(LabelCodes.DoseNumber)],
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.DoseNumber)],
                     TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.LotNumber),
-                new TableCell([new DisplayLabel(LabelCodes.LotNumber)], TableCellType.Header)
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.LotNumber)], TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Location),
-                new TableCell([new DisplayLabel(LabelCodes.AdministeringCenter)], TableCellType.Header)
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.AdministeringCenter)], TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Performer),
-                new TableCell([new DisplayLabel(LabelCodes.Performer)],
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.Performer)],
                     TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.IsSubpotent),
-                new TableCell([new ConstantText("Je subpotentní")], TableCellType.Header)
+                new TableCell([new LocalizedLabel("immunization.isSubpotent")], TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Status),
-                new TableCell([new DisplayLabel(LabelCodes.Administered)],
+                new TableCell([new EhdsiDisplayLabel(LabelCodes.Administered)],
                     TableCellType.Header)
             ),
             new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Text),
@@ -122,12 +146,12 @@ public class Immunizations(List<XmlDocumentNavigator> items, bool skipIdPopulati
         [EnumValueSet("http://hl7.org/fhir/ValueSet/immunization-status")]
         Status,
 
-        Text
+        Text,
     }
 
     public enum InfrequentProtocolPropertiesPaths
     {
         TargetDisease,
-        [OpenType("doseNumber")] DoseNumber
+        [OpenType("doseNumber")] DoseNumber,
     }
 }

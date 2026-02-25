@@ -15,6 +15,7 @@
     --even-level-section-background-color: white;
 }
 
+
 .section-success {
     --odd-level-section-background-color: var(--#{$prefix}success-100);
     --even-level-section-background-color: white;
@@ -33,6 +34,43 @@
 .section-gray {
     --odd-level-section-background-color: var(--#{$prefix}gray-100);
     --even-level-section-background-color: white;
+}
+
+body.render-mode-documentation {
+    .section-default {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
+
+    .section-secondary {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
+
+    .section-info {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
+
+    .section-success {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
+
+    .section-warning {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
+
+    .section-error {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
+
+    .section-gray {
+        --odd-level-section-background-color: var(--#{$prefix}primary-400);
+        --even-level-section-background-color: var(--#{$prefix}primary-300);
+    }
 }
 
 // Handle switching bg-color for nested sections by level. Odd and even levels has it's bg-colors defined above for each severity.

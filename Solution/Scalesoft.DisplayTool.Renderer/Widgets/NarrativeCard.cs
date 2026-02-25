@@ -15,7 +15,7 @@ public class NarrativeCard(string narrativeXPath = "f:text") : Widget
     )
     {
         var widget = new Card(
-            new DisplayLabel(LabelCodes.OriginalNarrative),
+            new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
             new Narrative(narrativeXPath)
         );
 

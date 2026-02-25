@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
+﻿using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -15,6 +15,11 @@ public class ShowMultiReference(
 ) : Widget
 
 {
+    public static Func<IEnumerable<Widget>, Widget> DefaultBrokenReferenceHandler => brokenReferences => new Container([
+        new TextContainer(TextStyle.Bold, new LocalizedLabel("general.reference-without-content")),
+        new ItemList(ItemListType.Unordered, [..brokenReferences]),
+    ], ContainerType.Div, "resource-container");
+
     public ShowMultiReference(
         string path,
         Func<List<XmlDocumentNavigator>, string?, Widget> foundItemGroupBuilder,
@@ -36,10 +41,7 @@ public class ShowMultiReference(
             foundItemGroupBuilder,
             brokenReferences =>
             [
-                new Container([
-                    new TextContainer(TextStyle.Bold, new ConstantText("Položky bez obsahu")),
-                    new ItemList(ItemListType.Unordered, [..brokenReferences]),
-                ], ContainerType.Div, "resource-container")
+                DefaultBrokenReferenceHandler(brokenReferences),
             ]
         )
     {
@@ -47,20 +49,19 @@ public class ShowMultiReference(
 
     public ShowMultiReference(
         string path = ".",
-        bool displayResourceType = true
+        bool displayResourceType = true,
+        bool displayBorder = false
     )
         : this(
             path,
             ((foundNavigators, groupName) =>
             [
-                new AnyResource(foundNavigators, groupName, displayResourceType: displayResourceType)
+                new AnyResource(foundNavigators, groupName, displayResourceType: displayResourceType,
+                    displayBorder: displayBorder)
             ]),
             brokenReferences =>
             [
-                new Container([
-                    new TextContainer(TextStyle.Bold, new ConstantText("Položky bez obsahu")),
-                    new ItemList(ItemListType.Unordered, [..brokenReferences]),
-                ], ContainerType.Div, "resource-container")
+                DefaultBrokenReferenceHandler(brokenReferences),
             ]
         )
     {

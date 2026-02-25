@@ -8,7 +8,8 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ShowDateTime(string path = ".") : Widget
+public class ShowDateTime(string path = ".", DateFormatDisplay preferredDisplay = DateFormatDisplay.MaximumAvailable)
+    : Widget
 {
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -48,6 +49,17 @@ public class ShowDateTime(string path = ".") : Widget
             _ => DateFormatType.MinuteHourDayMonthYearTimezone,
         };
 
+        // strip time info if only date display is requested
+        if (preferredDisplay == DateFormatDisplay.DateOnly && format == DateFormatType.MinuteHourDayMonthYearTimezone)
+        {
+            format = DateFormatType.DayMonthYearTimezone;
+        }
+
+        // strip date info if only time display is requested. If no time is provided in source data, ignore the request
+        if (preferredDisplay == DateFormatDisplay.TimeOnly && format == DateFormatType.MinuteHourDayMonthYearTimezone)
+        {
+            format = DateFormatType.MinuteHourTimezone;
+        }
 
         if (DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, out var date))
         {
@@ -71,4 +83,11 @@ public class ShowDateTime(string path = ".") : Widget
                 },
             ]));
     }
+}
+
+public enum DateFormatDisplay
+{
+    MaximumAvailable,
+    DateOnly,
+    TimeOnly,
 }

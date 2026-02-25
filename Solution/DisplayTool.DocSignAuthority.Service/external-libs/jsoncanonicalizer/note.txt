@@ -1,0 +1,2 @@
+Libraries compiled from code located at https://github.com/cyberphone/json-canonicalization/tree/master/dotnet
+The code was not modified.

@@ -1,6 +1,7 @@
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
+using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -15,15 +16,23 @@ public class NarrativeCollapser(string narrativeXPath = "f:text") : Widget
         RenderContext context
     )
     {
-        var widget = new HideableDetails(ContainerType.Div,
+        var showNarrativeByDefault = NarrativeUtils.ShowNarrativeByDefault(navigator.SelectSingleNode("f:text"));
+
+        var narrativeCollapser =
             new Collapser(
-                [new DisplayLabel(LabelCodes.OriginalNarrative)],
-                [],
+                [new EhdsiDisplayLabel(LabelCodes.OriginalNarrative)],
                 [new Narrative(narrativeXPath)],
-                true,
-                customClass: "narrative-print-collapser"
-            )
-        );
+                !showNarrativeByDefault,
+                customClass: "narrative-print-collapser " + (showNarrativeByDefault ? "d-flex" : "")
+            );
+
+        Widget widget =
+            showNarrativeByDefault
+                ? narrativeCollapser
+                : new HideableDetails(ContainerType.Div,
+                    narrativeCollapser
+                );
+
         return widget.Render(navigator, renderer, context);
     }
 }

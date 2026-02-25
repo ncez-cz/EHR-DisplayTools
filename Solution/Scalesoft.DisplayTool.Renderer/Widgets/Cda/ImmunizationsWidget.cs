@@ -20,99 +20,97 @@ new Variable("code", "$immunizationsSectionCode"),
 ]), 
 ], [
 new Collapser([
-new Text("$originalNarrativeTableTitle")
-, 
+    new Text("$originalNarrativeTableTitle")
+    , 
 ], [
-], [
-new NarrativeText("n1:text", null), 
+    new NarrativeText("n1:text", null), 
 ]), 
 new LineBreak(), 
 new Collapser([
-new Text("$translatedCodedTableTitle")
-, 
+    new Text("$translatedCodedTableTitle")
+    , 
 ], [
-], [
-new Choose([
-new When("not (n1:entry/n1:substanceAdministration/@nullFlavor)", [
-new Table([
-new TableBody([
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'79'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'9'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'80'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'5'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'124'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'152'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'169'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'170'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'171'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'172'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'122'"),
-]), 
-],
-TableCellType.Header), 
-]), 
-new ChangeContext("n1:entry/n1:substanceAdministration", new Widget19()),
-]), 
-], true), 
-]),
-], [
-new WidgetWithVariables(new ShowEHdsiNullFlavorWidget(), [
-new Variable("code", "n1:entry/n1:substanceAdministration/@nullFlavor"),
-]), 
-]), 
+    new Choose([
+        new When("not (n1:entry/n1:substanceAdministration/@nullFlavor)", [
+            new Table([
+                new TableBody([
+                    new TableRow([
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'79'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'9'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'80'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'5'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'124'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'152'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'169'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'170'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'171'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'172'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                    new Variable("code", "'122'"),
+                                ]), 
+                            ],
+                            TableCellType.Header), 
+                    ]), 
+                    new ChangeContext("n1:entry/n1:substanceAdministration", new Widget19()),
+                ]), 
+            ], true), 
+        ]),
+    ], [
+        new WidgetWithVariables(new ShowEHdsiNullFlavorWidget(), [
+            new Variable("code", "n1:entry/n1:substanceAdministration/@nullFlavor"),
+        ]), 
+    ]), 
 ]), 
 ], titleAbbreviations: SectionTitleAbbreviations.Immunizations),
 ]), 

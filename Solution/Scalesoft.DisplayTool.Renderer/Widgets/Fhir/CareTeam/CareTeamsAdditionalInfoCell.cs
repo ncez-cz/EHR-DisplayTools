@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -14,49 +14,44 @@ public class CareTeamsAdditionalInfoCell(XmlDocumentNavigator item) : Widget
     )
     {
         var infrequentOptions =
-            InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
+            InfrequentProperties.Evaluate<InfrequentPropertiesPaths>(item);
 
         var participantTableCell = new TableCell(
         [
             new Container([
                 new HideableDetails(
-                    infrequentOptions.Contains(InfrequentPropertiesPaths.Identifier)
-                        ? new NameValuePair([new ConstantText("Identifikátor týmu")],
-                        [
-                            new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()]),
-                        ])
-                        : infrequentOptions.Contains(InfrequentPropertiesPaths.Id)
-                            ? new NameValuePair([new ConstantText("Technický identifikátor týmu")],
-                            [
-                                new Optional("f:id", new Text("@value"))
-                            ])
-                            : new ConstantText("Identifikátor podání není specifikován")
+                    infrequentOptions.Condition(InfrequentPropertiesPaths.Identifier,
+                        new NameValuePair(
+                            new LocalizedLabel("care-team.identifier"),
+                            new CommaSeparatedBuilder("f:identifier", _ => [new ShowIdentifier()])
+                        )
+                    )
                 ),
                 infrequentOptions.Contains(InfrequentPropertiesPaths.ReasonCode)
-                    ? new NameValuePair([new ConstantText("Účel týmu")],
+                    ? new NameValuePair([new LocalizedLabel("care-team.reason")],
                     [
                         new CommaSeparatedBuilder("f:reasonCode", _ => [new CodeableConcept()]),
                     ])
                     : new NullWidget(),
                 infrequentOptions.Contains(InfrequentPropertiesPaths.ManagingOrganization)
-                    ? new NameValuePair([new ConstantText("Odpovědná organizace")],
+                    ? new NameValuePair([new LocalizedLabel("care-team.managingOrganization")],
                     [
                         new CommaSeparatedBuilder("f:managingOrganization", _ => [new AnyReferenceNamingWidget()]),
                     ])
                     : new NullWidget(),
                 infrequentOptions.Contains(InfrequentPropertiesPaths.Note)
-                    ? new NameValuePair([new ConstantText("Komentář")],
+                    ? new NameValuePair([new LocalizedLabel("care-team.note")],
                     [
                         new ItemListBuilder("f:note", ItemListType.Unordered, _ => [new ShowAnnotationCompact()]),
                     ])
                     : new NullWidget()
-            ], optionalClass: "name-value-pair-wrapper"),
+            ], optionalClass: "name-value-pair-wrapper row-gap-1"),
         ]);
 
         if (infrequentOptions.Count == 0)
         {
             participantTableCell = new TableCell([
-                new TextContainer(TextStyle.Muted, [new ConstantText("Informace nejsou k dispozici")])
+                new TextContainer(TextStyle.Muted, [new LocalizedLabel("general.information-unavailable")])
             ]);
         }
 

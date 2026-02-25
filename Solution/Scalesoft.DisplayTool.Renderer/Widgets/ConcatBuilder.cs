@@ -18,7 +18,7 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets;
 /// </param>
 public class ConcatBuilder(
     string itemsPath,
-    Func<int, int, XmlDocumentNavigator, IList<Widget>> itemBuilder,
+    Func<int, int, XmlDocumentNavigator, XmlDocumentNavigator?, IList<Widget>> itemBuilder,
     Widget? separator = null,
     string? orderSelector = null,
     bool orderAscending = true,
@@ -48,7 +48,7 @@ public class ConcatBuilder(
         string? orderSelector = null,
         bool orderAscending = true
     ) : this(itemsPath,
-        (i, _, _) => itemBuilder(i), new ConstantText(separator), orderSelector, orderAscending)
+        (i, _, _, _) => itemBuilder(i), new ConstantText(separator), orderSelector, orderAscending)
     {
     }
 
@@ -59,7 +59,7 @@ public class ConcatBuilder(
         string? orderSelector = null,
         bool orderAscending = true
     ) : this(itemsPath,
-        (i, _, _) => itemBuilder(i), separator, orderSelector, orderAscending)
+        (i, _, _, _) => itemBuilder(i), separator, orderSelector, orderAscending)
     {
     }
 
@@ -70,7 +70,7 @@ public class ConcatBuilder(
         string? orderSelector = null,
         bool orderAscending = true
     ) : this(itemsPath,
-        (i, totalCount, _) => itemBuilder(i, totalCount), new ConstantText(separator), orderSelector, orderAscending)
+        (i, totalCount, _, _) => itemBuilder(i, totalCount), new ConstantText(separator), orderSelector, orderAscending)
     {
     }
 
@@ -80,7 +80,8 @@ public class ConcatBuilder(
         Widget? separator = null,
         string? orderSelector = null,
         bool orderAscending = true
-    ) : this(string.Empty, itemBuilder, separator, orderSelector, orderAscending)
+    ) : this(string.Empty, (i, totalCount, nav, _) => itemBuilder(i, totalCount, nav), separator, orderSelector,
+        orderAscending)
     {
         m_providedNodes = items;
     }
@@ -90,7 +91,19 @@ public class ConcatBuilder(
         Func<int, int, XmlDocumentNavigator, IList<Widget>> itemBuilder,
         NodeOrderer? orderer,
         Widget? separator = null
-    ) : this(itemsPath, itemBuilder, separator, orderer: orderer)
+    ) : this(itemsPath, (i, totalCount, nav, _) => itemBuilder(i, totalCount, nav), separator, orderer: orderer)
+    {
+    }
+
+    public ConcatBuilder(
+        string itemsPath,
+        Func<int, int, XmlDocumentNavigator, IList<Widget>> itemBuilder,
+        Widget? separator = null,
+        string? orderSelector = null,
+        bool orderAscending = true,
+        NodeOrderer? orderer = null
+    ) : this(itemsPath, (i, totalCount, nav, _) => itemBuilder(i, totalCount, nav), separator, orderSelector,
+        orderAscending, orderer)
     {
     }
 
@@ -107,9 +120,12 @@ public class ConcatBuilder(
         var elementsToRender = ordererToUse(elements);
 
         List<RenderResult> children = [];
-        foreach (var (element, i) in elementsToRender.Select((e, i) => (e, i)))
+        for (var i = 0; i < elementsToRender.Count; i++)
         {
-            children.Add(await itemBuilder(i, count, element).RenderConcatenatedResult(element, renderer, context));
+            var element = elementsToRender[i];
+            var nextNav = elementsToRender.ElementAtOrDefault(i + 1);
+            children.Add(await itemBuilder(i, count, element, nextNav)
+                .RenderConcatenatedResult(element, renderer, context));
         }
 
         var separatorRendered = separator == null ? string.Empty : await separator.Render(data, renderer, context);

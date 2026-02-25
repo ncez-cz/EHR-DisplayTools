@@ -13,14 +13,23 @@ public class Container : Widget
     private readonly ContainerType m_type;
     private readonly string? m_optionalClass;
     private readonly IdentifierSource? m_idSource;
+    private readonly bool m_renderEmptyContainer;
     private readonly IdentifierSource? m_visualIdSource;
 
-    public Container(IList<Widget> content, ContainerType type = ContainerType.Div, string? optionalClass = null, IdentifierSource? idSource = null, IdentifierSource? visualIdSource = null)
+    public Container(
+        IList<Widget> content,
+        ContainerType type = ContainerType.Div,
+        string? optionalClass = null,
+        IdentifierSource? idSource = null,
+        IdentifierSource? visualIdSource = null,
+        bool renderEmptyContainer = false
+    )
     {
         m_content = content;
         m_type = type;
         m_optionalClass = optionalClass;
         m_idSource = idSource;
+        m_renderEmptyContainer = renderEmptyContainer;
         m_visualIdSource = visualIdSource ?? idSource;
     }
 
@@ -29,16 +38,20 @@ public class Container : Widget
         ContainerType type = ContainerType.Div,
         string? optionalClass = null,
         IdentifierSource? idSource = null,
-        IdentifierSource? visualIdSource = null
-    ) : this([content], type, optionalClass, idSource, visualIdSource)
+        IdentifierSource? visualIdSource = null,
+        bool renderEmptyContainer = false
+    ) : this([content], type, optionalClass, idSource, visualIdSource, renderEmptyContainer)
     {
     }
 
-    public override async Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+    public override async Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         var contentResult = await m_content.RenderConcatenatedResult(navigator, renderer, context);
-        if (!contentResult.HasValue)
+        if (!contentResult.HasValue || contentResult.Content == string.Empty && !m_renderEmptyContainer)
         {
             return contentResult;
         }

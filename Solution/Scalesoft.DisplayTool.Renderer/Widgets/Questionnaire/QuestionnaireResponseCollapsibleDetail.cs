@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -17,9 +17,11 @@ public static class QuestionnaireResponseCollapsibleDetail
 
         if (navigator.EvaluateCondition("f:item"))
         {
-            collapsibleRow.AddCollapser(
-                new ConstantText("Položky"),
-                new Condition("f:item", new QuestionnaireResponseItems())
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("questionnaire-response.item"),
+                    new Condition("f:item", new QuestionnaireResponseItems())
+                )
             );
         }
 
@@ -28,25 +30,32 @@ public static class QuestionnaireResponseCollapsibleDetail
             var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator,
                 "f:encounter", "f:text");
 
-            collapsibleRow.AddCollapser(
-                new ConstantText(Labels.Encounter),
-                ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
-                    "f:encounter"),
-                encounterNarrative != null
-                    ?
-                    [
-                        new NarrativeCollapser(encounterNarrative.GetFullPath())
-                    ]
-                    : null,
-                narrativeContent: encounterNarrative != null
-                    ? new NarrativeModal(encounterNarrative.GetFullPath())
-                    : null
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("node-names.Encounter"),
+                    ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
+                        "f:encounter"),
+                    encounterNarrative != null
+                        ?
+                        [
+                            new NarrativeCollapser(encounterNarrative.GetFullPath())
+                        ]
+                        : null,
+                    ModalContent: encounterNarrative != null
+                        ? new NarrativeModal(encounterNarrative.GetFullPath())
+                        : null
+                )
             );
         }
 
         if (navigator.EvaluateCondition("f:text"))
         {
-            collapsibleRow.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
+                    new Narrative("f:text")
+                )
+            );
         }
 
         return collapsibleRow;
@@ -73,11 +82,11 @@ public class QuestionnaireResponseItems : Widget
         var tree = new Table([
             new TableHead([
                 new TableRow([
-                    new TableCell([new ConstantText("Číslo otázky")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("questionnaire-response.linkId")], TableCellType.Header),
                     new If(_ => infrequentProperties.Contains(QuestionnaireItemInfrequentProperties.Text),
-                        new TableCell([new ConstantText("Otázka")], TableCellType.Header)),
+                        new TableCell([new LocalizedLabel("questionnaire-response.text")], TableCellType.Header)),
                     new If(_ => infrequentProperties.Contains(QuestionnaireItemInfrequentProperties.Answer),
-                        new TableCell([new ConstantText("Odpověď")], TableCellType.Header)),
+                        new TableCell([new LocalizedLabel("questionnaire-response.answer")], TableCellType.Header)),
                 ]),
             ]),
             rows,
@@ -104,7 +113,7 @@ public class QuestionnaireResponseItem(
         {
             collapsibleRow.Add(
                 new CollapsibleDetail(
-                    new ConstantText("Podzáznamy"),
+                    new LocalizedLabel("questionnaire-response.sub-items"),
                     new QuestionnaireResponseItems()
                 )
             );

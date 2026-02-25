@@ -110,14 +110,14 @@ public class RazorWidgetRenderer : IWidgetRenderer
         return await RenderComponent<TooltipView>(viewModel);
     }
 
-    public async Task<string> RenderCollapser(Collapser.ViewModel viewModel)
-    {
-        return await RenderComponent<CollapserView>(viewModel);
-    }
-
     public async Task<string> RenderContainer(Container.ViewModel viewModel)
     {
         return await RenderComponent<ContainerView>(viewModel);
+    }
+
+    public async Task<string> RenderNarrativeContainer(NarrativeContainer.ViewModel viewModel)
+    {
+        return await RenderComponent<NarrativeView>(viewModel);
     }
 
     public async Task<string> RenderTextContainer(TextContainer.ViewModel viewModel)
@@ -144,17 +144,6 @@ public class RazorWidgetRenderer : IWidgetRenderer
     {
         return await RenderComponent<ButtonView>(viewModel);
     }
-
-    public async Task<string> RenderTimeline(Timeline.ViewModel viewModel)
-    {
-        return await RenderComponent<TimelineView>(viewModel);
-    }
-
-    public async Task<string> RenderTimelineCard(TimelineCard.ViewModel viewModel)
-    {
-        return await RenderComponent<TimelineCardView>(viewModel);
-    }
-
 
     public async Task<string> RenderThematicBreak(ThematicBreak.ViewModel viewModel)
     {
@@ -187,7 +176,12 @@ public class RazorWidgetRenderer : IWidgetRenderer
     }
 
 
-    public async Task<string> WrapWithLayout(string? htmlContent, string? htmlValidationContent, RenderMode? renderMode)
+    public async Task<string> WrapWithLayout(
+        string? htmlContent,
+        string? htmlValidationContent,
+        RenderMode? renderMode,
+        bool isEmbeddable = false
+    )
     {
         var frontendResourceProvider = new FrontendResourceProvider();
         var resources = frontendResourceProvider.ReadResources();
@@ -205,8 +199,9 @@ public class RazorWidgetRenderer : IWidgetRenderer
                         {
                             Scripts = resources.Scripts,
                             Styles = resources.Styles,
-                            Content = fullHtmlContent ?? string.Empty,
-                            RenderMode = renderMode
+                            Content = fullHtmlContent,
+                            RenderMode = renderMode,
+                            IsEmbeddable = isEmbeddable,
                         }
                     },
                 };

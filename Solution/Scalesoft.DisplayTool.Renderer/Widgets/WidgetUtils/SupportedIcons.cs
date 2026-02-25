@@ -75,5 +75,6 @@ public enum SupportedIcons
     FileHand,
     Eye,
     EyeSlash,
-    ChevronRight
+    ChevronRight,
+    Ban,
 }

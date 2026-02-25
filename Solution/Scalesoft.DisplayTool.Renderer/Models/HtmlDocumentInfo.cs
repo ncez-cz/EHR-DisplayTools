@@ -11,4 +11,6 @@ public class HtmlDocumentInfo
     public required string Content { get; set; }
     
     public RenderMode? RenderMode { get; set; }
+    
+    public bool IsEmbeddable { get; set; }
 }

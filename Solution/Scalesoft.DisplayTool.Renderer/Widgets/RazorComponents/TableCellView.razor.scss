@@ -68,6 +68,10 @@ td {
     position: relative;
 }
 
+.render-mode-documentation td {
+    word-break: break-all;
+}
+
 .collapse-toggler-checkbox {
     display: none;
 }

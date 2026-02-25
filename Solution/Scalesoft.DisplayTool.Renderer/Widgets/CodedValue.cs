@@ -11,7 +11,6 @@ public class CodedValue(
     string? code,
     string? codeSystem,
     string? fallbackValue = null,
-    string? fileName = null,
     bool displayCodeSystem = false,
     bool displayCodeSystemOnFallbackOnly = false,
     bool isValueSet = false,
@@ -37,8 +36,7 @@ public class CodedValue(
         if (!string.IsNullOrWhiteSpace(preferredCodeSystemOverride))
         {
             appliedCodeSystem = preferredCodeSystemOverride;
-            translated = await context.Translator.GetCodedValue(
-                fileName ?? string.Empty,
+            translated = await context.TranslatorWrapper.GetCodedValue(
                 code,
                 appliedCodeSystem,
                 language,
@@ -49,8 +47,7 @@ public class CodedValue(
         if (string.IsNullOrWhiteSpace(translated) && !string.IsNullOrEmpty(codeSystem))
         {
             appliedCodeSystem = codeSystem;
-            translated = await context.Translator.GetCodedValue(
-                fileName ?? string.Empty,
+            translated = await context.TranslatorWrapper.GetCodedValue(
                 code,
                 appliedCodeSystem,
                 language,

@@ -2,7 +2,6 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -22,7 +21,7 @@ public class ShowNameWidget(bool showInline = false) : Widget
             new Choose([
                 new When("$name/n1:family", structuredNameWidgets),
             ], new Container([
-                new PlainBadge(new DisplayLabel(LabelCodes.FamilyName), Severity.Primary),
+                new PlainBadge(new EhdsiDisplayLabel(LabelCodes.FamilyName), Severity.Primary),
                 new Heading([new Text("$name")], HeadingSize.H5),
             ])),
         ];
@@ -62,7 +61,7 @@ public class ShowNameWidget(bool showInline = false) : Widget
             return
             [
                 new Container([
-                    new PlainBadge(new DisplayLabel(labelCode), Severity.Primary),
+                    new PlainBadge(new EhdsiDisplayLabel(labelCode), Severity.Primary),
                     new Heading([new Text(path)], HeadingSize.H5)
                 ])
             ];

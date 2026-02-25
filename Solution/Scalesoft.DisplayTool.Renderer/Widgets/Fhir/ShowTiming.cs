@@ -7,7 +7,11 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ShowTiming(string path = ".", FlexDirection nameValuePairDirection = FlexDirection.Row) : Widget
+public class ShowTiming(
+    string path = ".",
+    FlexDirection nameValuePairDirection = FlexDirection.Row,
+    NameValuePair.NameValuePairStyle nameValuePairStyle = NameValuePair.NameValuePairStyle.Secondary
+) : Widget
 {
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -28,33 +32,33 @@ public class ShowTiming(string path = ".", FlexDirection nameValuePairDirection 
         var tree = new ChangeContext(path,
             new Concat([
                 new Condition("f:event",
-                    new NameValuePair([new ConstantText("Datum")],
+                    new NameValuePair([new LocalizedLabel("timing.event")],
                         [new CommaSeparatedBuilder("f:event", _ => [new ShowDateTime()]),],
-                        direction: nameValuePairDirection)
+                        direction: nameValuePairDirection, style: nameValuePairStyle)
                 ),
 
                 new Condition("f:repeat/f:*[starts-with(name(), 'bounds')]",
                     new ChangeContext("f:repeat", new NameValuePair(new Choose([
-                        new When("f:boundsDuration", new ConstantText("Délka trvání")),
-                        new When("f:boundsRange", new ConstantText("Rozsah")),
-                        new When("f:boundsPeriod", new ConstantText("Doba")),
-                    ]), new OpenTypeElement(null, "bounds"), direction: nameValuePairDirection))
+                        new When("f:boundsDuration", new LocalizedLabel("timing.boundsDuration")),
+                        new When("f:boundsRange", new LocalizedLabel("timing.boundsRange")),
+                        new When("f:boundsPeriod", new LocalizedLabel("timing.boundsPeriod")),
+                    ]), new OpenTypeElement(null, "bounds"), direction: nameValuePairDirection, style: nameValuePairStyle))
                 ),
 
                 new Condition("f:repeat/f:frequency | f:repeat/f:period | f:repeat/f:periodUnit",
                     new NameValuePair(
                         [
-                            new ConstantText("Četnost")
+                            new LocalizedLabel("timing.repeat")
                         ],
                         [
                             new Optional("f:repeat/f:frequency",
                                 new Text("@value"),
                                 new ConstantText(" "),
-                                new DisplayLabel(LabelCodes.Times)
+                                new EhdsiDisplayLabel(LabelCodes.Times)
                             ),
                             new Optional("f:repeat/f:period",
                                 new ConstantText(" "),
-                                new DisplayLabel(LabelCodes.Every),
+                                new EhdsiDisplayLabel(LabelCodes.Every),
                                 new ConstantText(" "),
                                 new Text("@value"),
                                 new ConstantText(" ")
@@ -62,28 +66,28 @@ public class ShowTiming(string path = ".", FlexDirection nameValuePairDirection 
                             new Optional("f:repeat/f:periodUnit",
                                 new EnumLabel("@value", "http://hl7.org/fhir/ValueSet/units-of-time")
                             )
-                        ], direction: nameValuePairDirection
+                        ], direction: nameValuePairDirection, style: nameValuePairStyle
                     )
                 ),
 
                 new Condition("f:repeat/f:timeOfDay",
-                    new NameValuePair([new ConstantText("Časy")],
+                    new NameValuePair([new LocalizedLabel("timing.repeat.timeOfDay")],
                         [new CommaSeparatedBuilder("f:repeat/f:timeOfDay", _ => [new Text("@value")])],
-                        direction: nameValuePairDirection)
+                        direction: nameValuePairDirection, style: nameValuePairStyle)
                 ),
 
                 new Condition("f:repeat/f:dayOfWeek",
-                    new NameValuePair([new ConstantText("Dny v týdnu")],
+                    new NameValuePair([new LocalizedLabel("timing.repeat.daysOfWeek")],
                         [new CommaSeparatedBuilder("f:repeat/f:dayOfWeek", _ => [new Text("@value")])],
-                        direction: nameValuePairDirection)
+                        direction: nameValuePairDirection, style: nameValuePairStyle)
                 ),
 
                 // TODO implement count, countMax, duration, durationUnit, frequencyMax, periodMax, offset, code #DT-267
 
                 new Condition("f:repeat/f:when",
-                    new NameValuePair([new ConstantText("Denní doby")],
+                    new NameValuePair([new LocalizedLabel("timing.repeat.when")],
                         [new CommaSeparatedBuilder("f:repeat/f:when", _ => [new Text("@value")])],
-                        direction: nameValuePairDirection)
+                        direction: nameValuePairDirection, style: nameValuePairStyle)
                 ),
             ])
         );

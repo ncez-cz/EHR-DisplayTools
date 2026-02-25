@@ -17,13 +17,17 @@ public class ModifierExtensionCheck : Widget
         if (navigator.EvaluateCondition("//f:modifierExtension"))
         {
             var result = await new Widgets.Alert(
-                new ConstantText(
-                    "Dokument obsahuje neznámá rozšíření, která mohou měnit význam zobrazených hodnot. Vykreslené údaje mají pouze informativní charakter."
+                new LocalizedLabel(
+                    "general.unkown-modifier-message"
                 ),
                 Severity.Error
             ).Render(navigator, renderer, context);
-            
-            result.Errors.Add(new ParseError{Kind = ErrorKind.InvalidValue, Message = "Unknown modifierExtension encountered.", Path="//f:modifierExtension", Severity = ErrorSeverity.Warning});
+
+            result.Errors.Add(new ParseError
+            {
+                Kind = ErrorKind.InvalidValue, Message = "Unknown modifierExtension encountered.",
+                Path = "//f:modifierExtension", Severity = ErrorSeverity.Warning
+            });
             return result;
         }
 

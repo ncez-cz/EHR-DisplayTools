@@ -1,38 +1,94 @@
 ﻿@using Scalesoft.DisplayTool.Renderer.Widgets
 @using Scalesoft.DisplayTool.Renderer.Extensions
 
-@code {
+<div
+    class="@(Model.Title != null || Model.Body != null || Model.Footer != null ? "card" : string.Empty) @(Model.IsCollapsible ? "collapse overflow-auto " : string.Empty) 
+           @Model.CustomClass @(GetSeverityClass())"
+    id="@Model.Id"
+    data-id="@Model.VisualId">
 
-    private string GetSeverityClass()
+    @RenderHeader()
+
+    @if (Model.IsCollapsible && (Model.Body != null || Model.Footer != null))
     {
-        if (Model.Severity != null)
-        {
-            return $"severity-{Model.Severity?.ToEnumString()}";
-        }
-
-        return string.Empty;
-    }
-
-}
-
-<div class="card @Model.CustomClass @(GetSeverityClass())" id="@Model.Id" data-id="@Model.VisualId">
-    @if (!Model.HideTitle)
-    {
-        <div class="card-header card-header d-flex align-items-center justify-content-between py-0">
-            @((MarkupString)(Model.Title ?? string.Empty))
+        <div class="collapsible-content-wrapper">
+            <div class="collapsible-content">
+                @RenderBody()
+                @RenderFooter()
+            </div>
         </div>
     }
-    <div class="card-body">
-        @((MarkupString)(Model.Body ?? string.Empty))
-    </div>
-    @if (!Model.HideFooter)
+    else
     {
-        <div class="card-footer">
-            @((MarkupString)(Model.Footer ?? string.Empty))
-        </div>
+        @RenderBody()
+        @RenderFooter()
     }
 </div>
 
 @code {
-    [Parameter] public required Card.ViewModel Model { get; set; }
+    [Parameter] public required CardBase.ViewModel Model { get; set; }
+
+    private string GetSeverityClass()
+    {
+        return Model.Severity != null ? $"severity-{Model.Severity?.ToEnumString()}" : string.Empty;
+    }
+
+    private RenderFragment RenderHeader() =>
+        @<text>
+             @if (Model.IsCollapsible && (Model.Body != null || Model.Footer != null))
+             {
+                 <input type="checkbox"
+                        class="collapse-checkbox"
+                        id="@Model.InputId"
+                        checked="@(!Model.IsCollapsed)"/>
+
+                 <label
+                     class="collapse-header collapse-label card-header d-flex align-items-center justify-content-between"
+                     for="@Model.InputId">
+                <span class="d-flex flex-column toggle-label-content">
+                    <span class="card-main-title">
+                        @((MarkupString)(Model.Title ?? string.Empty))
+                    </span>
+                    @if (!string.IsNullOrEmpty(Model.Subtitle))
+                    {
+                        <span class="card-subtitle small">
+                            @((MarkupString)Model.Subtitle)
+                        </span>
+                    }
+                </span>
+                     <span class="collapser-icons">
+                    @((MarkupString)(Model.IconPrefix ?? string.Empty))
+                         @((MarkupString)Model.Icon)
+                </span>
+                 </label>
+             }
+             else if (Model.Title != null)
+             {
+                 <div
+                     class="card-header d-flex align-items-center justify-content-between">
+                     @((MarkupString)Model.Title)
+                 </div>
+             }
+    </text>;
+
+    private RenderFragment RenderBody() =>
+        @<text>
+             @if (Model.Body != null)
+             {
+                 <div class="card-body @Model.BodyOptionalClass">
+                     @((MarkupString)(Model.Body ?? string.Empty))
+                 </div>
+             }
+    </text>;
+
+    private RenderFragment RenderFooter() =>
+        @<text>
+             @if (Model.Footer != null)
+             {
+                 <div class="card-footer">
+                     @((MarkupString)Model.Footer)
+                 </div>
+             }
+    </text>;
+
 }

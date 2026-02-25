@@ -2,7 +2,6 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -30,10 +29,9 @@ public class DisplayAuthorsWidget : Widget
                 new Variable("functionCode", "/n1:ClinicalDocument/n1:author[$hcpCounter]/n1:functionCode"),
                 new Collapser([
                         new Choose([
-                            new When("$assignedPerson", new DisplayLabel(LabelCodes.Author)),
-                        ], new DisplayLabel(LabelCodes.AuthorDevice))
-                    ],
-                    [], [
+                            new When("$assignedPerson", new EhdsiDisplayLabel(LabelCodes.Author)),
+                        ], new EhdsiDisplayLabel(LabelCodes.AuthorDevice))
+                    ], [
                         new Choose([
                             new When("$assignedPerson", new Choose([
                                 new When("not($assignedPerson/n1:name/@nullFlavor)", new WidgetWithVariables(

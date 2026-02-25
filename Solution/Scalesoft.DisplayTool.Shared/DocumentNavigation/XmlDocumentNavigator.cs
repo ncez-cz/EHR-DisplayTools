@@ -1,10 +1,15 @@
 ﻿using System.Xml.XPath;
+using Scalesoft.DisplayTool.Shared.Signature;
 
 namespace Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 public class XmlDocumentNavigator
 {
     private const string HideableContextName = "hideable-context";
+
+    private const string CompositionSubjectIdName = "composition-subject-id";
+
+    private const string SignatureValidationResultVariableName = "signature-validation-result";
 
     public XmlDocumentNavigator? Parent { get; }
 
@@ -13,6 +18,51 @@ public class XmlDocumentNavigator
     public string PathFromParent { get; }
 
     public bool IsInHideableContext => Variables.ContainsKey(HideableContextName);
+
+    public string? CompositionSubjectId
+    {
+        get => Variables.TryGetValue(CompositionSubjectIdName, out var value) ? value as string : null;
+        set
+        {
+            if (value != null)
+            {
+                Variables[CompositionSubjectIdName] = value;
+            }
+            else
+            {
+                Variables.Remove(CompositionSubjectIdName);
+            }
+        }
+    }
+
+    public DocumentSignatureValidationOperationResult? SignatureValidationResult
+    {
+        get => Variables.TryGetValue(SignatureValidationResultVariableName, out var value)
+            ? value as DocumentSignatureValidationOperationResult
+            : null;
+        set
+        {
+            if (value != null)
+            {
+                Variables[SignatureValidationResultVariableName] = value;
+            }
+            else
+            {
+                Variables.Remove(SignatureValidationResultVariableName);
+            }
+        }
+    }
+
+    public bool IsSubjectFromComposition()
+    {
+        if (Node?.Name != "subject" || CompositionSubjectId == null)
+        {
+            return false;
+        }
+
+        var expression = CreateExpression("f:reference/@value");
+        return CompositionSubjectId == Node.SelectSingleNode(expression)?.InnerXml;
+    }
 
     public Dictionary<string, object> Variables { get; }
 
@@ -216,12 +266,12 @@ public class XmlDocumentNavigator
     }
 
     /// <summary>
-    /// Compiles an XPath expression using the provided XPath string and the configured XML namespace manager.
+    ///     Compiles an XPath expression using the provided XPath string and the configured XML namespace manager.
     /// </summary>
     /// <param name="xpath">The XPath string to compile into an XPathExpression.</param>
     /// <returns>
-    /// An <see cref="XPathExpression"/> object compiled from the provided XPath string,
-    /// configured with a custom context that includes user-defined variables.
+    ///     An <see cref="XPathExpression" /> object compiled from the provided XPath string,
+    ///     configured with a custom context that includes user-defined variables.
     /// </returns>
     private XPathExpression CreateExpression(string xpath)
     {

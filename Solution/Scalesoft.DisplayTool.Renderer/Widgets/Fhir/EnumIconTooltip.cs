@@ -310,6 +310,22 @@ public class EnumIconTooltip(string nodePath, string enumDefinitionUri, Widget t
                     (SupportedCodes.Planned, ""),
                     (SupportedIcons.Calendar, SupportedIconClasses.BlueInfoIcon)
                 },
+                {
+                    (SupportedCodes.LaboratoryTrendB, ""),
+                    (SupportedIcons.FaceSmile, SupportedIconClasses.GreenSuccessIcon)
+                },
+                {
+                    (SupportedCodes.LaboratoryTrendD, ""),
+                    (SupportedIcons.StackedChevronDown, SupportedIconClasses.BlueInfoIcon)
+                },
+                {
+                    (SupportedCodes.LaboratoryTrendU, ""),
+                    (SupportedIcons.StackedChevronUp, SupportedIconClasses.BlueInfoIcon)
+                },
+                {
+                    (SupportedCodes.LaboratoryTrendW, ""),
+                    (SupportedIcons.FaceFrown, SupportedIconClasses.RedDangerIcon)
+                },
             };
 }
 
@@ -373,6 +389,10 @@ public enum SupportedCodes
     [EnumMember(Value = "low-priority")] LowPriority,
     [EnumMember(Value = "rejected")] Rejected,
     [EnumMember(Value = "planned")] Planned,
+    [EnumMember(Value = "b")] LaboratoryTrendB,
+    [EnumMember(Value = "d")] LaboratoryTrendD,
+    [EnumMember(Value = "u")] LaboratoryTrendU,
+    [EnumMember(Value = "w")] LaboratoryTrendW,
 }
 
 public enum SupportedIconClasses

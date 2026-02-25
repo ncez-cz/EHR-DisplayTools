@@ -15,15 +15,58 @@ public class Binary(
     string? mimeType = null,
     string? base64data = null,
     bool onlyContentOrUrl = false
-) : ItemListResourceBase<Binary>, IResourceWidget
+) : Widget, IResourceWidget
 {
     public static string ResourceType => "Binary";
     [UsedImplicitly] public static bool RequiresExternalTitle => true;
+    public static bool HasBorderedContainer(Widget widget) => false;
 
     public Binary() : this(null)
     {
     }
-    
+
+    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
+    {
+        var imagesNavs = new List<XmlDocumentNavigator>();
+        var otherNavs = new List<XmlDocumentNavigator>();
+        foreach (var item in items)
+        {
+            var mimeTypeResult = item.SelectSingleNode("f:contentType/@value").Node?.Value;
+            if (mimeTypeResult?.StartsWith("image") == true)
+            {
+                imagesNavs.Add(item);
+            }
+            else
+            {
+                otherNavs.Add(item);
+            }
+        }
+
+        var filesContent = new List<Widget>
+            { new Container(new LocalizedLabel("binary.files"), ContainerType.Div, "text-info-600") };
+        foreach (var widget in otherNavs)
+        {
+            filesContent.Add(new ChangeContext(widget,
+                new Container(new Binary(), idSource: widget, optionalClass: "fw-bold")));
+        }
+
+        var imagesContent = new List<Widget>();
+        foreach (var widget in imagesNavs)
+        {
+            imagesContent.Add(new ChangeContext(widget,
+                new Container(new Binary(), idSource: widget, optionalClass: "m-1 binary-image")));
+        }
+
+        return
+        [
+            new Container([
+                new Container(filesContent, ContainerType.Div, imagesNavs.Count == 0 ? "col-12" : "col-6"),
+                new Container(new FlexList(imagesContent, FlexDirection.Row), ContainerType.Div,
+                    otherNavs.Count == 0 ? "col-12" : "col-6"),
+            ], ContainerType.Div, "row")
+        ];
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -50,21 +93,23 @@ public class Binary(
 
         if (dataResult == null)
         {
-            return new TextContainer(TextStyle.Muted, new ConstantText("Nejsou dostupná žádná data")).Render(navigator, renderer, context);
+            return new TextContainer(TextStyle.Muted, new LocalizedLabel("general.data-unavailable")).Render(navigator,
+                renderer, context);
         }
 
         if (!mimeTypeResult.StartsWith("image"))
         {
             var parts = mimeTypeResult.Split('/');
             var type = parts.Length > 1 ? parts[1] : mimeTypeResult;
-                
-            var downloadLink = new Link(new ConstantText($"Příloha ({type})"), $"data:{mimeTypeResult};base64,{dataResult}", downloadInfo: "Příloha");
+
+            var downloadLink = new Link(
+                new Concat([new LocalizedLabel("node-names.Attachment-sgl"), new ConstantText($" ({type})")]),
+                $"data:{mimeTypeResult};base64,{dataResult}", downloadInfo: "Příloha");
             return downloadLink.Render(navigator, renderer, context);
         }
 
         var result = new Image($"data:{mimeTypeResult};base64,{dataResult}", altText, width, height);
 
         return result.Render(navigator, renderer, context);
-
     }
 }

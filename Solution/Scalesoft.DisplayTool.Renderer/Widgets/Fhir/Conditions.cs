@@ -6,11 +6,12 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
 public class Conditions(
     List<XmlDocumentNavigator> items,
-    Widget problemColumnLabel
+    Widget problemColumnLabel,
+    bool skipIdPopulation = false
 ) : Widget
 {
     public Conditions(List<XmlDocumentNavigator> items, bool skipIdPopulation = false) : this(items,
-        new ConstantText("Problém"))
+        new LocalizedLabel("condition"), skipIdPopulation)
     {
     }
 
@@ -20,18 +21,14 @@ public class Conditions(
         RenderContext context
     )
     {
-        var widget = new Column(
-            [
-                new AlternatingBackgroundColumn(
-                    items.Select(x => new ChangeContext(
-                            x,
-                            new ConditionResource(problemColumnLabel)
-                        )
-                    ).ToList<Widget>()
-                ),
-            ],
-            flexContainerClasses: "gap-0"
-        );
+        var widget =
+            new AlternatingBackgroundColumn(
+                items.Select(x => new ChangeContext(
+                        x,
+                        new ConditionResource(problemColumnLabel, skipIdPopulation)
+                    )
+                ).ToList<Widget>()
+            );
 
         return widget.Render(navigator, renderer, context);
     }

@@ -14,7 +14,7 @@ public class NameValuePair : Widget
     private readonly NameValuePairSize m_size;
     private readonly NameValuePairStyle m_style;
     private readonly IdentifierSource? m_visualIdSource;
-    private readonly NameValuePairClasses? m_classes;
+    private NameValuePairClasses? m_classes;
 
     public NameValuePair(
         IList<Widget> name,
@@ -68,6 +68,23 @@ public class NameValuePair : Widget
 
         var nameText = string.Join(string.Empty, m_name.Select(x => renderResult.GetContent(x) ?? string.Empty));
         var valueText = string.Join(string.Empty, m_value.Select(x => renderResult.GetContent(x) ?? string.Empty));
+        
+        if (string.IsNullOrEmpty(valueText) && string.IsNullOrEmpty(nameText))
+        {
+            return RenderResult.NullResult;
+        }
+
+        m_classes ??= new NameValuePairClasses();
+
+        if (string.IsNullOrEmpty(valueText))
+        {
+            m_classes.NameClass += " span-over-full-name-value-pair-cell";
+        }
+        else if (string.IsNullOrEmpty(nameText))
+        {
+            m_classes.ValueClass += " span-over-full-name-value-pair-cell";
+        }
+
         var viewModel = new ViewModel
         {
             NameContent = nameText,

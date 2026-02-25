@@ -9,7 +9,7 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets;
 public static class InfrequentProperties
 {
     public static Builder<T> Optional<T>(
-        InfrequentPropertiesData<T> presentProperties,
+        this InfrequentPropertiesData<T> presentProperties,
         T property,
         Func<List<XmlDocumentNavigator>, IList<Widget>> builder
     ) where T : notnull
@@ -29,7 +29,7 @@ public static class InfrequentProperties
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static Builder<T> Optional<T>(
-        InfrequentPropertiesData<T> presentProperties,
+        this InfrequentPropertiesData<T> presentProperties,
         T property,
         params Widget[] children
     ) where T : notnull
@@ -54,8 +54,8 @@ public static class InfrequentProperties
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static Builder<T> Optional<T>(
+        this InfrequentPropertiesData<T> presentProperties,
         Widget separator,
-        InfrequentPropertiesData<T> presentProperties,
         T property,
         params Widget[] children
     ) where T : notnull
@@ -79,7 +79,7 @@ public static class InfrequentProperties
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static Builder<T> Condition<T>(
-        InfrequentPropertiesData<T> presentProperties,
+        this InfrequentPropertiesData<T> presentProperties,
         T property,
         params Widget[] children
     ) where T : notnull
@@ -101,7 +101,7 @@ public static class InfrequentProperties
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
     public static Builder<T> Optional<T>(
-        InfrequentPropertiesData<T> presentProperties,
+        this InfrequentPropertiesData<T> presentProperties,
         T property,
         Func<XmlDocumentNavigator, IList<Widget>> builder,
         Widget? separator = null
@@ -123,6 +123,14 @@ public static class InfrequentProperties
         Widget? separator = null
     ) : Widget where T : notnull
     {
+        private Widget? m_elseWidget;
+
+        public Builder<T> Else(params Widget[] children)
+        {
+            m_elseWidget = new Concat(children);
+            return this;
+        }
+
         public override async Task<RenderResult> Render(
             XmlDocumentNavigator navigator,
             IWidgetRenderer renderer,
@@ -131,12 +139,24 @@ public static class InfrequentProperties
         {
             if (!presentProperties.TryGet(property, out var path))
             {
+                if (m_elseWidget != null)
+                {
+                    return await m_elseWidget.Render(navigator, renderer, context);
+                }
+
                 return string.Empty;
             }
 
             var elements = navigator.SelectAllNodes(path).ToList();
             return await new Concat(builder(elements), separator).Render(navigator, renderer, context);
         }
+    }
+
+    public static InfrequentPropertiesDataInContext<T> Evaluate<T>(XmlDocumentNavigator item) where T : Enum
+    {
+        var props = Evaluate<T>([item]);
+
+        return new InfrequentPropertiesDataInContext<T>(item, props);
     }
 
     public static InfrequentPropertiesData<T> Evaluate<T>(List<XmlDocumentNavigator> items)

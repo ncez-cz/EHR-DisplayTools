@@ -1,0 +1,188 @@
+@use "../../HtmlResources/src/theme-variables" as *;
+
+.timeline {
+    position: relative;
+}
+
+$timeline-bullet-size: 12px;
+$timeline-bullet-top-margin: 0.15rem;
+$timeline-width: 6px;
+$timeline-to-container-left-pos: $spacing05;
+$timeline-item-to-container-left-pos: $spacing11;
+
+.timeline-vertical {
+    &::before {
+        content: '';
+        position: absolute;
+        left: $timeline-to-container-left-pos;
+        top: calc(#{$timeline-bullet-size * 0.5} + $spacing02);
+        height: calc(100% - (#{$timeline-bullet-size * 0.5} + $spacing02)); // 100% - top
+        width: $timeline-width;
+        background: var(--#{$prefix}primary-300);
+    }
+
+    .nested-timeline-card-container:last-child, .timeline-card-container:last-child {
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            background-color: var(--#{$prefix}body-bg);
+            top: calc(#{$timeline-bullet-size * 0.5} + $timeline-bullet-top-margin);
+            left: calc(#{$timeline-to-container-left-pos} - #{$timeline-item-to-container-left-pos});
+            height: 100%;
+            width: $timeline-width;
+            z-index: 2;
+        }
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: $spacing06;
+        margin-left: $timeline-item-to-container-left-pos;
+
+        &.main-care-plan {
+            &::before {
+                display: none;
+            }
+        }
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: calc(#{$timeline-to-container-left-pos} - #{$timeline-item-to-container-left-pos} - (#{$timeline-width * 0.5}));
+            top: $timeline-bullet-top-margin;
+            width: $timeline-bullet-size;
+            height: $timeline-bullet-size;
+            border-radius: 50%;
+            background: var(--#{$prefix}primary-600);
+            z-index: 3;
+        }
+
+        &.request-group-container {
+            &::before {
+                background: var(--#{$prefix}primary-700);
+            }
+        }
+    }
+}
+
+.timeline-title {
+    font-weight: bold;
+    color: var(--#{$prefix}primary-700);
+}
+
+.timeline-time {
+    color: var(--#{$prefix}primary-600);
+    margin-bottom: 0.15rem;
+    font-size: var(--#{$prefix}h5-font-size);
+}
+
+.timeline-body {
+    &:not(:has(.section)) {
+        .card {
+            .card-body {
+                background-color: var(--#{$prefix}card-bg);
+            }
+
+            $levelsOfNesting: 50; // 50 levels of nesting should be more than enough of card nesting in care plan activities 
+            $selector: "";
+            @for $i from 2 through $levelsOfNesting {
+                $selector: $selector + " .card";
+
+                &#{$selector} .card-body {
+                    @if $i % 2 == 0 {
+                        background-color: var(--#{$prefix}primary-100);
+                    } @else {
+                        background-color: var(--#{$prefix}card-bg);
+                    }
+                }
+            }
+        }
+
+    }
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.timeline-group-container {
+    margin-top: $spacing03;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing03;
+    padding: 0;
+    border: none;
+    background-color: transparent;
+}
+
+.timeline-group-item {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 200px;
+    margin-bottom: 0;
+    padding: $spacing03;
+    background: var(--#{$prefix}primary-50);
+    border-radius: var(--#{$prefix}border-radius-sm);
+    border: 1px solid var(--#{$prefix}primary-300);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.timeline-group-content {
+    padding: 0;
+}
+
+.request-group-container {
+    &::before {
+        background: var(--#{$prefix}primary-700);
+    }
+
+    .timeline-content {
+        background: var(--#{$prefix}primary-300);
+    }
+}
+
+.care-plan-timeline {
+    .child-activity {
+        margin-left: $spacing11 + $spacing04;
+
+        &::before {
+            width: $spacing02;
+            height: $spacing02;
+            left: calc(#{$spacing05} - #{$spacing11} - #{$spacing04} - 2px);
+            background: var(--#{$prefix}primary-400);
+        }
+    }
+
+    .main-care-plan {
+        margin-bottom: $spacing02;
+    }
+}
+
+.timeline-group-item.child-activity.request-group-item {
+    margin-left: 0;
+}
+
+.timeline-card-container {
+    position: relative;
+    padding: $spacing02 0;
+
+    .timeline-item {
+        margin-bottom: 0;
+    }
+}
+
+.unscheduled-activities-container {
+    margin-top: $spacing06;
+}
+
+.request-group-item + .request-group-item {
+    margin-top: $spacing04;
+}
+
+.nested-timeline-card-container ~ .nested-timeline-card-container {
+    margin-top: $spacing04;
+}

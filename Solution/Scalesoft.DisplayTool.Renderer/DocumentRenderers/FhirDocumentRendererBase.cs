@@ -13,6 +13,7 @@ using Scalesoft.DisplayTool.Renderer.Validators;
 using Scalesoft.DisplayTool.Renderer.Validators.Signature;
 using Scalesoft.DisplayTool.Renderer.Widgets;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 using Scalesoft.DisplayTool.Shared.Translation;
 
@@ -24,6 +25,7 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
     private readonly ILogger<FhirDocumentRendererBase> m_logger;
     private readonly ICodeTranslator m_translator;
     private readonly Language m_language;
+    private readonly IFhirDocumentSignatureManager m_fhirDocumentSignatureManager;
     private readonly ILoggerFactory m_loggerFactory;
 
     protected FhirDocumentRendererBase(
@@ -34,13 +36,15 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
         HtmlToPdfConverter htmlToPdfConverter,
         ICodeTranslator translator,
         Language language,
-        IDocumentSignatureValidationManager documentSignatureValidationManager,
+        IPdfSignatureManager pdfSignatureManager,
+        IFhirDocumentSignatureManager fhirDocumentSignatureManager,
         ILoggerFactory loggerFactory
-    ) : base(documentValidatorProvider, htmlToPdfConverter, documentSignatureValidationManager)
+    ) : base(documentValidatorProvider, htmlToPdfConverter, pdfSignatureManager)
     {
         InputFormat = inputFormat;
         m_translator = translator;
         m_language = language;
+        m_fhirDocumentSignatureManager = fhirDocumentSignatureManager;
         m_loggerFactory = loggerFactory;
         m_widgetRenderer = widgetRenderer;
         m_logger = logger;
@@ -55,6 +59,7 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
         OutputFormat outputFormat,
         DocumentOptions options,
         DocumentType documentType,
+        bool isEmbeddable,
         RenderMode renderMode = RenderMode.Standard,
         LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
     )
@@ -75,6 +80,12 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
             }
         }
 
+        var documentTypeForSignatureValidation = MapDocumentType(InputFormat);
+
+        var signatureValidationResult =
+            await m_fhirDocumentSignatureManager.ValidateSignatureAsync(fileContent,
+                documentTypeForSignatureValidation);
+
         XPathNavigator? navigator = null;
         try
         {
@@ -87,20 +98,46 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
         }
         catch (Exception ex) when (ex is JsonException || ex is XmlException)
         {
-            var message = "Došlo k chybě při zpracovávání dokumentu";
-            m_logger.LogError(ex, message);
+            var message = "An error occurred while processing the document.";
+
+            if (m_logger.IsEnabled(LogLevel.Error))
+            {
+                m_logger.LogError(ex, message);
+            }
+
             return new DocumentResult
             {
-                Content = Array.Empty<byte>(),
-                Errors = [message],
+                Content = [],
+                Errors = [message, ex.Message],
                 Warnings = [],
                 IsRenderedSuccessfully = false,
             };
         }
 
         var root = new XmlDocumentNavigator(navigator);
-        root.AddNamespace("f", "http://hl7.org/fhir");
-        root.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
+        AddFhirNamespaces(root);
+
+        var hasProvenanceWithSignature = root.EvaluateCondition("f:Bundle/f:entry/f:resource/f:Provenance/f:signature");
+        if (hasProvenanceWithSignature)
+        {
+            var provenanceTarget =
+                ReferenceHandler.GetSingleNodeNavigatorFromReference(root,
+                    "f:Bundle/f:entry/f:resource/f:Provenance[1]/f:target[1]", ".");
+            var firstInnerBundle = root.SelectSingleNode("f:Bundle/f:entry/f:resource/f:Bundle[1]");
+            if (provenanceTarget?.Node?.ComparePosition(firstInnerBundle.Node) == XmlNodeOrder.Same)
+            {
+                var sr = new StringReader(firstInnerBundle.Node?.OuterXml ?? string.Empty);
+                var newDoc = new XPathDocument(sr);
+                var newNav = newDoc.CreateNavigator();
+                root = new XmlDocumentNavigator(newNav);
+                AddFhirNamespaces(root);
+            }
+        }
+
+        if (signatureValidationResult != null)
+        {
+            root.SignatureValidationResult = signatureValidationResult;
+        }
 
         var renderContext = new RenderContext(
             m_translator,
@@ -111,6 +148,13 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
             options.PreferTranslationsFromDocument,
             levelOfDetail
         );
+
+        var subjectId = root.SelectSingleNode("f:Bundle/f:entry/f:resource/f:Composition/f:subject/f:reference/@value")
+            .Node?.InnerXml;
+        if (subjectId != null)
+        {
+            root.CompositionSubjectId = subjectId;
+        }
 
         var nodesWithIds = root.SelectAllNodes("f:Bundle/f:entry/f:resource//*[f:id[@value]]");
         foreach (var nodeWithId in nodesWithIds)
@@ -126,45 +170,61 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
             }
         }
 
-        var composition = root.SelectSingleNode("f:Bundle/f:entry/f:resource/f:Composition");
-        if (ResourceIdentifier.TryFromNavigator(composition, out var compositionId))
+        var resource = root.SelectSingleNode("/f:Bundle/f:entry[1]/f:resource/*[1]");
+        if (resource.Node == null)
         {
-            renderContext.AddRenderedResource(composition, compositionId, out _);
+            // Try rendering a raw resource without a composition
+            resource = root.SelectSingleNode("/*[1]");
+            if (resource.Node == null)
+            {
+                return new DocumentResult
+                {
+                    Content = [],
+                    Errors = ["No resource found."],
+                    Warnings = [],
+                    IsRenderedSuccessfully = false,
+                };
+            }
         }
 
-        if (composition.Node == null)
+        if (ResourceIdentifier.TryFromNavigator(resource, out var compositionId))
+        {
+            renderContext.AddRenderedResource(resource, compositionId, out _);
+        }
+
+        if (documentType != DocumentType.AnyBundle && resource.Node.Name != "Composition")
         {
             return new DocumentResult
             {
                 Content = [],
-                Errors = ["Missing required Composition resource"],
+                Errors = ["Missing required Composition resource."],
                 Warnings = [],
                 IsRenderedSuccessfully = false,
             };
         }
 
-        Widget widget = documentType switch
+        Widget widget;
+
+        // If we're dealing with a raw resource without a composition, render it as a generic resource widget
+        if (resource.Node.Name != "Composition" && resource.Node.Name != "Bundle")
         {
-            DocumentType.PatientSummary => new ChangeContext(composition,
-                new CompositionIps()),
-            DocumentType.DischargeReport => new ChangeContext(composition,
-                new CompositionHdr()),
-            DocumentType.ImagingOrder => new ChangeContext(composition,
-                new CompositionImagingOrder()),
-            DocumentType.Laboratory => new ChangeContext(
-                composition,
-                new CompositionLab()
-            ),
-            DocumentType.LaboratoryOrder => new ChangeContext(
-                composition,
-                new CompositionLabOrder()
-            ),
-            DocumentType.ImagingReport => new ChangeContext(
-                composition,
-                new CompositionImg()
-            ),
-            _ => throw new NotSupportedException($"Unknown document type: {documentType}"),
-        };
+            widget = new Concat([new FhirHeader(), new AnyResource(resource)]);
+        }
+        else
+        {
+            widget = documentType switch
+            {
+                DocumentType.PatientSummary => new ChangeContext(resource, new CompositionIps()),
+                DocumentType.DischargeReport => new ChangeContext(resource, new CompositionHdr()),
+                DocumentType.ImagingOrder => new ChangeContext(resource, new CompositionImagingOrder()),
+                DocumentType.Laboratory => new ChangeContext(resource, new CompositionLab()),
+                DocumentType.LaboratoryOrder => new ChangeContext(resource, new CompositionLabOrder()),
+                DocumentType.ImagingReport => new ChangeContext(resource, new CompositionImg()),
+                DocumentType.AnyBundle => new ChangeContext(resource, new AnyBundle()),
+                DocumentType.EmsReport => new ChangeContext(resource, new CompositionEms()),
+                _ => throw new NotSupportedException($"Unknown document type: {documentType}"),
+            };
+        }
 
         List<Widget> widgets =
         [
@@ -185,7 +245,8 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
         var validationRenderResult = await validationWidget.Render(root, m_widgetRenderer, renderContext);
 
         var htmlContent =
-            await m_widgetRenderer.WrapWithLayout(renderResult.Content, validationRenderResult.Content, renderMode);
+            await m_widgetRenderer.WrapWithLayout(renderResult.Content, validationRenderResult.Content, renderMode,
+                isEmbeddable);
 
         var renderedDocumentContent = await CreateOutputDocumentAsync(fileContent, htmlContent, outputFormat);
         var errors = renderResult.Errors.Where(x => x.Severity >= ErrorSeverity.Fatal)
@@ -205,5 +266,24 @@ public abstract class FhirDocumentRendererBase : SpecificDocumentRendererBase
         };
 
         return documentResult;
+    }
+
+    private FhirDocumentFormat MapDocumentType(InputFormat inputFormat)
+    {
+        switch (inputFormat)
+        {
+            case InputFormat.FhirXml:
+                return FhirDocumentFormat.FhirXml;
+            case InputFormat.FhirJson:
+                return FhirDocumentFormat.FhirJson;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(inputFormat), inputFormat, null);
+        }
+    }
+
+    private void AddFhirNamespaces(XmlDocumentNavigator root)
+    {
+        root.AddNamespace("f", "http://hl7.org/fhir");
+        root.AddNamespace("xhtml", "http://www.w3.org/1999/xhtml");
     }
 }

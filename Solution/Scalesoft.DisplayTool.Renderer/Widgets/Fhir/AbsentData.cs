@@ -18,10 +18,12 @@ public class AbsentData(string path) : Widget
         List<Widget> widgets =
         [
             new TextContainer(TextStyle.Muted, [
-                new DisplayLabel(LabelCodes.MissingInfo),
-                new ConstantText(", důvod: "),
+                new EhdsiDisplayLabel(LabelCodes.MissingInfo),
+                new ConstantText(", "),
+                new LocalizedLabel("general.reason"),
+                new ConstantText(": "),
                 new Choose([
-                    new When($"{path}/f:extension/f:valueCode/@value",
+                    new When($"{path}/f:extension/f:valueCode/@value", // TODO - maybe extension condition is missing? - see IsDataAbsent
                         new EnumLabel($"{path}/f:extension/f:valueCode/@value",
                             "http://hl7.org/fhir/ValueSet/data-absent-reason")),
                     new When($"{path}/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/data-absent-reason']/f:code/@value",

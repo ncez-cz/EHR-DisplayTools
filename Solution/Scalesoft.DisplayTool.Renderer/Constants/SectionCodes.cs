@@ -5,14 +5,17 @@ public static class LoincSectionCodes
     public const string Allergies = "48765-2";
     public const string AdvanceDirectives = "42348-3";
     public const string Medications = "10160-0";
+    public const string MedicationAdministration = "87232-5";
     public const string Immunizations = "11369-6";
 
     public const string PastIllnessHx = "11348-0";
 
     // CZ HDR Claims this is diagnostic summary
     public const string Problems = "11450-4";
+    public const string HospitalDischargeDiagnosis = "11535-2";
     public const string FunctionalStatus = "47420-5";
-    public const string Alert = "75310-3";
+    public const string HealthConcerns = "75310-3";
+    public const string Alert = "104605-1";
     public const string PlanOfCare = "18776-5";
     public const string PhysicalFindings = "29545-1";
     public const string SignificantResults = "30954-2";
@@ -31,6 +34,7 @@ public static class LoincSectionCodes
 
     // Probably should use 67781-5
     public const string Synthesis = "51848-0";
+    public const string SummarizationOfEncounter = "67781-5";
     public const string AdditionalDocuments = "77599-9";
     public const string PaymentSources = "48768-6";
     public const string PhysicalExamByBodyAreas = "55286-9";
@@ -50,4 +54,10 @@ public static class LoincSectionCodes
     public const string Appointment = "56446-8";
     public const string ClinicalInformation = "55752-0";
     public const string RadiologyStudies = "18726-0";
+    
+    //EMS
+    public const string Attachments = "34109-9";
+    public const string Procedure = "29554-3";
+    public const string Mission = "67664-3";
+    public const string Timeline = "67667-6";
 }

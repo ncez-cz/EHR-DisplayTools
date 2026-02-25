@@ -15,119 +15,36 @@ public class ObservationResource : IResourceWidget
 
     public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator navigator)
     {
-        //// Observation - Anthropometric Data
-            if (navigator.EvaluateCondition(
-                    "f:code/f:coding[f:system/@value='http://loinc.org' and (f:code/@value='39156-5' or f:code/@value='56086-2' or f:code/@value='8280-0' or f:code/@value='9843-4' or f:code/@value='8302-2' or f:code/@value='29463-7')]"))
+        Widget? label = null;
+
+        var infrequentProperties = InfrequentProperties.Evaluate<ObservationInfrequentProperties>(navigator);
+
+        if (navigator.EvaluateCondition("f:code"))
+        {
+            label = new ChangeContext(navigator, "f:code", new CodeableConcept());
+        }
+
+        if (infrequentProperties.Contains(ObservationInfrequentProperties.Value) &&
+            !navigator.EvaluateCondition("f:valueSampledData")) // use observation value, except for charts
+        {
+            return new ResourceSummaryModel
             {
-                var valueQuantityNav = navigator.SelectSingleNode("f:valueQuantity");
-                if (!IsNavigatorNullOrEmpty(valueQuantityNav))
-                {
-                    return new ResourceSummaryModel
-                    {
-                        Value = new NameValuePair(
-                            new ChangeContext(
-                                navigator.SelectSingleNode("f:code[f:coding/f:system/@value='http://loinc.org']"),
-                                new CodeableConcept()),
-                            new ChangeContext(valueQuantityNav, new ShowQuantity())),
-                    };
-                }
-            }
+                Label = label,
+                Value = new ChangeContext(navigator, new OpenTypeElement(null)),
+            };
+        }
 
-            //// Observation - Infectious contact
-            if (navigator.EvaluateCondition(
-                    "f:code/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/v3-ParticipationType' and f:code/@value='EXPAGNT']"))
+        if (label != null)
+        {
+            return new ResourceSummaryModel
             {
-                var valueNav = navigator.SelectSingleNode("*[starts-with(local-name(), 'value')]");
-                if (!IsNavigatorNullOrEmpty(valueNav) &&
-                    valueNav.Node?.Name !=
-                    "valueSampledData") // ignore if value is missing or is SampleData - cannot create link text out of a chart
-                {
-                    return new ResourceSummaryModel
-                    {
-                        Value = new NameValuePair(
-                            new ChangeContext(navigator.SelectSingleNode("f:code"), new CodeableConcept()),
-                            new ChangeContext(navigator, new OpenTypeElement(null))),
-                    };
-                        
-                }
-            }
+                Value = label,
+            };
+        }
 
-            //// Observation - SDOH
-            if (navigator.EvaluateCondition(
-                    "f:category/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/observation-category' and f:code/@value='social-history']"))
-            {
-                var valueNav = navigator.SelectSingleNode("*[starts-with(local-name(), 'value')]");
-                if (!IsNavigatorNullOrEmpty(valueNav) &&
-                    valueNav.Node?.Name !=
-                    "valueSampledData") // ignore if value is missing or is SampleData - cannot create link text out of a chart
-                {
-                    return new ResourceSummaryModel
-                    {
-                        Value = new NameValuePair(
-                            new ChangeContext(navigator.SelectSingleNode("f:code"), new CodeableConcept()),
-                            new ChangeContext(navigator, new OpenTypeElement(null)))
-                    };
-                }
-            }
-
-            //// Observation - travel history
-            if (navigator.EvaluateCondition(
-                    "f:code/f:coding[f:system/@value='http://loinc.org' and f:code/@value='94651-7']"))
-            {
-                var valueNav = navigator.SelectSingleNode("f:valueCodeableConcept");
-                if (!IsNavigatorNullOrEmpty(valueNav))
-                {
-                    return new ResourceSummaryModel
-                    {
-                        Value = new NameValuePair(
-                            new ChangeContext(navigator.SelectSingleNode("f:code"), new CodeableConcept()),
-                            new ChangeContext(valueNav, new CodeableConcept()))
-                    };
-                }
-            }
-
-            //// Observation - Laboratory
-            if (navigator.EvaluateCondition(CzLaboratoryObservation.XPathCondition))
-            {
-                var valueNav = navigator.SelectSingleNode("*[starts-with(local-name(), 'value')]");
-                if (!IsNavigatorNullOrEmpty(valueNav) &&
-                    valueNav.Node?.Name !=
-                    "valueSampledData") // ignore if value is missing or is SampleData - cannot create link text out of a chart
-                {
-                    return new ResourceSummaryModel
-                    {
-                        Value = new NameValuePair(
-                            new ChangeContext(navigator.SelectSingleNode("f:code"), new CodeableConcept()),
-                            new ChangeContext(navigator, new OpenTypeElement(null))),
-                    };
-                }
-            }
-
-            //// Observation - Imaging Order is skipped - no obvious way to detect it
-
-            //// Observation - Imaging Report
-            if (navigator.EvaluateCondition(
-                    "f:identifier/f:type/f:coding[f:system/@value='https://hl7.cz/fhir/img/CodeSystem/codesystem-missing-dicom-terminology' and f:code/@value='00080018']"))
-            {
-                var valueNav = navigator.SelectSingleNode("*[starts-with(local-name(), 'value')]");
-                if (!IsNavigatorNullOrEmpty(valueNav) &&
-                    valueNav.Node?.Name !=
-                    "valueSampledData") // ignore if value is missing or is SampleData - cannot create link text out of a chart
-                {
-                    return new ResourceSummaryModel
-                    {
-                        Value = new NameValuePair(
-                            new ChangeContext(navigator.SelectSingleNode("f:code"), new CodeableConcept()),
-                            new ChangeContext(navigator, new OpenTypeElement(null))),
-                    };
-                }
-            }
-
-            //// Observation - Laboratory Order is skipped - no obvious way to detect it
-
-            return null;
+        return null;
     }
-    
+
     private static bool IsNavigatorNullOrEmpty(XmlDocumentNavigator nav)
     {
         if (nav.Node == null)
@@ -152,7 +69,24 @@ public class ObservationResource : IResourceWidget
 
         return false;
     }
-    
+
+    public static bool HasBorderedContainer(Widget resourceWidget)
+    {
+        if (resourceWidget is If ifWidget) // CzLaboratoryObservation is wrapped in an If widget
+        {
+            return true;
+        }
+
+        if (resourceWidget is AlternatingBackgroundColumn
+            alternatingBackgroundColumn) // regular observations are wrapped in an AlternatingBackgroundColumn widget, by themselves they have no border, and if there are no broken references, AlternatingBackgroundColumn also has no border
+        {
+            return false;
+        }
+
+        throw new InvalidOperationException(
+            $"Expected {nameof(If)} widget or {nameof(AlternatingBackgroundColumn)} widget,  got {resourceWidget.GetType().Name}");
+    }
+
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {
         var labObs = new List<XmlDocumentNavigator>();
@@ -172,15 +106,17 @@ public class ObservationResource : IResourceWidget
         return
         [
             new If(_ => labObs.Count != 0, new CzLaboratoryObservation(labObs)),
+            new If(_ => labObs.Count != 0 && otherObs.Count != 0,
+                new Container([], ContainerType.Div, "my-2", renderEmptyContainer: true)),
             new AlternatingBackgroundColumn(
                 [
                     ..otherObs.Select(x => new ChangeContext(
                             x,
                             new ObservationCard()
                         )
-                    )
+                    ),
                 ]
-            ),
+            )
         ];
     }
 }

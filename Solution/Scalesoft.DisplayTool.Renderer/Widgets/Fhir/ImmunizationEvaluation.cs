@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Immunization;
@@ -12,49 +12,66 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class ImmunizationEvaluation : SequentialResourceBase<ImmunizationEvaluation>, IResourceWidget
 {
     public static string ResourceType => "ImmunizationEvaluation";
+    public static bool HasBorderedContainer(Widget widget) => true;
 
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         var cardContent = new List<Widget>
         {
             new Container([
                 // id must be rendered by the parent class
                 // ignore identifier
-                new NameValuePair([new ConstantText("Stav")], [
+                new NameValuePair([new LocalizedLabel("immunization-evaluation.status")], [
                     new Choose(
                     [
-                        new When("f:status/@value='completed'", new ConstantText("Dokončeno")),
-                        new When("f:status/@value='entered-in-error'", new ConstantText("Zadáno omylem")),
+                        new When("f:status/@value='completed'",
+                            new LocalizedLabel("immunization-evaluation.status.completed")),
+                        new When("f:status/@value='entered-in-error'",
+                            new LocalizedLabel("immunization-evaluation.status.entered-in-error")),
                     ]),
                 ]),
-                new Optional("f:date", new NameValuePair([new DisplayLabel(LabelCodes.Date)], [new ShowDateTime()])),
+                new Optional("f:date",
+                    new NameValuePair([new EhdsiDisplayLabel(LabelCodes.Date)], [new ShowDateTime()])),
                 new Optional("f:authority",
-                    new NameValuePair([new ConstantText("Zodpovědná organizace")],
+                    new NameValuePair([new LocalizedLabel("immunization-evaluation.authority")],
                     [
-                        ShowSingleReference.WithDefaultDisplayHandler(nav => [new Container([new PersonOrOrganization(nav)], idSource: nav)])
+                        ShowSingleReference.WithDefaultDisplayHandler(nav =>
+                            [new Container([new PersonOrOrganization(nav)], idSource: nav)]),
                     ])),
-                new NameValuePair([new ConstantText("Očkování proti")], [new ChangeContext("f:targetDisease", new CodeableConcept())]),
-            ], optionalClass: "name-value-pair-wrapper w-max-content"),
+                new NameValuePair([new LocalizedLabel("immunization-evaluation.targetDisease")],
+                    [new ChangeContext("f:targetDisease", new CodeableConcept())]),
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
             // ignore patient
-            new Collapser([new ConstantText("Vyhodnocované očkování")], [],
-                [ShowSingleReference.WithDefaultDisplayHandler(nav => [new Immunizations([nav])], "f:immunizationEvent")]),
+            new Collapser([new LocalizedLabel("immunization-evaluation.immunizationEvent")],
+            [
+                ShowSingleReference.WithDefaultDisplayHandler(nav => [new Immunizations([nav])], "f:immunizationEvent")
+            ]),
             new Container([
-                new NameValuePair([new ConstantText("Stav dávky")], [new ChangeContext("f:doseStatus", new CodeableConcept())]),
-                new Optional("f:doseStatusReason", new NameValuePair([new ConstantText("Důvod stavu dávky")], [
-                    new ItemListBuilder(".", ItemListType.Unordered, _ =>
-                    [
-                        new CodeableConcept(),
-                    ]),
-                ])),
-                new Optional("f:description", new NameValuePair([new ConstantText("Popis")], [new Text("@value")])),
-                new Optional("f:series", new NameValuePair([new ConstantText("Název očkovací řady")], [new Text("@value")])),
+                new NameValuePair([new LocalizedLabel("immunization-evaluation.doseStatus")],
+                    [new ChangeContext("f:doseStatus", new CodeableConcept())]),
+                new Optional("f:doseStatusReason", new NameValuePair(
+                    [new LocalizedLabel("immunization-evaluation.doseStatusReason")], [
+                        new ItemListBuilder(".", ItemListType.Unordered, _ =>
+                        [
+                            new CodeableConcept(),
+                        ]),
+                    ])),
+                new Optional("f:description",
+                    new NameValuePair([new LocalizedLabel("immunization-evaluation.description")],
+                        [new Text("@value")])),
+                new Optional("f:series",
+                    new NameValuePair([new LocalizedLabel("immunization-evaluation.series")], [new Text("@value")])),
                 new Condition("f:doseNumberPositiveInt | f:doseNumberString",
-                    new NameValuePair([new DisplayLabel(LabelCodes.DoseNumber)],
+                    new NameValuePair([new EhdsiDisplayLabel(LabelCodes.DoseNumber)],
                         [new OpenTypeElement(null, "doseNumber")])), // positiveInt | string
                 new Condition("f:seriesDosesPositiveInt | f:seriesDosesString",
-                    new NameValuePair([new ConstantText("Celkový počet dávek")],
+                    new NameValuePair([new LocalizedLabel("immunization-evaluation.seriesDoses")],
                         [new OpenTypeElement(null, "seriesDoses")])), // positiveInt | string
-            ], optionalClass: "name-value-pair-wrapper w-max-content"),
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
         };
 
         var widget = new Card(null, new Container(cardContent));

@@ -9,23 +9,20 @@
         <DisableScopedCssBundling>false</DisableScopedCssBundling>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="GitVersion.MsBuild" Version="6.4.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        <PackageReference Include="GitVersion.MsBuild" Version="6.5.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.20" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.9" />
-        <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.9" />
-        <PackageReference Include="ZXing.Net" Version="0.16.10"/>
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.4"/>
+        <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.23"/>
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.2"/>
+        <PackageReference Include="ZXing.Net" Version="0.16.11"/>
     </ItemGroup>
-
     <ItemGroup>
         <PackageJsonFile Include="$(ProjectDir)package.json" Visible="false"/>
         <PackageLockFile Include="$(ProjectDir)package-lock.json" Visible="false"/>
         <PnpmLockFile Include="$(ProjectDir)pnpm-lock.yaml" Visible="false"/>
     </ItemGroup>
-
     <!-- 🧹 Clean CSS before rebuild -->
     <Target Name="CleanCssFiles" BeforeTargets="Build;BuildFrontend">
         <ItemGroup>
@@ -33,59 +30,39 @@
         </ItemGroup>
         <Delete Files="@(FilesToDelete)"/>
     </Target>
-
     <!-- ⚙️ Detect available package manager (Bun > PNPM > NPM) -->
     <Target Name="DetectPackageManager">
         <!-- Check for Bun -->
         <Exec Command="bun --version" IgnoreExitCode="true" StandardOutputImportance="Low">
-            <Output TaskParameter="ExitCode" PropertyName="BunExists" />
+            <Output TaskParameter="ExitCode" PropertyName="BunExists"/>
         </Exec>
-
         <!-- Check for PNPM -->
         <Exec Command="pnpm --version" IgnoreExitCode="true" StandardOutputImportance="Low">
-            <Output TaskParameter="ExitCode" PropertyName="PnpmExists" />
+            <Output TaskParameter="ExitCode" PropertyName="PnpmExists"/>
         </Exec>
-
         <PropertyGroup>
             <PackageManager Condition="'$(BunExists)' == '0'">bun</PackageManager>
             <PackageManager Condition="'$(BunExists)' != '0' and '$(PnpmExists)' == '0'">pnpm</PackageManager>
             <PackageManager Condition="'$(PackageManager)' == ''">npm</PackageManager>
         </PropertyGroup>
-
         <Message Text="Using package manager: $(PackageManager)" Importance="High"/>
     </Target>
-
     <!-- 📦 Restore frontend deps -->
-    <Target Name="RestoreFrontendDependencies"
-            BeforeTargets="Build;BuildFrontend"
-            DependsOnTargets="DetectPackageManager"
-            Inputs="@(PackageJsonFile)"
-            Outputs="$(ProjectDir)node_modules\.restore.timestamp">
+    <Target Name="RestoreFrontendDependencies" BeforeTargets="Build;BuildFrontend" DependsOnTargets="DetectPackageManager" Inputs="@(PackageJsonFile)" Outputs="$(ProjectDir)node_modules\.restore.timestamp">
         <Message Text="Restoring frontend dependencies via $(PackageManager)" Importance="High"/>
-
         <!-- Ensure node_modules folder exists -->
-        <MakeDir Directories="$(ProjectDir)node_modules" Condition="!Exists('$(ProjectDir)node_modules')" />
-
+        <MakeDir Directories="$(ProjectDir)node_modules" Condition="!Exists('$(ProjectDir)node_modules')"/>
         <!-- Run install -->
-        <Exec WorkingDirectory="$(ProjectDir)" Command="$(PackageManager) install" />
-
+        <Exec WorkingDirectory="$(ProjectDir)" Command="$(PackageManager) install"/>
         <!-- Always create timestamp -->
-        <Touch Files="$(ProjectDir)node_modules\.restore.timestamp" AlwaysCreate="true" />
+        <Touch Files="$(ProjectDir)node_modules\.restore.timestamp" AlwaysCreate="true"/>
     </Target>
-
     <!-- 🏗️ Build frontend (bun run build or pnpm/npm run build) -->
     <Target Name="BuildFrontend" BeforeTargets="Build" DependsOnTargets="DetectPackageManager">
         <Message Text="Building frontend using $(PackageManager)" Importance="High"/>
-
-        <Exec WorkingDirectory="$(ProjectDir)" Condition="'$(Configuration)' == 'Debug'"
-              Command="$(PackageManager) run build-dev" />
-
-        <Exec WorkingDirectory="$(ProjectDir)" Condition="'$(Configuration)' != 'Debug'"
-              Command="$(PackageManager) run build" />
+        <Exec WorkingDirectory="$(ProjectDir)" Condition="'$(Configuration)' == 'Debug'" Command="$(PackageManager) run build-dev"/>
+        <Exec WorkingDirectory="$(ProjectDir)" Condition="'$(Configuration)' != 'Debug'" Command="$(PackageManager) run build"/>
     </Target>
-    
-    
-    
     <ItemGroup>
         <EmbeddedResource Include="$(ProjectDir)/HtmlResources/dist/**/*"/>
     </ItemGroup>
@@ -100,22 +77,17 @@
         <None Update="$(ProjectDir)/Widgets/RazorComponents/*.razor.css" CssScope="data-$([System.String]::Copy('%(Filename)').Replace('.razor','').ToLower())"/>
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="PDFsharp" Version="6.1.1"/>
-        <PackageReference Include="PuppeteerSharp" Version="20.1.0"/>
-        <PackageReference Include="System.ServiceModel.Duplex" Version="6.0.0" />
-        <PackageReference Include="System.ServiceModel.Http" Version="8.1.2" />
-        <PackageReference Include="System.ServiceModel.NetTcp" Version="8.1.2" />
-        <PackageReference Include="System.ServiceModel.Security" Version="6.0.0" />
-        <PackageReference Include="System.ServiceModel.Federation" Version="8.1.2" />
+        <PackageReference Include="PDFsharp" Version="6.2.4"/>
+        <PackageReference Include="PuppeteerSharp" Version="20.2.5"/>
+        <PackageReference Include="System.ServiceModel.Http" Version="8.1.2"/>
     </ItemGroup>
-
     <ItemGroup>
+        <ProjectReference Include="..\DisplayTool.DocSignAuthority.Client\DisplayTool.DocSignAuthority.Client.csproj"/>
         <ProjectReference Include="..\Scalesoft.DisplayTool.Extensions\Scalesoft.DisplayTool.Extensions.csproj"/>
         <ProjectReference Include="..\Scalesoft.DisplayTool.Shared\Scalesoft.DisplayTool.Shared.csproj"/>
         <ProjectReference Include="..\Scalesoft.DisplayTool.TermxTranslator\Scalesoft.DisplayTool.TermxTranslator.csproj"/>
         <ProjectReference Include="..\Scalesoft.EZCAII.Client\Scalesoft.EZCAII.Client.csproj"/>
     </ItemGroup>
-
     <ItemGroup>
         <None Update="Widgets\RazorComponents\PdfToHtmlView.razor.scss">
             <DependentUpon>PdfToHtmlView.razor</DependentUpon>

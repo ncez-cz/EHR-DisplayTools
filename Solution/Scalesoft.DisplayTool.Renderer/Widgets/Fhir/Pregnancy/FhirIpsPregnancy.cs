@@ -23,13 +23,13 @@ public class FhirIpsPregnancy(List<XmlDocumentNavigator> items) : Widget
         var historicalPregnancyEvents = items.Except(currentPregnancyEvents).ToList();
 
         var currentPregnanciesTable = new Container([
-            new TextContainer(TextStyle.Bold, [new DisplayLabel(LabelCodes.CurrentPregnancyStatus)]),
-            ..currentPregnancyEvents.Select(x => new ChangeContext(x, new ObservationCard()))
+            new TextContainer(TextStyle.Bold, [new EhdsiDisplayLabel(LabelCodes.CurrentPregnancyStatus)]),
+            ..currentPregnancyEvents.Select(x => new ChangeContext(x, new ObservationCard())),
         ], ContainerType.Div, "resource-container");
 
         var historicalPregnanciesTable = new Container([
-            new TextContainer(TextStyle.Bold, [new DisplayLabel(LabelCodes.HistoryOfPreviousPregnancies)]),
-            ..historicalPregnancyEvents.Select(x => new ChangeContext(x, new ObservationCard()))
+            new TextContainer(TextStyle.Bold, [new EhdsiDisplayLabel(LabelCodes.HistoryOfPreviousPregnancies)]),
+            ..historicalPregnancyEvents.Select(x => new ChangeContext(x, new ObservationCard())),
         ], ContainerType.Div, "resource-container");
 
         Widget[] widgetTree =

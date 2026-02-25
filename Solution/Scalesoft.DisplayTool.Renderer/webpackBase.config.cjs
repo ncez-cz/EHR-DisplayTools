@@ -34,7 +34,15 @@ module.exports = env => ({
     },
     optimization: {
         minimize: !env.development,
-        minimizer: [new terserPlugin({parallel: true}), new cssMinimizerPlugin({parallel: true})],
+        minimizer: [new terserPlugin({
+            parallel: true,
+            terserOptions: {
+                format: {
+                    comments: false,
+                },
+            },
+            extractComments: false,
+        }), new cssMinimizerPlugin({parallel: true})],
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js"],

@@ -6,6 +6,16 @@ namespace Scalesoft.DisplayTool.Renderer.Utils;
 public class InfrequentPropertiesData<T> where T : notnull
 {
     private readonly Dictionary<T, string> m_infrequentProperties = new();
+    public IReadOnlyDictionary<T, string> InfrequentProperties => m_infrequentProperties.AsReadOnly();
+
+    protected InfrequentPropertiesData(IReadOnlyDictionary<T, string> infrequentProperties)
+    {
+        m_infrequentProperties = new Dictionary<T, string>(infrequentProperties);
+    }
+
+    public InfrequentPropertiesData()
+    {
+    }
 
     public void Add(T property, string path)
     {

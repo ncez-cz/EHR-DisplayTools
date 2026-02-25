@@ -10,17 +10,68 @@ public class MergedServiceRequests : Widget, IResourceWidget
 {
     private readonly IList<XmlDocumentNavigator> m_items;
     private readonly bool m_keepTitleInResource;
+    private readonly bool m_isBordered;
     private readonly List<Widget> m_titleAppendWidgets = [];
+
+    public static string ResourceType => "ServiceRequest";
+
+    public static bool HasBorderedContainer(Widget widget) => false;
 
     public MergedServiceRequests(
         IList<XmlDocumentNavigator> items,
         out Widget titleAppend,
-        bool keepTitleInResource = true
+        bool keepTitleInResource = true,
+        bool isBordered = false
     )
     {
         m_items = items;
         m_keepTitleInResource = keepTitleInResource;
+        m_isBordered = isBordered;
         titleAppend = new LazyWidget(() => m_titleAppendWidgets);
+    }
+
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator item)
+    {
+        Widget? label = null;
+        Widget? value = null;
+
+        if (item.EvaluateCondition("f:code"))
+        {
+            value = new ChangeContext(item, "f:code", new CodeableConcept());
+        }
+        else if (item.EvaluateCondition("f:category"))
+        {
+            value = new ChangeContext(item, new CommaSeparatedBuilder("f:category", _ => new CodeableConcept()));
+        }
+        else if (item.EvaluateCondition("f:intent"))
+        {
+            value = new ChangeContext(item, "f:intent", new EnumLabel("@value", "http://hl7.org/fhir/request-intent"));
+        }
+
+        if (item.EvaluateCondition("f:doNotPerform[@value='true']") && value != null)
+        {
+            value = new Container([
+                new Tooltip([],
+                    [
+                        new LocalizedLabel("general.do-not-perform"),
+                    ],
+                    [],
+                    icon: new Icon(SupportedIcons.Ban, "enum-tooltip-icon red-danger-icon")
+                ),
+                value,
+            ], ContainerType.Span);
+        }
+
+        if (value == null)
+        {
+            return null;
+        }
+
+        return new ResourceSummaryModel
+        {
+            Label = label,
+            Value = value,
+        };
     }
 
     public override Task<RenderResult> Render(
@@ -90,13 +141,17 @@ public class MergedServiceRequests : Widget, IResourceWidget
                 var serviceRequestsOfDifferingProps = serviceKvps.Select(x => x.Value)
                     .Select(x => new ChangeContext(x,
                         new ServiceRequest(differentProps,
-                            nameValuePairStyle: NameValuePair.NameValuePairStyle.Secondary)));
+                            nameValuePairStyle: NameValuePair.NameValuePairStyle.Secondary))).ToList();
                 widgets.AddRange(serviceRequestsOfDifferingProps);
-                if (sharedDisplayedProps.Count > 0)
+                if (sharedDisplayedProps.Count != 0)
                 {
                     var serviceRequestOfSharedProps =
                         new ChangeContext(serviceReqNav, new ServiceRequest(sharedDisplayedProps));
-                    widgets.Add(new ThematicBreak());
+                    if (serviceRequestsOfDifferingProps.Count != 0)
+                    {
+                        widgets.Add(new ThematicBreak());
+                    }
+
                     widgets.Add(serviceRequestOfSharedProps);
                 }
 
@@ -104,10 +159,11 @@ public class MergedServiceRequests : Widget, IResourceWidget
             }
         }
 
-        return new Container(widgets, optionalClass: "merged-service-requests").Render(navigator, renderer, context);
+        return new Container(widgets,
+            optionalClass: "merged-service-requests").Render(
+            navigator,
+            renderer, context);
     }
-
-    public static string ResourceType => "ServiceRequest";
 
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {

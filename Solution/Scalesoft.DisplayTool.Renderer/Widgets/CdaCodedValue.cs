@@ -17,7 +17,7 @@ public class CdaCodedValue(string fileName, string code, string codeSystem) : Wi
             throw new InvalidOperationException("Expected string variables for reader languages");
         }
 
-        var widget = new CodedValue(code1, codeSystem1, string.Empty, file);
+        var widget = new CodedValue(code1, codeSystem1, string.Empty);
         return widget.Render(navigator, renderer, context);
     }
 }

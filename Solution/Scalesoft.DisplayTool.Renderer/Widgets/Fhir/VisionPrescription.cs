@@ -71,9 +71,9 @@ public class VisionPrescription : Widget
             widgetTree.Add(genericLensTable);
         }
 
-        widgetTree.Add(new NameValuePair([new ConstantText("Datum vystavení receptu")],
+        widgetTree.Add(new NameValuePair([new LocalizedLabel("vision-prescription.dateWritten")],
             [new ShowDateTime("f:dateWritten")]));
-        widgetTree.Add(new NameValuePair([new DisplayLabel(LabelCodes.Status)],
+        widgetTree.Add(new NameValuePair([new EhdsiDisplayLabel(LabelCodes.Status)],
             [new EnumLabel("f:status", "http://hl7.org/fhir/ValueSet/request-status")]));
 
         widgetTree.Add(new Optional("f:encounter",
@@ -81,8 +81,8 @@ public class VisionPrescription : Widget
                 (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                 x =>
                 [
-                    new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                        isCollapsed: true)
+                    new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
+                        isCollapsed: true),
                 ]
             )
         ));
@@ -102,21 +102,21 @@ public class VisionPrescription : Widget
         List<TableCell> prescriptionHeaderFirstRow =
         [
             new([new ConstantText(string.Empty)], TableCellType.Header, 1, 2),
-            new([new ConstantText("Sféra")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Osa")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Cylindr")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Prisma")], TableCellType.Header, 2, 1),
-            new([new ConstantText("Addice")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.sphere")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.axis")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.cylinder")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.prism")], TableCellType.Header, 2, 1),
+            new([new LocalizedLabel("vision-prescription.add")], TableCellType.Header, 1, 2),
         ];
         ConditionallyAddInfrequentColumnNames(navs, prescriptionHeaderFirstRow);
         Widget[] tableHeader =
         [
-            new TableCaption([new ConstantText("Recept na čočky")]),
+            new TableCaption([new LocalizedLabel("vision-prescription.lens-prescription")]),
             new TableHead([
                 new TableRow([..prescriptionHeaderFirstRow]),
                 new TableRow([
-                    new TableCell([new ConstantText("Dp")], TableCellType.Header),
-                    new TableCell([new ConstantText("Basis")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("vision-prescription.prism.amount")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("vision-prescription.prism.base")], TableCellType.Header),
                 ]),
             ]),
         ];
@@ -129,24 +129,24 @@ public class VisionPrescription : Widget
         List<TableCell> prescriptionHeaderFirstRow =
         [
             new([new ConstantText(string.Empty)], TableCellType.Header, 1, 2),
-            new([new ConstantText("Sféra")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Zakřivení")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Síla")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Průmer")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Osa")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Cylindr")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Prisma")], TableCellType.Header, 2, 1),
-            new([new ConstantText("Addice")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.sphere")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.backCurve")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.power")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.diameter")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.axis")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.cylinder")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.prism")], TableCellType.Header, 2, 1),
+            new([new LocalizedLabel("vision-prescription.add")], TableCellType.Header, 1, 2),
         ];
         ConditionallyAddInfrequentColumnNames(navs, prescriptionHeaderFirstRow);
         Widget[] tableHeader =
         [
-            new TableCaption([new ConstantText("Recept na kontaktní čočky")]),
+            new TableCaption([new LocalizedLabel("vision-prescription.contact-lense-prescription")]),
             new TableHead([
                 new TableRow([..prescriptionHeaderFirstRow]),
                 new TableRow([
-                    new TableCell([new ConstantText("Dp")], TableCellType.Header),
-                    new TableCell([new ConstantText("Basis")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("vision-prescription.prism.amount")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("vision-prescription.prism.base")], TableCellType.Header),
                 ]),
             ]),
         ];
@@ -159,24 +159,24 @@ public class VisionPrescription : Widget
         List<TableCell> prescriptionHeaderFirstRow =
         [
             new([new ConstantText(string.Empty)], TableCellType.Header, 1, 2),
-            new([new ConstantText("Sféra")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Zakřivení")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Síla")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Průmer")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Osa")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Cylindr")], TableCellType.Header, 1, 2),
-            new([new ConstantText("Prisma")], TableCellType.Header, 2, 1),
-            new([new ConstantText("Addice")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.sphere")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.backCurve")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.power")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.diameter")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.axis")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.cylinder")], TableCellType.Header, 1, 2),
+            new([new LocalizedLabel("vision-prescription.prism")], TableCellType.Header, 2, 1),
+            new([new LocalizedLabel("vision-prescription.add")], TableCellType.Header, 1, 2),
         ];
         ConditionallyAddInfrequentColumnNames(navs, prescriptionHeaderFirstRow);
         Widget[] tableHeader =
         [
-            new TableCaption([new ConstantText("Recept na čočky / kontaktní čočky")]),
+            new TableCaption([new LocalizedLabel("vision-prescription.generic-lense")]),
             new TableHead([
                 new TableRow([..prescriptionHeaderFirstRow]),
                 new TableRow([
-                    new TableCell([new ConstantText("Dp")], TableCellType.Header),
-                    new TableCell([new ConstantText("Basis")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("vision-prescription.prism.amount")], TableCellType.Header),
+                    new TableCell([new LocalizedLabel("vision-prescription.prism.base")], TableCellType.Header),
                 ]),
             ]),
         ];
@@ -196,22 +196,26 @@ public class VisionPrescription : Widget
 
         if (anyPrescriptionHasDuration)
         {
-            headerRowCells.Add(new TableCell([new ConstantText("Doba nošení")], TableCellType.Header, 1, 2));
+            headerRowCells.Add(new TableCell([new LocalizedLabel("vision-prescription.duration")], TableCellType.Header,
+                1, 2));
         }
 
         if (anyPrescriptionHasColor)
         {
-            headerRowCells.Add(new TableCell([new ConstantText("Barva")], TableCellType.Header, 1, 2));
+            headerRowCells.Add(new TableCell([new LocalizedLabel("vision-prescription.color")], TableCellType.Header, 1,
+                2));
         }
 
         if (anyPrescriptionHasBrand)
         {
-            headerRowCells.Add(new TableCell([new ConstantText("Značka")], TableCellType.Header, 1, 2));
+            headerRowCells.Add(new TableCell([new LocalizedLabel("vision-prescription.brand")], TableCellType.Header, 1,
+                2));
         }
 
         if (anyPrescriptionHasNote)
         {
-            headerRowCells.Add(new TableCell([new ConstantText("Poznámka")], TableCellType.Header, 1, 2));
+            headerRowCells.Add(new TableCell([new LocalizedLabel("vision-prescription.note")], TableCellType.Header, 1,
+                2));
         }
     }
 

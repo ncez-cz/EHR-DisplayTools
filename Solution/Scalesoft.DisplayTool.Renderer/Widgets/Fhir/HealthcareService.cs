@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -10,6 +10,7 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourceWidget
 {
     public static string ResourceType => "HealthcareService";
+    public static bool HasBorderedContainer(Widget widget) => false;
 
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -17,157 +18,195 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
         RenderContext context
     )
     {
+        var infrequentProperties = InfrequentProperties.Evaluate<HealthcareServiceInfrequentProperties>(navigator);
+
         var headerInfo = new Container([
-            new ConstantText("Zdravotnická služba"),
-            new Optional("f:name",
+            new LocalizedLabel("healthcare-service"),
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.Name,
                 new ConstantText(" ("),
                 new Text("@value"),
                 new ConstantText(")")
             ),
         ], ContainerType.Span);
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
 
-        var basicInfo = new Container([
-            new Optional("f:active", new TextContainer(TextStyle.Bold,
-                new ShowBoolean("Neaktivní", "Aktivní"),
-                optionalClass: "full-grid-row"
-            )),
-            new Optional("f:name", new NameValuePair(
-                new DisplayLabel(LabelCodes.Name),
-                new Text("@value")
-            )),
-            new Optional("f:comment",
+        var basicInfo = new Container(
+        [
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.Active,
+                new TextContainer(
+                    TextStyle.Bold,
+                    new ShowBoolean(
+                        new LocalizedLabel("healthcare-service.active.false"),
+                        new LocalizedLabel("healthcare-service.active.true")
+                    ),
+                    optionalClass: "span-over-full-name-value-pair-cell"
+                )
+            ),
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.Name,
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.Description),
+                    new EhdsiDisplayLabel(LabelCodes.Name),
+                    new Text("@value")
+                )),
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.Comment,
+                new NameValuePair(
+                    new EhdsiDisplayLabel(LabelCodes.Description),
                     new Text("@value")
                 )
             ),
-            new Optional("f:providedBy", new NameValuePair(
-                new ConstantText("Poskytovatel"),
-                new AnyReferenceNamingWidget()
-            )),
-            new Condition("f:category", new NameValuePair(
-                new ConstantText("Kategorie"),
-                new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()])
-            )),
-            new Condition("f:type", new NameValuePair(
-                new ConstantText("Typ"),
-                new CommaSeparatedBuilder("f:type", _ => [new CodeableConcept()])
-            )),
-            new Condition("f:specialty", new NameValuePair(
-                new ConstantText("Specializace"),
-                new CommaSeparatedBuilder("f:specialty", _ => [new CodeableConcept()])
-            )),
-            new Condition("f:location", new NameValuePair(
-                new ConstantText("Umístění"),
-                new CommaSeparatedBuilder("f:location", _ => [new AnyReferenceNamingWidget()])
-            )),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
-
-        var detailBadge = new PlainBadge(new ConstantText("Detailní informace"));
-        var detailInfo = new Container([
-            new Optional("f:extraDetails",
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.ProvidedBy,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("healthcare-service.providedBy"),
+                    }
+                )
+            ),
+            new Condition("f:category",
                 new NameValuePair(
-                    new ConstantText("Další podrobnosti"),
+                    new LocalizedLabel("healthcare-service.category"),
+                    new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()])
+                )
+            ),
+            new Condition("f:type",
+                new NameValuePair(
+                    new LocalizedLabel("healthcare-service.type"),
+                    new CommaSeparatedBuilder("f:type", _ => [new CodeableConcept()])
+                )
+            ),
+            new Condition("f:specialty",
+                new NameValuePair(
+                    new LocalizedLabel("healthcare-service.specialty"),
+                    new CommaSeparatedBuilder("f:specialty", _ => [new CodeableConcept()])
+                )
+            ),
+            new Condition("f:location",
+                new NameValuePair(
+                    new LocalizedLabel("healthcare-service.location"),
+                    new CommaSeparatedBuilder("f:location", _ => [new AnyReferenceNamingWidget()])
+                )
+            ),
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
+
+        var detailBadge = new PlainBadge(new LocalizedLabel("general.detailed-information"));
+        var detailInfo = new Container([
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.ExtraDetails,
+                new NameValuePair(
+                    new LocalizedLabel("healthcare-service.extraDetails"),
                     new Markdown("@value")
                 )
             ),
-            new Optional("f:photo",
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.Photo,
                 new NameValuePair(
-                    new ConstantText("Fotografie"),
+                    new LocalizedLabel("healthcare-service.photo"),
                     new Attachment()
                 )
             ),
             new Container([
                 new Condition("f:telecom",
-                    new TextContainer(TextStyle.Bold, new DisplayLabel(LabelCodes.Telecom)),
+                    new TextContainer(TextStyle.Bold, new EhdsiDisplayLabel(LabelCodes.Telecom)),
                     new Row([new ShowContactPoint()])
-                )
+                ),
             ], ContainerType.Div, "mt-2 mb-2"),
             new Container([
                 new Condition("f:coverageArea", new NameValuePair(
-                    new ConstantText("Pokrytí oblastí"),
+                    new LocalizedLabel("healthcare-service.coverageArea"),
                     new CommaSeparatedBuilder("f:coverageArea", _ => [new AnyReferenceNamingWidget()])
                 )),
                 new Condition("f:serviceProvisionCode", new NameValuePair(
-                    new ConstantText("Podmínky poskytování služeb"),
+                    new LocalizedLabel("healthcare-service.serviceProvisionCode"),
                     new CommaSeparatedBuilder("f:serviceProvisionCode", _ => [new CodeableConcept()])
                 )),
-            ], optionalClass: "name-value-pair-wrapper w-max-content"),
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
             new Condition("f:eligibility",
-                new TextContainer(TextStyle.Bold, new ConstantText("Podmínky způsobilosti:")),
+                new TextContainer(
+                    TextStyle.Bold,
+                    [new LocalizedLabel("healthcare-service.eligibility"), new ConstantText(":")]
+                ),
                 new ItemListBuilder("f:eligibility", ItemListType.Unordered, _ =>
                 [
                     new Concat([
                         new Optional("f:code",
                             new NameValuePair(
-                                new ConstantText("Kód"),
+                                new LocalizedLabel("healthcare-service.eligibility.code"),
                                 new CodeableConcept()
                             )
                         ),
                         new Optional("f:comment",
                             new NameValuePair(
-                                new ConstantText("Komentář"),
+                                new LocalizedLabel("healthcare-service.eligibility.comment"),
                                 new Markdown("@value")
                             )
-                        )
-                    ])
+                        ),
+                    ]),
                 ])
             ),
             new Container([
                 new Condition("f:program", new NameValuePair(
-                    new ConstantText("Programy"),
+                    new LocalizedLabel("healthcare-service.program"),
                     new CommaSeparatedBuilder("f:program", _ => [new CodeableConcept()])
                 )),
                 new Condition("f:characteristic", new NameValuePair(
-                    new ConstantText("Charakteristiky"),
+                    new LocalizedLabel("healthcare-service.characteristic"),
                     new CommaSeparatedBuilder("f:characteristic", _ => [new CodeableConcept()])
                 )),
                 new Condition("f:referralMethod", new NameValuePair(
-                    new ConstantText("Způsoby doporučení"),
+                    new LocalizedLabel("healthcare-service.referralMethod"),
                     new CommaSeparatedBuilder("f:referralMethod", _ => [new CodeableConcept()])
                 )),
-            ], optionalClass: "name-value-pair-wrapper w-max-content"),
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
             //ignore endpoint
         ]);
 
-        var operationBadge = new PlainBadge(new ConstantText("Provozní informace"));
+        var operationBadge = new PlainBadge(new LocalizedLabel("healthcare-service.availability-info"));
         var operationInfo = new Container([
-            new Optional("f:appointmentRequired",
-                new TextContainer(TextStyle.Bold, [
-                        new ShowBoolean("Nevyžaduje rezervaci", "Vyžaduje rezervaci"),
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.AppointmentRequired,
+                new TextContainer(
+                    TextStyle.Bold,
+                    [
+                        new ShowBoolean(
+                            new LocalizedLabel("healthcare-service.appointmentRequired.false"),
+                            new LocalizedLabel("healthcare-service.appointmentRequired.true")
+                        ),
                     ]
                 ),
                 new LineBreak()
             ),
             new Condition("f:availableTime",
-                new TextContainer(TextStyle.Bold, new ConstantText("Dostupné časy:")),
+                new TextContainer(
+                    TextStyle.Bold,
+                    [new LocalizedLabel("healthcare-service.availableTime"), new ConstantText(":")]
+                ),
                 new Row([
-                    new HealthcareServiceAvailableTime()
+                    new HealthcareServiceAvailableTime(),
                 ])
             ),
             new Condition("f:notAvailable",
-                new TextContainer(TextStyle.Bold, new ConstantText("Nedostupné časy:")),
+                new TextContainer(
+                    TextStyle.Bold,
+                    [new LocalizedLabel("healthcare-service.availableTime.notAvailable"), new ConstantText(":")]
+                ),
                 new Row([
                     new ListBuilder("f:notAvailable[f:during]", FlexDirection.Row, _ =>
                         [
                             new Condition("f:during",
                                 new Card(new ShowPeriod("f:during"),
-                                    new Markdown("f:description/@value"), "time-card")
+                                    new Markdown("f:description/@value"), optionalClass: "time-card")
                             ),
-                        ]
+                        ], flexContainerClasses: "column-gap-2 flex-wrap"
                     ),
                     new Condition("not(f:during)",
-                        new Card(new ConstantText("Bez doby"), new ItemListBuilder("f:notAvailable[not(f:during)]",
-                            ItemListType.Unordered, _ => [new Markdown("f:description/@value")]
-                        ), "time-card")
+                        new Card(new LocalizedLabel("healthcare-service.notAvailable.during.absent"),
+                            new ItemListBuilder("f:notAvailable[not(f:during)]",
+                                ItemListType.Unordered, _ => [new Markdown("f:description/@value")]
+                            ), optionalClass: "time-card")
                     )
                 ])
             ),
-            new Optional("f:availabilityExceptions",
+            infrequentProperties.Optional(HealthcareServiceInfrequentProperties.AvailabilityExceptions,
                 new NameValuePair(
-                    new ConstantText("Výjimky dostupnosti"),
+                    new LocalizedLabel("healthcare-service.availabilityExceptions"),
                     new Text("@value")
                 )
             ),
@@ -176,7 +215,7 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
 
         var complete =
             new Container([
-                new Collapser([headerInfo], [], [
+                new Collapser([headerInfo], [
                         new Condition(
                             "f:active or f:name or f:comment or f:providedBy or f:category or f:type or f:specialty or f:location",
                             badge,
@@ -209,10 +248,22 @@ public class HealthcareService : ColumnResourceBase<HealthcareService>, IResourc
                         ]
                         : null,
                     iconPrefix: [new NarrativeModal()]
-                )
+                ),
             ]);
 
 
         return complete.Render(navigator, renderer, context);
     }
+}
+
+public enum HealthcareServiceInfrequentProperties
+{
+    Name,
+    Active,
+    Comment,
+    ProvidedBy,
+    ExtraDetails,
+    Photo,
+    AppointmentRequired,
+    AvailabilityExceptions,
 }

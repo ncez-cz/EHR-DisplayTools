@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -14,14 +14,22 @@ public class Evidence(
 {
     public static string ResourceType => "Evidence";
 
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public Evidence() : this(null)
     {
     }
 
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
+        var infrequentProperties = InfrequentProperties.Evaluate<EvidenceInfrequentProperties>(navigator);
+
         var headerInfo = new Container([
-            collapserTitle ?? new ConstantText("Důkaz"),
+            collapserTitle ?? new LocalizedLabel("evidence"),
             new Optional("f:title",
                 new ConstantText(" ("),
                 new Text("@value"),
@@ -29,132 +37,162 @@ public class Evidence(
             )
         ], ContainerType.Span);
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
 
         var basicInfo = new Container([
-            new Optional("f:title|f:shortTitle|f:name", new NameValuePair(
-                new DisplayLabel(LabelCodes.Name),
-                new Text("@value")
-            )),
-            new Optional("f:subtitle", new NameValuePair(
-                new ConstantText("Podnázev"),
-                new Text("@value")
-            )),
+            new Optional("f:title|f:shortTitle|f:name",
+                new NameValuePair(
+                    new EhdsiDisplayLabel(LabelCodes.Name),
+                    new Text("@value")
+                )
+            ),
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Subtitle,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.subtitle"),
+                    new Text("@value")
+                )
+            ),
             new NameValuePair(
-                new ConstantText("Stav publikace"),
+                new LocalizedLabel("evidence.status"),
                 new EnumLabel("f:status", "http://hl7.org/fhir/ValueSet/publication-status")
             ),
-            new Optional("f:date", new NameValuePair(
-                new ConstantText("Datum publikace"),
-                new ShowDateTime()
-            )),
-            new Optional("f:description", new NameValuePair(
-                new DisplayLabel(LabelCodes.Description),
-                new Text("@value")
-            )),
-            new Optional("f:copyright", new NameValuePair(
-                new ConstantText("Autorská práva"),
-                new Markdown("@value")
-            )),
-            new Condition("f:jurisdiction", new NameValuePair(
-                new ConstantText("Působnost"),
-                new CommaSeparatedBuilder("f:jurisdiction", _ => [new CodeableConcept()])
-            )),
-            new Optional("f:approvalDate", new NameValuePair(
-                new ConstantText("Datum schválení"),
-                new ShowDateTime()
-            )),
-            new Optional("f:lastReviewDate", new NameValuePair(
-                new ConstantText("Datum posledního přezkoumání"),
-                new ShowDateTime()
-            )),
-            new Optional("f:effectivePeriod", new NameValuePair(
-                new ConstantText("Platnost"),
-                new ShowPeriod()
-            )),
-            new Condition("f:topic", new NameValuePair(
-                new ConstantText("Témata"),
-                new CommaSeparatedBuilder("f:topic", _ => [new CodeableConcept()])
-            )),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Date,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.date"),
+                    new ShowDateTime()
+                )
+            ),
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Description,
+                new NameValuePair(
+                    new EhdsiDisplayLabel(LabelCodes.Description),
+                    new Text("@value")
+                )
+            ),
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Copyright,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.copyright"),
+                    new Markdown("@value")
+                )
+            ),
+            infrequentProperties.Condition(EvidenceInfrequentProperties.Jurisdiction,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.jurisdiction"),
+                    new CommaSeparatedBuilder("f:jurisdiction", _ => [new CodeableConcept()])
+                )
+            ),
+            infrequentProperties.Optional(EvidenceInfrequentProperties.ApprovalDate,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.approvalDate"),
+                    new ShowDateTime()
+                )
+            ),
+            infrequentProperties.Optional(EvidenceInfrequentProperties.LastReviewDate,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.lastReviewDate"),
+                    new ShowDateTime()
+                )
+            ),
+            infrequentProperties.Optional(EvidenceInfrequentProperties.EffectivePeriod,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.effectivePeriod"),
+                    new ShowPeriod()
+                )
+            ),
+            infrequentProperties.Condition(EvidenceInfrequentProperties.Topic,
+                new NameValuePair(
+                    new LocalizedLabel("evidence.topic"),
+                    new CommaSeparatedBuilder("f:topic", _ => [new CodeableConcept()])
+                )
+            ),
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
         var actorInfo = new Container([
             new Condition("f:contact|f:publisher",
                 new Container([
-                    new PlainBadge(new ConstantText("Vydavatel")),
+                    new PlainBadge(new LocalizedLabel("evidence.publisher")),
                     new Optional("f:publisher",
                         new NameValuePair(
-                            new DisplayLabel(LabelCodes.Name),
+                            new EhdsiDisplayLabel(LabelCodes.Name),
                             new Text("@value")
                         )),
                     new Container([
                         new Condition("f:contact",
-                            new TextContainer(TextStyle.Bold, new DisplayLabel(LabelCodes.Telecom)),
+                            new TextContainer(TextStyle.Bold, new EhdsiDisplayLabel(LabelCodes.Telecom)),
                             new Row([new ShowContactDetail("f:contact")])
                         )
-                    ], ContainerType.Div, "mt-2")
+                    ], ContainerType.Div, "mt-2"),
                 ])
             ),
-            new Condition("f:author",
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Author,
                 new Container([
-                    new PlainBadge(new ConstantText("Autor")),
-                    new Row([
-                        new ShowContactDetail("f:author")
-                    ])
+                    new PlainBadge(new LocalizedLabel("evidence.author")),
+                    new Row([new ShowContactDetail(".")]),
                 ], optionalClass: "mt-2")
             ),
-            new Condition("f:editor",
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Editor,
                 new Container([
-                    new PlainBadge(new ConstantText("Editor")),
-                    new Row([new ShowContactDetail("f:editor")])
+                    new PlainBadge(new LocalizedLabel("evidence.editor")),
+                    new Row([new ShowContactDetail(".")]),
                 ], optionalClass: "mt-2")
             ),
-            new Condition("f:reviewer",
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Reviewer,
                 new Container([
-                    new PlainBadge(new ConstantText("Recenzent")),
-                    new Row([new ShowContactDetail("f:reviewer")])
+                    new PlainBadge(new LocalizedLabel("evidence.reviewer")),
+                    new Row([new ShowContactDetail(".")]),
                 ], optionalClass: "mt-2")
             ),
-            new Condition("f:endorser",
+            infrequentProperties.Optional(EvidenceInfrequentProperties.Endoser,
                 new Container([
-                    new PlainBadge(new ConstantText("Podpora")),
-                    new Row([new ShowContactDetail("f:endorser")])
+                    new PlainBadge(new LocalizedLabel("evidence.endorser")),
+                    new Row([new ShowContactDetail(".")]),
                 ], optionalClass: "mt-2")
             ),
         ]);
 
-        var componentBadge = new PlainBadge(new ConstantText("Komponenty důkazu"));
+        var componentBadge = new PlainBadge(new LocalizedLabel("evidence.evidence-components"));
         var componentInfo = new Container([
             new Container([
-                new Condition("f:exposureBackground",
-                    new NameValuePair(
-                        new ConstantText("Zkoumaná populace"),
-                        new AnyReferenceNamingWidget("f:exposureBackground")
+                infrequentProperties.Optional(EvidenceInfrequentProperties.ExposureBackground,
+                    new AnyReferenceNamingWidget(
+                        widgetModel: new ReferenceNamingWidgetModel
+                        {
+                            Type = ReferenceNamingWidgetType.NameValuePair,
+                            LabelOverride = new LocalizedLabel("evidence.exposureBackground"),
+                        }
                     )
                 ),
-                new Condition("f:exposureVariant",
-                    new NameValuePair(
-                        new ConstantText("Zkoumaná intervence"),
-                        new AnyReferenceNamingWidget("f:exposureBackground")
+                infrequentProperties.Optional(EvidenceInfrequentProperties.ExposureVariant,
+                    new AnyReferenceNamingWidget(
+                        widgetModel: new ReferenceNamingWidgetModel
+                        {
+                            Type = ReferenceNamingWidgetType.NameValuePair,
+                            LabelOverride = new LocalizedLabel("evidence.exposureVariant"),
+                        }
                     )
                 ),
-                new Condition("f:outcome",
-                    new NameValuePair(
-                        new DisplayLabel(LabelCodes.Outcome),
-                        new AnyReferenceNamingWidget("f:exposureBackground")
+                infrequentProperties.Optional(EvidenceInfrequentProperties.Outcome,
+                    new AnyReferenceNamingWidget(
+                        widgetModel: new ReferenceNamingWidgetModel
+                        {
+                            Type = ReferenceNamingWidgetType.NameValuePair,
+                            LabelOverride = new EhdsiDisplayLabel(LabelCodes.Outcome),
+                        }
                     )
                 ),
-            ], optionalClass: "name-value-pair-wrapper w-max-content"),
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
             new Condition("f:relatedArtifact",
-                new TextContainer(TextStyle.Bold, new ConstantText("Související artefakty:")),
+                new TextContainer(
+                    TextStyle.Bold,
+                    [new LocalizedLabel("evidence.relatedArtifact"), new ConstantText(":")]
+                ),
                 new ListBuilder("f:relatedArtifact", FlexDirection.Row, _ =>
                     [new RelatedArtifact()]
                 )
-            )
+            ),
         ]);
 
         var complete =
-            new Collapser([headerInfo], [], [
+            new Collapser([headerInfo], [
                     badge,
                     basicInfo,
                     new Condition("f:contact or f:publisher or f:author or f:editor or f:reviewer or f:endorser",
@@ -171,11 +209,11 @@ public class Evidence(
                         : new NullWidget(),
                     new Condition("f:note",
                         new ThematicBreak(),
-                        new PlainBadge(new ConstantText("Poznámky")),
+                        new PlainBadge(new LocalizedLabel("evidence.note")),
                         new ListBuilder("f:note", FlexDirection.Column, _ =>
                             [new ShowAnnotationCompact()]
                         )
-                    )
+                    ),
                 ], footer: navigator.EvaluateCondition("f:text")
                     ?
                     [
@@ -187,5 +225,25 @@ public class Evidence(
 
 
         return complete.Render(navigator, renderer, context);
+    }
+
+    public enum EvidenceInfrequentProperties
+    {
+        Subtitle,
+        Date,
+        Description,
+        Copyright,
+        ApprovalDate,
+        LastReviewDate,
+        EffectivePeriod,
+        ExposureBackground,
+        ExposureVariant,
+        Outcome,
+        Jurisdiction,
+        Topic,
+        Author,
+        Editor,
+        Reviewer,
+        Endoser,
     }
 }

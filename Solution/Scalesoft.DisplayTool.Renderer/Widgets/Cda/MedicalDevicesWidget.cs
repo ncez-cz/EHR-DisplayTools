@@ -22,56 +22,54 @@ new Variable("code", "$medicalDevicesSectionCode"),
 ]), 
 ], [
 new Collapser([
-new Text("$originalNarrativeTableTitle")
-, 
+    new Text("$originalNarrativeTableTitle")
+    , 
 ], [
-], [
-new NarrativeText("n1:text", null), 
+    new NarrativeText("n1:text", null), 
 ]), 
 new LineBreak(), 
 new Collapser([
-new Text("$translatedCodedTableTitle")
-, 
+    new Text("$translatedCodedTableTitle")
+    , 
 ], [
-], [
-new Table([
-new TableBody([
-new Choose([
-new When("($playingDeviceCode/@code='no-known-devices' or $playingDeviceCode/@code='no-device-info')", [
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiAbsentOrUnknownDeviceWidget(), [
-new Variable("node", "$playingDeviceCode"),
-]), 
-],
-TableCellType.Data, 2), 
-]), 
-]),
-], [
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'21'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'203'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'36'"),
-]), 
-],
-TableCellType.Header), 
-]), 
-new ChangeContext("n1:entry/n1:supply", new Widget29()), 
-]), 
-]), 
-], true), 
+    new Table([
+        new TableBody([
+            new Choose([
+                new When("($playingDeviceCode/@code='no-known-devices' or $playingDeviceCode/@code='no-device-info')", [
+                    new TableRow([
+                        new TableCell([
+                                new WidgetWithVariables(new ShowEHdsiAbsentOrUnknownDeviceWidget(), [
+                                    new Variable("node", "$playingDeviceCode"),
+                                ]), 
+                            ],
+                            TableCellType.Data, 2), 
+                    ]), 
+                ]),
+            ], [
+                new TableRow([
+                    new TableCell([
+                            new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                new Variable("code", "'21'"),
+                            ]), 
+                        ],
+                        TableCellType.Header), 
+                    new TableCell([
+                            new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                new Variable("code", "'203'"),
+                            ]), 
+                        ],
+                        TableCellType.Header), 
+                    new TableCell([
+                            new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                new Variable("code", "'36'"),
+                            ]), 
+                        ],
+                        TableCellType.Header), 
+                ]), 
+                new ChangeContext("n1:entry/n1:supply", new Widget29()), 
+            ]), 
+        ]), 
+    ], true), 
 ]), 
 ], titleAbbreviations: SectionTitleAbbreviations.HistoryOfMedicalDeviceUse),
 ]),

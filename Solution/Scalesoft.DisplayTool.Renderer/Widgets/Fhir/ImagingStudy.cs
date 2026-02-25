@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -12,61 +12,91 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidget
 {
     public static string ResourceType => "ImagingStudy";
-    
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
         RenderContext context
     )
     {
+        var infrequentProperties = InfrequentProperties.Evaluate<ImagingStudyInfrequentProperties>(navigator);
+
         Widget[] widgetTree =
         [
             new Card(
                 new Concat([
                     new Row([
-                        new ConstantText("Obrazová studie"),
+                        new LocalizedLabel("imaging-study"),
                         new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/imagingstudy-status",
-                            new DisplayLabel(LabelCodes.Status))
+                            new EhdsiDisplayLabel(LabelCodes.Status))
                     ], flexContainerClasses: "gap-1 align-items-center"),
-                    new NarrativeModal()
+                    new NarrativeModal(),
                 ]),
                 new Container([
                     new Container([
-                        new Condition("f:modality", new NameValuePair([new ConstantText("Modality")], [
+                        new Condition("f:modality", new NameValuePair([new LocalizedLabel("imaging-study.modality")], [
                             new ItemListBuilder("f:modality", ItemListType.Unordered, _ => [new Coding()])
                         ])),
-                        new Optional("f:started",
-                            new NameValuePair([new ConstantText("Zahájeno")], [new ShowDateTime()])),
+                        infrequentProperties.Optional(ImagingStudyInfrequentProperties.Started,
+                            new NameValuePair(
+                                new LocalizedLabel("imaging-study.started"),
+                                new ShowDateTime()
+                            )
+                        ),
                         // ignore subject
                         // ignore identifier
-                        new Condition("f:referrer",
-                            new HideableDetails(new NameValuePair([new ConstantText("Odkazující lékař"),],
-                                [new AnyReferenceNamingWidget("f:referrer")]))),
+                        infrequentProperties.Optional(ImagingStudyInfrequentProperties.Referrer,
+                            new HideableDetails(
+                                new AnyReferenceNamingWidget(
+                                    widgetModel: new ReferenceNamingWidgetModel
+                                    {
+                                        Type = ReferenceNamingWidgetType.NameValuePair,
+                                        LabelOverride = new LocalizedLabel("imaging-study.referrer"),
+                                    }
+                                )
+                            )
+                        ),
                         new Condition("f:interpreter", new HideableDetails(
                             new NameValuePair(
-                                [new ConstantText("Interpretující lékaři")],
-                                [
-                                    new ItemListBuilder("f:interpreter", ItemListType.Unordered,
-                                        _ => [new AnyReferenceNamingWidget()])
-                                ]
+                                new LocalizedLabel("imaging-study.interpreter"),
+                                new ItemListBuilder("f:interpreter",
+                                    ItemListType.Unordered, _ => [new AnyReferenceNamingWidget()])
                             )
                         )),
                         // ignore endpoint - little value to the end user - reader
-                        new Optional("f:numberOfSeries",
-                            new NameValuePair([new ConstantText("Počet řad")], [new Text("@value")])),
-                        new Optional("f:numberOfInstances",
-                            new NameValuePair([new ConstantText("Počet instancí")], [new Text("@value")])),
-                        new Condition("f:location", new HideableDetails(new Collapser([new ConstantText("Lokace"),], [],
-                        [
-                            ShowSingleReference.WithDefaultDisplayHandler(
-                                nav => [new AnyResource(nav, displayResourceType: false)],
-                                "f:location")
-                        ], true))),
+                        infrequentProperties.Optional(ImagingStudyInfrequentProperties.NumberOfSeries,
+                            new NameValuePair(
+                                new LocalizedLabel("imaging-study.numberOfSeries"),
+                                new Text("@value")
+                            )
+                        ),
+                        infrequentProperties.Optional(ImagingStudyInfrequentProperties.NumberOfInstances,
+                            new NameValuePair(
+                                new LocalizedLabel("imaging-study.numberOfInstances"),
+                                new Text("@value")
+                            )
+                        ),
+                        new Condition("f:location", new HideableDetails(new Collapser(
+                            [new LocalizedLabel("imaging-study.location"),],
+                            [
+                                ShowSingleReference.WithDefaultDisplayHandler(
+                                    nav => [new AnyResource(nav, displayResourceType: false)],
+                                    "f:location"),
+                            ], true))),
+                        new Condition("f:note",
+                            new HideableDetails(new NameValuePair([new LocalizedLabel("imaging-study.note")],
+                                [
+                                    new ConcatBuilder("f:note", _ => [new ShowAnnotationCompact()],
+                                        new LineBreak()),
+                                ],
+                                style: NameValuePair.NameValuePairStyle.Secondary))
+                        ),
                         new Condition("f:reasonCode",
-                            new NameValuePair([new ConstantText("Důvody")],
+                            new NameValuePair([new LocalizedLabel("imaging-study.reason")],
                                 [new CommaSeparatedBuilder("f:reasonCode", _ => new CodeableConcept())])),
-                        new Condition("f:reasonReference", new HideableDetails(new Collapser([new ConstantText("Důvody"),],
-                            [],
+                        new Condition("f:reasonReference", new HideableDetails(new Collapser(
+                            [new LocalizedLabel("imaging-study.reason"),],
                             [
                                 new ListBuilder("f:reasonReference", FlexDirection.Column,
                                     _ =>
@@ -76,98 +106,179 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
                                     ],
                                     separator: new LineBreak()),
                             ], true))),
-                        //ignore note
                         new Condition("f:procedureCode",
-                            new NameValuePair([new ConstantText("Procedury")],
+                            new NameValuePair([new LocalizedLabel("imaging-study.procedure")],
                                 [new CommaSeparatedBuilder("f:procedureCode", _ => new CodeableConcept())])),
-                    ], optionalClass: "name-value-pair-wrapper w-max-content"),
+                    ], optionalClass: "name-value-pair-wrapper w-fit-content"),
                     new Condition("f:procedureReference", new HideableDetails(new Collapser(
-                        [new ConstantText("Procedura"),], [],
+                        [new LocalizedLabel("imaging-study.procedure"),],
                         [
                             ShowSingleReference.WithDefaultDisplayHandler(
                                 nav => [new AnyResource(nav, displayResourceType: false)],
                                 "f:procedureReference")
                         ], true))),
-                    new Condition("f:basedOn", new Collapser([new ConstantText("Založeno na"),], [],
+                    new Condition("f:basedOn", new Collapser([new LocalizedLabel("imaging-study.basedOn"),],
                         [new ShowMultiReference("f:basedOn", displayResourceType: false)], true)),
-                    new Condition("f:series", new ThematicBreak(),
-                        new TextContainer(TextStyle.Bold, new ConstantText("Řada")),
+                    new Condition("f:series",
+                        new ThematicBreak(),
+                        new TextContainer(TextStyle.Bold, new LocalizedLabel("imaging-study.series")),
                         new ListBuilder(
-                            "f:series", FlexDirection.Column, (_, _) =>
-                            [
-                                new Collapser(
+                            "f:series", FlexDirection.Column, (_, nav) =>
+                            {
+                                var seriesInfrequentProperties =
+                                    InfrequentProperties.Evaluate<SeriesInfrequentProperties>(nav);
+                                return
+                                [
+                                    new Collapser(
                                     [
-                                        new NameValuePair(new ConstantText("Identifikátor instance řady DICOM"),
+                                        new NameValuePair(new LocalizedLabel("imaging-study.series.uid"),
                                             new Text("f:uid/@value"))
-                                    ],
-                                    [], [
+                                    ], [
                                         new Container([
-                                            new Optional("f:number",
-                                            new NameValuePair([new ConstantText("Identifikátor")],
-                                                [new Text("@value")])),
-                                        new HideableDetails(new NameValuePair([new ConstantText("Modalita")], [
-                                            new ChangeContext("f:modality", new Coding()),
-                                        ])),
-                                        new Optional("f:description",
-                                            new NameValuePair([new ConstantText("Popis")], [new Text("@value")])),
-                                        new Optional("f:numberOfInstances",
-                                            new HideableDetails(new NameValuePair([new ConstantText("Počet instancí")],
-                                                [new Text("@value")]))),
-                                        // ignore endpoint
-                                        new Optional("f:bodySite",
-                                            new NameValuePair([new DisplayLabel(LabelCodes.BodySite)], [new Coding()])),
-                                        new Optional("f:laterality",
-                                            new HideableDetails(new NameValuePair([new ConstantText("Lateralita")],
-                                                [new Coding()]))),
-                                        new Condition("f:specimen", new HideableDetails(new ListBuilder("f:specimen",
-                                            FlexDirection.Column,
-                                            _ =>
+                                            seriesInfrequentProperties.Optional(SeriesInfrequentProperties.Number,
+                                                new NameValuePair(
+                                                    new LocalizedLabel("imaging-study.series.number"),
+                                                    new Text("@value")
+                                                )
+                                            ),
+                                            new HideableDetails(
+                                                new NameValuePair(
+                                                    new LocalizedLabel("imaging-study.series.modality"),
+                                                    new ChangeContext("f:modality", new Coding())
+                                                )
+                                            ),
+                                            seriesInfrequentProperties.Optional(SeriesInfrequentProperties.Description,
+                                                new NameValuePair(
+                                                    new LocalizedLabel("imaging-study.series.description"),
+                                                    new Text("@value")
+                                                )
+                                            ),
+                                            seriesInfrequentProperties.Optional(
+                                                SeriesInfrequentProperties.NumberOfInstances,
+                                                new HideableDetails(
+                                                    new NameValuePair(
+                                                        new LocalizedLabel("imaging-study.series.numberOfInstances"),
+                                                        new Text("@value")
+                                                    )
+                                                )
+                                            ),
+                                            // ignore endpoint
+                                            seriesInfrequentProperties.Optional(SeriesInfrequentProperties.BodySite,
+                                                new NameValuePair(
+                                                    new EhdsiDisplayLabel(LabelCodes.BodySite),
+                                                    new Coding()
+                                                )
+                                            ),
+                                            seriesInfrequentProperties.Optional(SeriesInfrequentProperties.Laterality,
+                                                new HideableDetails(
+                                                    new NameValuePair(
+                                                        new LocalizedLabel("imaging-study.series.laterality"),
+                                                        new Coding()
+                                                    )
+                                                )
+                                            ),
+                                            seriesInfrequentProperties.Condition(SeriesInfrequentProperties.Specimen,
+                                                new HideableDetails(
+                                                    new ListBuilder("f:specimen", FlexDirection.Column, _ =>
+                                                    [
+                                                        new Card(new LocalizedLabel("imaging-study.series.speciment"),
+                                                            new Container([
+                                                                ShowSingleReference
+                                                                    .WithDefaultDisplayHandler(referenceNav =>
+                                                                    [
+                                                                        new AnyResource(referenceNav,
+                                                                            displayResourceType: false)
+                                                                    ]),
+                                                            ])
+                                                        ),
+                                                    ])
+                                                )
+                                            ),
+                                            seriesInfrequentProperties.Optional(SeriesInfrequentProperties.Started,
+                                                new HideableDetails(
+                                                    new NameValuePair(
+                                                        new LocalizedLabel("imaging-study.series.started"),
+                                                        new ShowDateTime()
+                                                    )
+                                                )
+                                            ),
+                                        ], optionalClass: "name-value-pair-wrapper w-fit-content"),
+                                        new Condition("f:performer", new Collapser(
+                                            [new LocalizedLabel("imaging-study.series.performer")],
                                             [
-                                                new Card(new ConstantText("Vzorek"), new Container([
-                                                    ShowSingleReference.WithDefaultDisplayHandler(nav =>
-                                                        [new AnyResource(nav, displayResourceType: false)]),
-                                                ])),
-                                            ]))),
-                                        new Optional("f:started",
-                                            new HideableDetails(new NameValuePair([new ConstantText("Zahájeno")],
-                                                [new ShowDateTime()]))),
-                                        ], optionalClass: "name-value-pair-wrapper w-max-content"),
-                                        new Condition("f:performer", new Collapser([new ConstantText("Provedl/a")], [],
-                                        [
-                                            new ListBuilder("f:performer", FlexDirection.Column,
-                                                _ =>
-                                                [
-                                                    new Optional("f:function",
-                                                        new NameValuePair([new ConstantText("Funkce")],
-                                                            [new CodeableConcept()])),
-                                                    new AnyReferenceNamingWidget("f:actor"),
-                                                ],
-                                                separator: new ThematicBreak(), flexContainerClasses: "gap-0"),
-                                        ])),
+                                                new ListBuilder("f:performer", FlexDirection.Column,
+                                                    (_, _, itemNav, next) =>
+                                                    [
+                                                        new Optional("f:function",
+                                                            new NameValuePair(
+                                                                [
+                                                                    new LocalizedLabel(
+                                                                        "imaging-study.series.performer.function")
+                                                                ],
+                                                                [new CodeableConcept()])),
+                                                        new AnyReferenceNamingWidget("f:actor"),
+                                                        new If(
+                                                            _ =>
+                                                            {
+                                                                const string conditionXpath = "f:function or f:actor";
+                                                                return next?.EvaluateCondition(conditionXpath) ==
+                                                                    true && itemNav.EvaluateCondition(conditionXpath);
+                                                            },
+                                                            new ThematicBreak())
+                                                    ], flexContainerClasses: "gap-0"),
+                                            ])),
                                         new Condition("f:instance", new HideableDetails(new Collapser(
-                                            [new ConstantText("Instance")], [], [
+                                            [new LocalizedLabel("imaging-study.series.instance")], [
                                                 new ListBuilder("f:instance", FlexDirection.Column,
-                                                    _ =>
+                                                    (_, _, itemNav, next) =>
                                                     [
                                                         new Container([
                                                             new ChangeContext("f:uid",
-                                                                new NameValuePair([new ConstantText("Identifikátor")],
+                                                                new NameValuePair(
+                                                                    [
+                                                                        new LocalizedLabel(
+                                                                            "imaging-study.series.instance.uid")
+                                                                    ],
                                                                     [new Text("@value")])),
                                                             new ChangeContext("f:sopClass",
-                                                                new NameValuePair([new ConstantText("Typ")],
+                                                                new NameValuePair(
+                                                                    [
+                                                                        new LocalizedLabel(
+                                                                            "imaging-study.series.instance.sopClass")
+                                                                    ],
                                                                     [new Coding()])),
                                                             new Optional("f:number",
-                                                                new NameValuePair([new ConstantText("Identifikátor")],
+                                                                new NameValuePair(
+                                                                    [
+                                                                        new LocalizedLabel(
+                                                                            "imaging-study.series.instance.number")
+                                                                    ],
                                                                     [new Text("@value")])),
                                                             new Optional("f:title",
-                                                                new NameValuePair([new ConstantText("Popis")],
+                                                                new NameValuePair(
+                                                                    [
+                                                                        new LocalizedLabel(
+                                                                            "imaging-study.series.instance.title")
+                                                                    ],
                                                                     [new Text("@value")])),
-                                                        ], optionalClass: "name-value-pair-wrapper w-max-content"),
+                                                        ], optionalClass: "name-value-pair-wrapper w-fit-content"),
+                                                        new If(
+                                                            _ =>
+                                                            {
+                                                                const string conditionXpath =
+                                                                    "f:uid or f:sopClass or f:number or f:title";
+                                                                return next?.EvaluateCondition(conditionXpath) ==
+                                                                       true &&
+                                                                       itemNav.EvaluateCondition(conditionXpath);
+                                                            },
+                                                            new ThematicBreak()),
                                                     ],
-                                                    separator: new ThematicBreak(), flexContainerClasses: "gap-0"),
+                                                    flexContainerClasses: "gap-0"),
                                             ]))),
-                                    ]),
-                            ])),
+                                    ])
+                                ];
+                            }
+                        )),
                 ]), footer: navigator.EvaluateCondition("f:text or f:encounter")
                     ? new Concat([
                         new Optional("f:encounter",
@@ -175,12 +286,12 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
                                 (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                                 x =>
                                 [
-                                    new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
+                                    new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
                                         isCollapsed: true)
                                 ]
                             )
                         ),
-                        new Optional("f:text",
+                        new Condition("f:text",
                             new NarrativeCollapser()
                         ),
                     ])
@@ -188,5 +299,24 @@ public class ImagingStudy : SequentialResourceBase<ImagingStudy>, IResourceWidge
         ];
 
         return widgetTree.RenderConcatenatedResult(navigator, renderer, context);
+    }
+
+    public enum ImagingStudyInfrequentProperties
+    {
+        Started,
+        Referrer,
+        NumberOfSeries,
+        NumberOfInstances
+    }
+
+    public enum SeriesInfrequentProperties
+    {
+        Number,
+        Description,
+        NumberOfInstances,
+        BodySite,
+        Laterality,
+        Started,
+        Specimen,
     }
 }

@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -12,6 +12,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.CareTeam;
 public class CareTeams(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
 {
     public static string ResourceType => "CareTeam";
+
+    public static bool HasBorderedContainer(Widget widget) => true;
 
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {
@@ -43,17 +45,17 @@ public class CareTeams(List<XmlDocumentNavigator> items) : Widget, IResourceWidg
                 new TableHead([
                     new TableRow([
                         new If(_ => participantInfrequentProperties.Count != 0,
-                            new TableCell([new ConstantText("Členové týmu")], TableCellType.Header)
+                            new TableCell([new LocalizedLabel("care-team.participant")], TableCellType.Header)
                         ),
                         new If(
                             _ => infrequentProperties.HasAnyOfGroup("BasicInfoCell"),
-                            new TableCell([new ConstantText("Základní informace")], TableCellType.Header)
+                            new TableCell([new LocalizedLabel("general.basic-information")], TableCellType.Header)
                         ),
                         new If(_ => infrequentProperties.HasAnyOfGroup("AdditionalInfoCell"),
-                            new TableCell([new ConstantText("Doplňujíci informace")], TableCellType.Header)
+                            new TableCell([new LocalizedLabel("general.additional-info")], TableCellType.Header)
                         ),
                         new If(_ => infrequentProperties.Contains(CareTeamInfrequentProperties.Status),
-                            new TableCell([new DisplayLabel(LabelCodes.Status)], TableCellType.Header)
+                            new TableCell([new EhdsiDisplayLabel(LabelCodes.Status)], TableCellType.Header)
                         ),
                         new If(_ => infrequentProperties.Contains(CareTeamInfrequentProperties.Text),
                             new NarrativeCell(false, TableCellType.Header)
@@ -87,18 +89,21 @@ public class CareTeams(List<XmlDocumentNavigator> items) : Widget, IResourceWidg
                 var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(item,
                     "f:encounter", "f:text");
 
-                rowDetails.AddCollapser(new ConstantText(Labels.Encounter),
-                    ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
-                        "f:encounter"),
-                    encounterNarrative != null
-                        ?
-                        [
-                            new NarrativeCollapser(encounterNarrative.GetFullPath())
-                        ]
-                        : null,
-                    encounterNarrative != null
-                        ? new NarrativeModal(encounterNarrative.GetFullPath())
-                        : null
+                rowDetails.Add(
+                    new CollapsibleDetail(
+                        new LocalizedLabel("node-names.Encounter"),
+                        ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
+                            "f:encounter"),
+                        encounterNarrative != null
+                            ?
+                            [
+                                new NarrativeCollapser(encounterNarrative.GetFullPath())
+                            ]
+                            : null,
+                        encounterNarrative != null
+                            ? new NarrativeModal(encounterNarrative.GetFullPath())
+                            : null
+                    )
                 );
             }
 
@@ -109,8 +114,12 @@ public class CareTeams(List<XmlDocumentNavigator> items) : Widget, IResourceWidg
                 // reference display name is being handled in AnyReferenceNamingWidget below
                 if (conditions.Any())
                 {
-                    rowDetails.AddCollapser(new ConstantText("Související problém"),
-                        new Conditions(conditions, new ConstantText("Problém")));
+                    rowDetails.Add(
+                        new CollapsibleDetail(
+                            new LocalizedLabel("care-team.reasonReference"),
+                            new Conditions(conditions, new LocalizedLabel("condition"))
+                        )
+                    );
                 }
 
                 if (unknownConditions.Any())
@@ -122,14 +131,23 @@ public class CareTeams(List<XmlDocumentNavigator> items) : Widget, IResourceWidg
                         displayValues.Add(new LineBreak());
                     }
 
-                    rowDetails.AddCollapser(new ConstantText("Neznámý související problém"),
-                        new Optional(".", displayValues.ToArray()));
+                    rowDetails.Add(
+                        new CollapsibleDetail(
+                            new LocalizedLabel("care-team.reasonReference-missing"),
+                            new Optional(".", displayValues.ToArray())
+                        )
+                    );
                 }
             }
 
             if (item.EvaluateCondition("f:text"))
             {
-                rowDetails.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
+                rowDetails.Add(
+                    new CollapsibleDetail(
+                        new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
+                        new Narrative("f:text")
+                    )
+                );
             }
 
             var tableRowContent = new List<Widget>
@@ -146,7 +164,7 @@ public class CareTeams(List<XmlDocumentNavigator> items) : Widget, IResourceWidg
                 new If(_ => infrequentProperties.Contains(CareTeamInfrequentProperties.Status),
                     new TableCell([
                             new EnumIconTooltip("f:status", "http://hl7.org/fhir/care-team-status",
-                                new DisplayLabel(LabelCodes.Status))
+                                new EhdsiDisplayLabel(LabelCodes.Status))
                         ]
                     )),
                 new If(_ => infrequentProperties.Contains(CareTeamInfrequentProperties.Text),

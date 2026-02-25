@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -31,7 +31,7 @@ public class Provision : Widget
                         new Concat([
                             new If(_ => i == 0,
                                 new ConstantText(" "),
-                                new DisplayLabel(LabelCodes.For)
+                                new EhdsiDisplayLabel(LabelCodes.For)
                             ),
                             new ChangeContext("f:role", new CodeableConcept()),
                             new ChangeContext("f:reference",
@@ -44,7 +44,10 @@ public class Provision : Widget
                         new Container([
                             new Concat(
                             [
-                                new ConstantText(" "), new DisplayLabel(LabelCodes.For), new ConstantText(" účel ")
+                                new ConstantText(" "), new EhdsiDisplayLabel(LabelCodes.For),
+                                new ConstantText(" "),
+                                new LocalizedLabel("consent.provision.purpose"),
+                                new ConstantText(" "),
                             ]),
                             new CommaSeparatedBuilder("f:purpose", _ => [new Coding()])
                         ], ContainerType.Span)
@@ -53,7 +56,9 @@ public class Provision : Widget
                     // Security Labels
                     new Condition("f:securityLabel",
                         new Container([
-                            new ConstantText(" [Security: "),
+                            new ConstantText(" ["),
+                            new LocalizedLabel("consent.provision.security"),
+                            new ConstantText(": "),
                             new CommaSeparatedBuilder("f:securityLabel", _ => [new Coding()]),
                             new ConstantText("]")
                         ], ContainerType.Span)
@@ -62,7 +67,7 @@ public class Provision : Widget
                     // Classes (resource types)
                     new Condition("f:class",
                         new Container([
-                            new ConstantText(" na zdroji "),
+                            new LocalizedLabel("consent.provision.class"),
                             new CommaSeparatedBuilder("f:class", _ => [new Coding()])
                         ], ContainerType.Span)
                     ),
@@ -70,7 +75,7 @@ public class Provision : Widget
                     // Actions
                     new Condition("f:action",
                         new Container([
-                            new ConstantText(" pro "),
+                            new LocalizedLabel("consent.provision.action"),
                             new CommaSeparatedBuilder("f:action", _ => [new CodeableConcept()])
                         ], ContainerType.Span)
                     ),
@@ -78,7 +83,9 @@ public class Provision : Widget
                     // Exception codes
                     new Condition("f:code",
                         new Container([
-                            new ConstantText(", pokud "),
+                            new ConstantText(", "),
+                            new LocalizedLabel("consent.provision.code"),
+                            new ConstantText(" "),
                             new CommaSeparatedBuilder("f:code", _ => [new CodeableConcept()])
                         ], ContainerType.Span)
                     ),

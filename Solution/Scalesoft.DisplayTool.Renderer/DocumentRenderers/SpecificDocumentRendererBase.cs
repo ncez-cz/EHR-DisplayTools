@@ -10,7 +10,7 @@ public abstract class SpecificDocumentRendererBase : ISpecificDocumentRenderer
 {
     private readonly DocumentValidatorProvider m_documentValidatorProvider;
     private readonly HtmlToPdfConverter m_htmlToPdfConverter;
-    private readonly IDocumentSignatureValidationManager m_documentSignatureValidationManager;
+    private readonly IPdfSignatureManager m_pdfSignatureManager;
 
     public abstract InputFormat InputFormat { get; }
 
@@ -19,6 +19,7 @@ public abstract class SpecificDocumentRendererBase : ISpecificDocumentRenderer
         OutputFormat outputFormat,
         DocumentOptions options,
         DocumentType documentType,
+        bool isEmbeddable,
         RenderMode renderMode = RenderMode.Standard,
         LevelOfDetail levelOdDetail = LevelOfDetail.Simplified
     );
@@ -26,12 +27,12 @@ public abstract class SpecificDocumentRendererBase : ISpecificDocumentRenderer
     protected SpecificDocumentRendererBase(
         DocumentValidatorProvider documentValidatorProvider,
         HtmlToPdfConverter htmlToPdfConverter,
-        IDocumentSignatureValidationManager documentSignatureValidationManager
+        IPdfSignatureManager pdfSignatureManager
     )
     {
         m_documentValidatorProvider = documentValidatorProvider;
         m_htmlToPdfConverter = htmlToPdfConverter;
-        m_documentSignatureValidationManager = documentSignatureValidationManager;
+        m_pdfSignatureManager = pdfSignatureManager;
     }
 
     protected IDocumentValidator GetValidator()
@@ -57,7 +58,7 @@ public abstract class SpecificDocumentRendererBase : ISpecificDocumentRenderer
                 renderedDocumentContent =
                     await m_htmlToPdfConverter.ConvertHtmlToPdf(htmlContent, fileContent, InputFormat);
                 var pdfSignResult =
-                    await m_documentSignatureValidationManager.SignPdfFileAsync(renderedDocumentContent);
+                    await m_pdfSignatureManager.SignPdfFileAsync(renderedDocumentContent);
                 if (pdfSignResult.OperationSuccess)
                 {
                     renderedDocumentContent = pdfSignResult.SignedDocument;

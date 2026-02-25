@@ -16,4 +16,5 @@ public enum TextStyle
     Uppercase = 1 << 9,
     CapitalizeFirst = 1 << 10,
     Light = 1 << 11,
+    Lowercase = 1 << 12,
 }

@@ -4,3 +4,9 @@ hr {
     margin: $spacing02 0;
     border-color: var(--#{$prefix}blue-400);
 }
+
+.render-mode-documentation {
+    hr {
+        border-color: var(--#{$prefix}blue-900);
+    }
+}

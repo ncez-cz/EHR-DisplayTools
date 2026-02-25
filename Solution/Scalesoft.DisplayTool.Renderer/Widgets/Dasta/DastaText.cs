@@ -13,6 +13,7 @@ public class DastaText(string select) : Widget
         [
             // ignore dsip:autor
             new Text("dsip:ptext"),
+            // TODO consider implementing ktext,priloha #DT-183
             // ignore dsip:ktext - text file content or base64-encoded binary file content (RTF, HTML, XML, PDF...)
             // ignore dsip:priloha - relative paths or URLs       
         ]);

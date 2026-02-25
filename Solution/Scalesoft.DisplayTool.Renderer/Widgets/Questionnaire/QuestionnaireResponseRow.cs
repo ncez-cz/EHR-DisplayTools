@@ -31,7 +31,7 @@ public class QuestionnaireResponseRow(
                 ])),
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Author),
                 new TableCell([
-                    new Optional("f:author",new AnyReferenceNamingWidget())
+                    new Optional("f:author", new AnyReferenceNamingWidget())
                 ])),
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Source),
                 new TableCell([
@@ -40,7 +40,7 @@ public class QuestionnaireResponseRow(
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Status),
                 new TableCell([
                     new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/questionnaire-answers-status",
-                        new DisplayLabel(LabelCodes.Status))
+                        new EhdsiDisplayLabel(LabelCodes.Status)),
                 ])
             ),
             new If(_ => infrequentProperties.Contains(QuestionnaireResponseInfrequentProperties.Text),

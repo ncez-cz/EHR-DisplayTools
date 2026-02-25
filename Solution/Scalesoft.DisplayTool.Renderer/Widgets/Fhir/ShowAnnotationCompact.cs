@@ -15,7 +15,7 @@ public class ShowAnnotationCompact : Widget
     {
         // ignore author, time
         var widget = new Container([new Markdown("f:text/@value")], ContainerType.Span,
-            idSource: navigator);
+            idSource: navigator); // TODO consider rendering markdown #DT-202
 
         return widget.Render(navigator, renderer, context);
     }

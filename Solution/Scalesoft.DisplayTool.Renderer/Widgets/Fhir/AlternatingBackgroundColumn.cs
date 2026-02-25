@@ -19,20 +19,30 @@ public class AlternatingBackgroundColumn(IList<Widget> widgets) : Widget
 
         List<Widget> finalWidgets = [];
 
-        foreach (var widget in widgets)
+        for (var i = 0; i < widgets.Count; i++)
         {
+            var widget = widgets[i];
             if (widget.IsNullWidget)
             {
                 continue;
             }
 
-            var lastWidget = widgets.Last();
-
+            var nextWidget = widgets.ElementAtOrDefault(i + 1);
             Widget widgetToAdd = new Container(widget, optionalClass: "p-1");
 
-            if (!widget.Equals(lastWidget))
+            if (nextWidget != null)
             {
-                widgetToAdd = new Column([widgetToAdd, new ThematicBreak("m-0")], flexContainerClasses: "gap-1");
+                Widget thBreak;
+                if (widget is HideableDetails || nextWidget is HideableDetails)
+                {
+                    thBreak = new HideableDetails(new ThematicBreak("m-0"));
+                }
+                else
+                {
+                    thBreak = new ThematicBreak("m-0");
+                }
+
+                widgetToAdd = new Column([widgetToAdd, thBreak], flexContainerClasses: "gap-1");
             }
 
             finalWidgets.Add(widgetToAdd);

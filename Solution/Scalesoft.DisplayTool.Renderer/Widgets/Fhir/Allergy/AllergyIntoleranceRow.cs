@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -32,24 +32,32 @@ public class AllergyIntoleranceRow(
             var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator,
                 "f:encounter", "f:text");
 
-            collapsibleRow.AddCollapser(new ConstantText(Labels.Encounter),
-                ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
-                    "f:encounter"),
-                encounterNarrative != null
-                    ?
-                    [
-                        new NarrativeCollapser(encounterNarrative.GetFullPath())
-                    ]
-                    : null,
-                encounterNarrative != null
-                    ? new NarrativeModal(encounterNarrative.GetFullPath())
-                    : null
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("node-names.Encounter"),
+                    ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
+                        "f:encounter"),
+                    encounterNarrative != null
+                        ?
+                        [
+                            new NarrativeCollapser(encounterNarrative.GetFullPath())
+                        ]
+                        : null,
+                    encounterNarrative != null
+                        ? new NarrativeModal(encounterNarrative.GetFullPath())
+                        : null
+                )
             );
         }
 
         if (navigator.EvaluateCondition("f:text"))
         {
-            collapsibleRow.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
+            collapsibleRow.Add(
+                new CollapsibleDetail(
+                    new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
+                    new Narrative("f:text")
+                )
+            );
         }
 
         if (reactionIndex == 1)
@@ -61,15 +69,25 @@ public class AllergyIntoleranceRow(
                             new EnumLabel("@value", "http://hl7.org/fhir/ValueSet/allergy-intolerance-type")),
                     ])
                 ),
+                new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Code),
+                    new TableCell([new Optional("f:code", new CodeableConcept())])
+                ),
+                new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Criticality),
+                    new TableCell([
+                        new EnumLabel("f:criticality/@value", "http://hl7.org/fhir/allergy-intolerance-criticality")
+                    ])
+                ),
                 new If(
                     _ => infrequentReactionProperties.Contains(AllergiesAndIntolerancesReactionInfrequentProperties
                         .Manifestation),
                     new TableCell([
                         new CommaSeparatedBuilder("$reaction/f:manifestation", _ => [new CodeableConcept()]),
+                        new Condition("$reaction/f:severity",
+                            new ConstantText(" ("),
+                            new EnumLabel("$reaction/f:severity", "http://hl7.org/fhir/reaction-event-severity"),
+                            new ConstantText(")")
+                        ),
                     ])
-                ),
-                new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Code),
-                    new TableCell([new Optional("f:code", new CodeableConcept())])
                 ),
                 new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Onset),
                     new TableCell([new Chronometry("onset", true)])
@@ -84,22 +102,15 @@ public class AllergyIntoleranceRow(
                     ])
                 ),
                 new If(
-                    _ => infrequentReactionProperties.ContainsAnyOf(AllergiesAndIntolerancesReactionInfrequentProperties
-                        .Severity) || infrequentProperties.ContainsAnyOf(
-                        AllergiesAndIntolerancesInfrequentProperties.Criticality,
+                    _ => infrequentProperties.ContainsAnyOf(
                         AllergiesAndIntolerancesInfrequentProperties.ClinicalStatus,
                         AllergiesAndIntolerancesInfrequentProperties.VerificationStatus),
                     new TableCell(
                     [
-                        new EnumIconTooltip("$reaction/f:severity", "http://hl7.org/fhir/reaction-event-severity",
-                            new DisplayLabel(LabelCodes.Severity)),
-                        new Optional("f:criticality",
-                            new EnumIconTooltip("@value", "http://hl7.org/fhir/allergy-intolerance-criticality",
-                                new ConstantText("Riziko"))),
                         new Optional("f:clinicalStatus",
-                            new CodeableConceptIconTooltip(new DisplayLabel(LabelCodes.ClinicalStatus))),
+                            new CodeableConceptIconTooltip(new EhdsiDisplayLabel(LabelCodes.ClinicalStatus))),
                         new Optional("f:verificationStatus",
-                            new CodeableConceptIconTooltip(new ConstantText("Stav ověření")))
+                            new CodeableConceptIconTooltip(new LocalizedLabel("allergy-intolerance.clinical-status")))
                     ])
                 ),
                 new If(
@@ -114,15 +125,23 @@ public class AllergyIntoleranceRow(
                 new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Type),
                     new TableCell([]) // type
                 ),
+                new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Code),
+                    new TableCell([]) // code
+                ),
+                new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Criticality),
+                    new TableCell([]) // code
+                ),
                 new If(
                     _ => infrequentReactionProperties.Contains(AllergiesAndIntolerancesReactionInfrequentProperties
                         .Manifestation),
                     new TableCell([
                         new CommaSeparatedBuilder("$reaction/f:manifestation", _ => [new CodeableConcept()]),
+                        new Condition("$reaction/f:severity",
+                            new ConstantText(" ("),
+                            new EnumLabel("$reaction/f:severity", "http://hl7.org/fhir/reaction-event-severity"),
+                            new ConstantText(")")
+                        ),
                     ])
-                ),
-                new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Code),
-                    new TableCell([]) // code
                 ),
                 new If(_ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Onset),
                     new TableCell([]) // onset
@@ -133,14 +152,12 @@ public class AllergyIntoleranceRow(
                     new TableCell([]) // abatement
                 ),
                 new If(
-                    _ => infrequentReactionProperties.Contains(AllergiesAndIntolerancesReactionInfrequentProperties
-                        .Severity),
-                    new TableCell([
-                        new Optional("$reaction/f:severity",
-                            new EnumIconTooltip(".", "http://hl7.org/fhir/reaction-event-severity",
-                                new DisplayLabel(LabelCodes.Severity))
-                        )
-                    ])
+                    _ => infrequentProperties.ContainsAnyOf(
+                        AllergiesAndIntolerancesInfrequentProperties.Criticality,
+                        AllergiesAndIntolerancesInfrequentProperties.ClinicalStatus,
+                        AllergiesAndIntolerancesInfrequentProperties.VerificationStatus),
+                    new TableCell(
+                        [])
                 ),
                 new If(
                     _ => infrequentProperties.Contains(AllergiesAndIntolerancesInfrequentProperties.Text),

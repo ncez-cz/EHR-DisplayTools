@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -13,7 +13,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class NutritionOrder : SequentialResourceBase<NutritionOrder>, IResourceWidget
 {
     public static string ResourceType => "NutritionOrder";
-    
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -26,130 +27,177 @@ public class NutritionOrder : SequentialResourceBase<NutritionOrder>, IResourceW
             // ignore instantiatesCanonical
             // ignore instantiatesUri
             // ignore instantiates
-            new NameValuePair([new ConstantText("Záměr")],
+            new NameValuePair([new LocalizedLabel("nutrition-order.intent")],
                 [new EnumLabel("f:intent", "http://hl7.org/fhir/ValueSet/request-intent")]),
             // ignore patient
-            new NameValuePair([new ConstantText("Datum vytvoření")], [new ShowDateTime("f:dateTime")]),
+            new NameValuePair([new LocalizedLabel("nutrition-order.dateTime")], [new ShowDateTime("f:dateTime")]),
             new Optional("f:orderer",
-                new NameValuePair(new ConstantText("Žadatel"), new AnyReferenceNamingWidget())),
+                new NameValuePair(new LocalizedLabel("nutrition-order.orderer"), new AnyReferenceNamingWidget())),
         ];
         var labelCollapser =
             ReferenceHandler.BuildCollapserByMultireference(AllergyBuilder, navigator, context, "f:allergyIntolerance",
-                "Alergie");
+                new LocalizedLabel("node-names.AllergyIntolerance"));
         widgetTree.AddRange(labelCollapser);
         widgetTree.AddRange([
-            new Optional("f:foodPreferenceModifier", new NameValuePair([new ConstantText("Stravovací preference")],
+            new Optional("f:foodPreferenceModifier", new NameValuePair(
+                [new LocalizedLabel("nutrition-order.foodPreferenceModifier")],
                 [new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()])])),
-            new Optional("f:excludeFoodModifier", new NameValuePair([new ConstantText("Vyloučit potraviny")],
+            new Optional("f:excludeFoodModifier", new NameValuePair(
+                [new LocalizedLabel("nutrition-order.excludeFoodModifier")],
                 [new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()])])),
             new Optional("f:oralDiet", new Container([
-                new Card(new ConstantText("Perorální dieta"), new Container([
-                    new Optional("f:type", new NameValuePair([new ConstantText("Typ diety / omezení")],
+                new Card(new LocalizedLabel("nutrition-order.oralDiet"), new Container([
+                    new Optional("f:type", new NameValuePair([new LocalizedLabel("nutrition-order.oralDiet.type")],
                         [new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()])])),
-                    new Optional("f:schedule", new NameValuePair([new ConstantText("Plán")],
-                        [new ItemListBuilder(".", ItemListType.Unordered, _ => [new ShowTiming()])])),
-                    new Optional("f:nutrient", new Card(new ConstantText("Úpravy složek potravy"), new Container([
-                        new ItemListBuilder(".", ItemListType.Unordered, _ =>
+                    new Optional("f:schedule", new NameValuePair(
+                        [new LocalizedLabel("nutrition-order.oralDiet.schedule")],
                         [
-                            new Optional("f:modifier",
-                                new NameValuePair([new ConstantText("Složka")], [new CodeableConcept()])),
-                            new Optional("f:amount",
-                                new NameValuePair([new ConstantText("Množství")], [new ShowQuantity()])),
-                        ]),
-                    ]))),
-                    new Optional("f:texture", new Card(new ConstantText("Úpravy struktury"), new Container([
-                        new ItemListBuilder(".", ItemListType.Unordered, _ =>
-                        [
-                            new Optional("f:modifier",
-                                new NameValuePair([new ConstantText("Struktura")], [new CodeableConcept()])),
-                            new Optional("f:foodType",
-                                new NameValuePair([new ConstantText("Typ jídla")], [new CodeableConcept()])),
-                        ]),
-                    ]))),
-                    new Optional("f:fluidConsistencyType", new NameValuePair([new ConstantText("Konzistence tekutin")],
+                            new ItemListBuilder(".", ItemListType.Unordered,
+                                _ => [new ShowTiming(nameValuePairStyle: NameValuePair.NameValuePairStyle.Initial)])
+                        ])),
+                    new Optional("f:nutrient", new Card(new LocalizedLabel("nutrition-order.oralDiet.nutrient"),
+                        new Container([
+                            new ItemListBuilder(".", ItemListType.Unordered, _ =>
+                            [
+                                new Optional("f:modifier",
+                                    new NameValuePair(
+                                        [new LocalizedLabel("nutrition-order.oralDiet.nutrient.modifier")],
+                                        [new CodeableConcept()])),
+                                new Optional("f:amount",
+                                    new NameValuePair([new LocalizedLabel("nutrition-order.oralDiet.nutrient.amount")],
+                                        [new ShowQuantity()])),
+                            ]),
+                        ]))),
+                    new Optional("f:texture", new Card(new LocalizedLabel("nutrition-order.oralDiet.texture"),
+                        new Container([
+                            new ItemListBuilder(".", ItemListType.Unordered, _ =>
+                            [
+                                new Optional("f:modifier",
+                                    new NameValuePair([new LocalizedLabel("nutrition-order.oralDiet.texture.modifier")],
+                                        [new CodeableConcept()])),
+                                new Optional("f:foodType",
+                                    new NameValuePair([new LocalizedLabel("nutrition-order.oralDiet.texture.foodType")],
+                                        [new CodeableConcept()])),
+                            ]),
+                        ]))),
+                    new Optional("f:fluidConsistencyType", new NameValuePair(
+                        [new LocalizedLabel("nutrition-order.oralDiet.fluidConsistencyType")],
                         [new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()])])),
                     new Optional("f:instruction",
-                        new NameValuePair([new ConstantText("Instrukce / dodatečné informace")], [new Text("@value")])),
+                        new NameValuePair([new LocalizedLabel("nutrition-order.oralDiet.instruction")],
+                            [new Text("@value")])),
                 ])),
             ], ContainerType.Div, "my-2")),
             new Optional("f:supplement", new ConcatBuilder(".", _ =>
             [
                 new Container([
-                    new Card(new ConstantText("Doplněk stravy"), new Container([
-                        new Optional("f:type", new NameValuePair([new ConstantText("Typ")], [new CodeableConcept()])),
+                    new Card(new LocalizedLabel("nutrition-order.supplement"), new Container([
+                        new Optional("f:type",
+                            new NameValuePair([new LocalizedLabel("nutrition-order.supplement.type")],
+                                [new CodeableConcept()])),
                         new Optional("f:productName",
-                            new NameValuePair([new ConstantText("Název výrobku")], [new Text("@value")])),
-                        new Optional("f:schedule", new NameValuePair([new ConstantText("Plán")],
-                            [new ItemListBuilder(".", ItemListType.Unordered, _ => [new ShowTiming()])])),
+                            new NameValuePair([new LocalizedLabel("nutrition-order.supplement.productName")],
+                                [new Text("@value")])),
+                        new Optional("f:schedule", new NameValuePair(
+                            [new LocalizedLabel("nutrition-order.supplement.schedule")],
+                            [
+                                new ItemListBuilder(".", ItemListType.Unordered,
+                                    _ => [new ShowTiming(nameValuePairStyle: NameValuePair.NameValuePairStyle.Initial)])
+                            ])),
                         new Optional("f:quantity",
-                            new NameValuePair([new ConstantText("Množství")], [new ShowQuantity()])),
+                            new NameValuePair([new LocalizedLabel("nutrition-order.supplement.quantity")],
+                                [new ShowQuantity()])),
                         new Optional("f:instruction",
-                            new NameValuePair([new ConstantText("Instrukce / dodatečné informace")],
+                            new NameValuePair([new LocalizedLabel("nutrition-order.supplement.instruction")],
                                 [new Text("@value")])),
                     ])),
                 ], ContainerType.Div, "my-2")
             ])),
             new Optional("f:enteralFormula", new Container([
-                new Card(new ConstantText("Enterální směs"), new Container([
+                new Card(new LocalizedLabel("nutrition-order.enteralFormula"), new Container([
                     new Optional("f:baseFormulaType",
-                        new NameValuePair([new ConstantText("Typ směsi")], [new CodeableConcept()])),
+                        new NameValuePair([new LocalizedLabel("nutrition-order.enteralFormula.baseFormulaType")],
+                            [new CodeableConcept()])),
                     new Optional("f:baseFormulaProductName",
-                        new NameValuePair([new ConstantText("Název výrobku - směs")], [new Text("@value")])),
+                        new NameValuePair([new LocalizedLabel("nutrition-order.enteralFormula.baseFormulaProductName")],
+                            [new Text("@value")])),
                     new Optional("f:additiveType",
-                        new NameValuePair([new ConstantText("Typ doplňkové látky")], [new CodeableConcept()])),
+                        new NameValuePair([new LocalizedLabel("nutrition-order.enteralFormula.additiveType")],
+                            [new CodeableConcept()])),
                     new Optional("f:additiveProductName",
-                        new NameValuePair([new ConstantText("Název výrobku - doplňková látka")], [new Text("@value")])),
+                        new NameValuePair([new LocalizedLabel("nutrition-order.enteralFormula.additiveProductName")],
+                            [new Text("@value")])),
                     new Optional("f:caloricDensity",
-                        new NameValuePair([new ConstantText("Kalorická hustota")], [new ShowQuantity()])),
-                    new Optional("f:routeofAdministration",
-                        new NameValuePair([new DisplayLabel(LabelCodes.AdministrationRoute)], [new CodeableConcept()])),
-                    new Optional("f:administration", new Card(new ConstantText("Instrukce k podání"), new Container([
-                        new ItemListBuilder(".", ItemListType.Unordered, _ =>
-                        [
-                            new Card(null, new Container([
-                                new Optional("f:schedule",
-                                    new NameValuePair([new ConstantText("Frekvence")], [new ShowTiming()])),
-                                new Optional("f:quantity",
-                                    new NameValuePair([new ConstantText("Množství")], [new ShowQuantity()])),
-                                new Optional("f:rateQuantity",
-                                    new NameValuePair([new ConstantText("Rychlost")], [new ShowQuantity()])),
-                                new Optional("f:rateRatio",
-                                    new NameValuePair([new ConstantText("Rychlost")], [new ShowRatio()])),
-                            ])),
-                        ])
-                    ]))),
-                    new Optional("f:administrationInstruction",
-                        new NameValuePair([new ConstantText("Instrukce k podání")], [new Text("@value")])),
-                    new Optional("f:maxVolumeToDeliver",
-                        new NameValuePair([new ConstantText("Maximální objem za jednotku času")],
+                        new NameValuePair([new LocalizedLabel("nutrition-order.enteralFormula.caloricDensity")],
                             [new ShowQuantity()])),
-                ]))
+                    new Optional("f:routeofAdministration",
+                        new NameValuePair([new EhdsiDisplayLabel(LabelCodes.AdministrationRoute)],
+                            [new CodeableConcept()])),
+                    new Optional("f:administration", new Card(
+                        new LocalizedLabel("nutrition-order.enteralFormula.administration"), new Container([
+                            new ItemListBuilder(".", ItemListType.Unordered, _ =>
+                            [
+                                new Card(null, new Container([
+                                    new Optional("f:schedule",
+                                        new NameValuePair(
+                                            [
+                                                new LocalizedLabel(
+                                                    "nutrition-order.enteralFormula.administration.schedule")
+                                            ],
+                                            [
+                                                new ShowTiming(
+                                                    nameValuePairStyle: NameValuePair.NameValuePairStyle.Initial)
+                                            ])),
+                                    new Optional("f:quantity",
+                                        new NameValuePair(
+                                        [
+                                            new LocalizedLabel("nutrition-order.enteralFormula.administration.quantity")
+                                        ], [new ShowQuantity()])),
+                                    new Optional("f:rateQuantity",
+                                        new NameValuePair(
+                                            [new LocalizedLabel("nutrition-order.enteralFormula.administration.rate")],
+                                            [new ShowQuantity()])),
+                                    new Optional("f:rateRatio",
+                                        new NameValuePair(
+                                            [new LocalizedLabel("nutrition-order.enteralFormula.administration.rate")],
+                                            [new ShowRatio()])),
+                                ])),
+                            ]),
+                        ]))),
+                    new Optional("f:administrationInstruction",
+                        new NameValuePair(
+                            [new LocalizedLabel("nutrition-order.enteralFormula.administrationInstruction")],
+                            [new Text("@value")])),
+                    new Optional("f:maxVolumeToDeliver",
+                        new NameValuePair([new LocalizedLabel("nutrition-order.enteralFormula.maxVolumeToDeliver")],
+                            [new ShowQuantity()])),
+                ])),
             ], ContainerType.Div, "my-2")),
             new Optional("f:encounter",
                 new ShowMultiReference(".",
                     (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                     x =>
                     [
-                        new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                            isCollapsed: true)
+                        new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
+                            isCollapsed: true),
                     ]
                 )
             ),
             new Choose([
                 new When("f:text",
                     new NarrativeCollapser()
-                )
+                ),
             ]),
         ]);
         // ignore note
 
         var widgetCollapser = new Collapser([
                 new Row([
-                    new ConstantText("Výživová doporučení"),
+                    new LocalizedLabel("nutrition-order"),
                     new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/request-status",
-                        new DisplayLabel(LabelCodes.Status))
-                ], flexContainerClasses: "gap-1")
-            ], [],
+                        new EhdsiDisplayLabel(LabelCodes.Status)),
+                ], flexContainerClasses: "gap-1"),
+            ],
             widgetTree, iconPrefix: [new NarrativeModal()]);
 
         return widgetCollapser.Render(navigator, renderer, context);

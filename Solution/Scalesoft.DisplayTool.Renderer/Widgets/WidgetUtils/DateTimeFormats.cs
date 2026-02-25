@@ -20,6 +20,8 @@ public static class DateTimeFormats
                     { DateFormatType.SecondMinuteHourDayMonthYear, "d.M.yyyy HH:mm:ss" },
                     { DateFormatType.SecondMinuteHourDayMonthYearTimezone, "d.M.yyyy HH:mm:ss UTCzzz" },
                     { DateFormatType.Timezone, "UTCzzz" },
+                    { DateFormatType.MinuteHour, "HH:mm" },
+                    { DateFormatType.MinuteHourTimezone, "HH:mm UTCzzz" },
                 }
             },
             {
@@ -34,6 +36,8 @@ public static class DateTimeFormats
                     { DateFormatType.SecondMinuteHourDayMonthYear, "dd.MM.yyyy HH:mm:ss" },
                     { DateFormatType.SecondMinuteHourDayMonthYearTimezone, "dd.MM.yyyy HH:mm:ss UTCzzz" },
                     { DateFormatType.Timezone, "UTCzzz" },
+                    { DateFormatType.MinuteHour, "HH:mm" },
+                    { DateFormatType.MinuteHourTimezone, "HH:mm UTCzzz" },
                 }
             },
         };
@@ -55,6 +59,10 @@ public static class DateTimeFormats
             {
                 DateFormatType.DayMonthYearTimezone,
                 new DateFormatTypeTimeZoneSplit(DateFormatType.DayMonthYear, DateFormatType.Timezone)
+            },
+            {
+                DateFormatType.MinuteHourTimezone,
+                new DateFormatTypeTimeZoneSplit(DateFormatType.MinuteHour, DateFormatType.Timezone)
             },
             {
                 DateFormatType.MinuteHourDayMonthYearTimezone,

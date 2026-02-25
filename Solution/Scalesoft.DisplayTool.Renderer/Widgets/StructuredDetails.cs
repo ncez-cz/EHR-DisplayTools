@@ -65,16 +65,6 @@ public class StructuredDetails
         Content.AddRange(items);
     }
 
-    public void AddCollapser(
-        Widget header,
-        Widget body,
-        List<Widget>? footer = null,
-        Widget? narrativeContent = null
-    )
-    {
-        Content.Add(new CollapsibleDetail(header, body, footer, narrativeContent));
-    }
-
     public void Concat(StructuredDetails other)
     {
         Content.AddRange(other.Content);
@@ -109,7 +99,7 @@ public class StructuredDetails
             Widget fullCollapser = detailItem switch
             {
                 CollapsibleDetail c => new Collapser(
-                    [c.Header], [], [c.Body],
+                    [c.Header], [c.Body],
                     isCollapsed: c.Body is Narrative or EncounterCard && sortedDetailItems.Count > 1,
                     footer: c.Footer,
                     customClass: c.Body is Narrative && hideNarrative ? "narrative-print-collapser" : string.Empty,

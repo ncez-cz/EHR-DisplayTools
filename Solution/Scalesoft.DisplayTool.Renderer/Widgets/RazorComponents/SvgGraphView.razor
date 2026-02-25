@@ -1,24 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="@Model.SvgWidth" height="@Model.SvgHeight" id="@Model.Id"
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 @Model.SvgWidth @Model.SvgHeight"
+     class="svg-adaptive-graph"
+     preserveAspectRatio="xMidYMid meet"
+     id="@Model.Id"
      data-id="@Model.VisualId">
+
     <rect width="100%" height="100%" fill="white"/>
 
-    <!-- Axes -->
     <line x1="@Model.SvgPadding" y1="@(Model.SvgHeight - Model.SvgPadding)"
-          x2="@(Model.SvgWidth - Model.SvgPadding)" y2="@(Model.SvgHeight - Model.SvgPadding)" stroke="black"/>
+          x2="@(Model.SvgWidth - Model.SvgPadding)" y2="@(Model.SvgHeight - Model.SvgPadding)"
+          class="graph-axis-line"/>
     <line x1="@Model.SvgPadding" y1="@Model.SvgPadding"
-          x2="@Model.SvgPadding" y2="@(Model.SvgHeight - Model.SvgPadding)" stroke="black"/>
+          x2="@Model.SvgPadding" y2="@(Model.SvgHeight - Model.SvgPadding)"
+          class="graph-axis-line"/>
 
     @foreach (var label in Model.Labels)
     {
         <text>
-            <text x="@label.X" y="@label.Y" font-size="@label.FontSize" fill="black" text-anchor="end"
+            <text x="@label.X" y="@label.Y"
+                  class="graph-label"
+                  text-anchor="end"
                   @attributes="label.Attributes">@((MarkupString)label.Label)</text>
         </text>
     }
 
     @foreach (var line in Model.Lines)
     {
-        <polyline fill="none" stroke="@line.Color" stroke-width="2" points="@line.Points"/>
+        <polyline fill="none"
+                  stroke="@line.Color"
+                  stroke-width="2"
+                  points="@line.Points"
+                  vector-effect="non-scaling-stroke"/>
     }
 
     @foreach (var triangle in Model.Triangles)
@@ -29,8 +41,10 @@
     @foreach (var legend in Model.LegendEntries)
     {
         <rect x="@legend.X" y="@legend.Y" width="15" height="15" fill="@legend.Color" stroke="black"/>
+
         <text>
-            <text x="@(legend.X + 20)" y="@(legend.Y + 12)" font-size="12"
+            <text x="@(legend.X + 20)" y="@(legend.Y + 12)"
+                  class="graph-legend-text"
                   fill="black">@((MarkupString)legend.Label)</text>
         </text>
     }

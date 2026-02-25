@@ -57,4 +57,24 @@ public static class EnumerableExtensions
 
         return sourceSet.SetEquals(itemsSet);
     }
+
+    public static IEnumerable<T> Intersperse<T>(this IEnumerable<T> source, T element)
+    {
+        var first = true;
+        foreach (var value in source)
+        {
+            if (!first)
+            {
+                yield return element;
+            }
+
+            yield return value;
+            first = false;
+        }
+    }
+
+    public static bool Only<T>(this ICollection<T> source, T item)
+    {
+        return source.Count == 1 && source.Contains(item);
+    }
 }

@@ -1,0 +1,904 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "My API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/Signature/encapsulated/sign": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignResponseContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignResponseContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignResponseContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Signature/file/encapsulated/sign": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "DocumentType",
+                  "File"
+                ],
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "DocumentType": {
+                    "$ref": "#/components/schemas/DocumentTypeContract"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                },
+                "DocumentType": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Signature/encapsulated/verify": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Signature/file/encapsulated/verify": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "DocumentType",
+                  "File"
+                ],
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "DocumentType": {
+                    "$ref": "#/components/schemas/DocumentTypeContract"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                },
+                "DocumentType": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Signature/integrated/sign": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignResponseContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignResponseContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignResponseContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Signature/file/integrated/sign": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "DocumentType",
+                  "File"
+                ],
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "DocumentType": {
+                    "$ref": "#/components/schemas/DocumentTypeContract"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                },
+                "DocumentType": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Signature/integrated/verify": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocumentSignContract"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationResponseContract"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentSignatureVerificationErrorContract"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Signature/file/integrated/verify": {
+      "post": {
+        "tags": [
+          "Signature"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "DocumentType",
+                  "File"
+                ],
+                "type": "object",
+                "properties": {
+                  "File": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "DocumentType": {
+                    "$ref": "#/components/schemas/DocumentTypeContract"
+                  }
+                }
+              },
+              "encoding": {
+                "File": {
+                  "style": "form"
+                },
+                "DocumentType": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Code": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "CodeableConcept": {
+        "type": "object",
+        "properties": {
+          "coding": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Coding"
+            },
+            "nullable": true
+          },
+          "textElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Coding": {
+        "type": "object",
+        "properties": {
+          "systemElement": {
+            "$ref": "#/components/schemas/FhirUri"
+          },
+          "versionElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "codeElement": {
+            "$ref": "#/components/schemas/Code"
+          },
+          "displayElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "userSelectedElement": {
+            "$ref": "#/components/schemas/FhirBoolean"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DataType": {
+        "type": "object",
+        "properties": {
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentSignContract": {
+        "required": [
+          "base64Document",
+          "documentType"
+        ],
+        "type": "object",
+        "properties": {
+          "base64Document": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "documentType": {
+            "$ref": "#/components/schemas/DocumentTypeContract"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentSignResponseContract": {
+        "required": [
+          "base64Document"
+        ],
+        "type": "object",
+        "properties": {
+          "base64Document": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentSignatureVerificationErrorContract": {
+        "required": [
+          "errorCode"
+        ],
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "$ref": "#/components/schemas/ErrorCodeContract"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentSignatureVerificationResponseContract": {
+        "required": [
+          "isValid"
+        ],
+        "type": "object",
+        "properties": {
+          "isValid": {
+            "type": "boolean"
+          },
+          "signedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "signor": {
+            "$ref": "#/components/schemas/ResourceReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "DocumentTypeContract": {
+        "enum": [
+          "FhirJson",
+          "FhirXml"
+        ],
+        "type": "string"
+      },
+      "ErrorCodeContract": {
+        "enum": [
+          "NoSignature",
+          "UnsupportedDocumentType",
+          "Other"
+        ],
+        "type": "string"
+      },
+      "Extension": {
+        "type": "object",
+        "properties": {
+          "urlElement": {
+            "$ref": "#/components/schemas/FhirUri"
+          },
+          "value": {
+            "$ref": "#/components/schemas/DataType"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FhirBoolean": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FhirDateTime": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FhirString": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FhirUri": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "nullable": true
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Identifier": {
+        "type": "object",
+        "properties": {
+          "useElement": {
+            "$ref": "#/components/schemas/IdentifierUseCode"
+          },
+          "type": {
+            "$ref": "#/components/schemas/CodeableConcept"
+          },
+          "systemElement": {
+            "$ref": "#/components/schemas/FhirUri"
+          },
+          "valueElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "period": {
+            "$ref": "#/components/schemas/Period"
+          },
+          "assigner": {
+            "$ref": "#/components/schemas/ResourceReference"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentifierUse": {
+        "enum": [
+          "Usual",
+          "Official",
+          "Temp",
+          "Secondary",
+          "Old"
+        ],
+        "type": "string"
+      },
+      "IdentifierUseCode": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/IdentifierUse"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Period": {
+        "type": "object",
+        "properties": {
+          "startElement": {
+            "$ref": "#/components/schemas/FhirDateTime"
+          },
+          "endElement": {
+            "$ref": "#/components/schemas/FhirDateTime"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ResourceReference": {
+        "type": "object",
+        "properties": {
+          "referenceElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "typeElement": {
+            "$ref": "#/components/schemas/FhirUri"
+          },
+          "identifier": {
+            "$ref": "#/components/schemas/Identifier"
+          },
+          "displayElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "elementIdElement": {
+            "$ref": "#/components/schemas/FhirString"
+          },
+          "extension": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Extension"
+            },
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Signature"
+    }
+  ]
+}

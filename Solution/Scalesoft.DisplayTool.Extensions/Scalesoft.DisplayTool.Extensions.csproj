@@ -6,13 +6,21 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+
     <ItemGroup>
-        <EmbeddedResource Include="Localization/CdaCodeLists/Epsos-Repository/*.xml"/>
-        <EmbeddedResource Include="Localization/CdaCodeLists/DastaCodeLists/*.xml"/>
+        <Content Include="Resources\*.xml" CopyToOutputDirectory="PreserveNewest" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Scalesoft.DisplayTool.Shared\Scalesoft.DisplayTool.Shared.csproj"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="GitVersion.MsBuild" Version="6.5.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="LiteDB" Version="5.0.21" />
     </ItemGroup>
 
 </Project>

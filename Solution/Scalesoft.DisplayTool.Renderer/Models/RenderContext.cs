@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
+using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -12,6 +13,8 @@ namespace Scalesoft.DisplayTool.Renderer.Models;
 public class RenderContext
 {
     public readonly ICodeTranslator Translator;
+
+    public readonly TranslatorWrapper TranslatorWrapper;
 
     public readonly Language Language;
 
@@ -55,6 +58,7 @@ public class RenderContext
         RenderMode = renderMode;
         PreferTranslationsFromDocument = preferTranslationsFromDocument;
         LevelOfDetail = levelOfDetail;
+        TranslatorWrapper = new TranslatorWrapper(translator);
     }
 
     /// <summary>
@@ -165,5 +169,17 @@ public class RenderContext
                 .ToList();
 
         return unrenderedResources;
+    }
+
+    public bool IsResourceRendered(XmlDocumentNavigator nav)
+    {
+        var referenceValue = ReferenceHandler.GetReferencesWithContent(nav, ".");
+        if (ResourceIdentifier.TryFromNavigator(referenceValue.First().Value, out var identifier))
+        {
+            var result = m_renderedResources.Any(x => x.Equals(identifier));
+            return result;
+        }
+        
+        return false;
     }
 }

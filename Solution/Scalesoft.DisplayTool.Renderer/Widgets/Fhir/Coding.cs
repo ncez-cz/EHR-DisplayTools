@@ -34,7 +34,7 @@ public class Coding(string? text = null, bool hideSystem = false, string? prefer
                     new ParseError
                     {
                         Kind = ErrorKind.InvalidValue,
-                        Message = "CodingIps must have display or code attribute",
+                        Message = "Coding must have display or code attribute",
                         Path = navigator.GetFullPath(),
                         Severity = ErrorSeverity.Warning,
                     },
@@ -53,33 +53,19 @@ public class Coding(string? text = null, bool hideSystem = false, string? prefer
             return await widget.Render(navigator, renderer, context);
         }
 
-        // First, try translations from extensions
-        var extension = navigator
-            .SelectAllNodes("f:display/f:extension[@url='http://hl7.org/fhir/StructureDefinition/translation']")
-            .FirstOrDefault(x =>
-                x.EvaluateCondition(
-                    $"f:extension[@url='lang' and (f:valueCode/@value='{lang}' or f:valueCode/@value='{shortLang}')]"));
-        var translation = extension?.SelectSingleNode("f:extension[@url='content']");
-        if (translation?.Node != null)
+        // Try to apply translations from extensions
+        var displayNav = navigator.SelectSingleNode("f:display");
+        Widget? fallbackWidget = null;
+        if (fallback != null)
         {
-            return await new OpenTypeElement(null).Render(translation, renderer, context); // string | markdown
+            fallbackWidget = new ConstantText(fallback);
         }
 
-        // Next, try checking if the current resource has the correct language
-        var resourceHasLanguage = navigator.EvaluateCondition("ancestor::f:resource/*/f:language");
-        var resourceHasCorrectLanguage =
-            navigator.EvaluateCondition($"ancestor::f:resource/*/f:language[@value='{lang}' or @value='{shortLang}']");
-
-        // Next, try checking if the current resource has no language, but the document has the right language
-        var documentHasCorrectLanguage =
-            navigator.EvaluateCondition($"/f:Bundle/f:language[@value='{lang}' or @value='{shortLang}']");
-
-        if (resourceHasCorrectLanguage || (!resourceHasLanguage && documentHasCorrectLanguage))
+        var translatedWidget =
+            TranslationExtensionUtils.TranslateWithHierarchy(displayNav, lang, shortLang, fallbackWidget);
+        if (translatedWidget != null)
         {
-            if (fallback != null)
-            {
-                return fallback;
-            }
+            return await translatedWidget.Render(navigator, renderer, context);
         }
 
         // Otherwise, try termx or fall back to text / code+system
@@ -90,7 +76,7 @@ public class Coding(string? text = null, bool hideSystem = false, string? prefer
                 new ParseError
                 {
                     Kind = ErrorKind.InvalidValue,
-                    Message = "CodingIps must have display or code attribute",
+                    Message = "Coding must have display or code attribute",
                     Path = navigator.GetFullPath(),
                     Severity = ErrorSeverity.Warning,
                 },

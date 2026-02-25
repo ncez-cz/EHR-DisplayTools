@@ -1,8 +1,7 @@
 ﻿@using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils
 
 @{
-    const string title = "";
-    const string toggleLabel = "Obsah";
+    const string title = "Obsah";
     const string errorMessage = "PDF obsah je prázdný.";
     const string heading = "Patient summary Document";
     var content = $"<iframe style=\"height: 100vh; width: 100%;\" src=\"data:application/pdf;base64,{Convert.ToBase64String(Model.PdfBytes)}\"></iframe>";
@@ -12,9 +11,9 @@
 {
     <HeadingView Model="new Heading.ViewModel{Content = heading, Size = HeadingSize.H2}"></HeadingView>
 
-    <CollapserView
-        Model="new Collapser.ViewModel{ToggleLabel = toggleLabel, Title = title, Content = content, Icon=Model.CollapseIcon }">
-    </CollapserView>
+    <CardView
+        Model="new CardBase.ViewModel{Title = title,  Body = content, Icon=Model.CollapseIcon, IsCollapsible = true }">
+    </CardView>
 }
 else
 {

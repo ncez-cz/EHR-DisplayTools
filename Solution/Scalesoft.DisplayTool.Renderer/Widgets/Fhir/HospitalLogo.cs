@@ -4,7 +4,7 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class HospitalLogo : Widget
+public class HospitalLogo(string imageOptionalClass = "header-image") : Widget
 {
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -19,7 +19,7 @@ public class HospitalLogo : Widget
                     new Container(
                         new ChangeContext("f:content[1]/f:attachment",
                             new Binary()), // why does logo DocumentReference contain multiple content?
-                        optionalClass: "header-image", idSource: documentReferenceNav),
+                        optionalClass: imageOptionalClass, idSource: documentReferenceNav),
                 ],
                 "f:valueReference");
 

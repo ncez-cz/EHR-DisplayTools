@@ -12,7 +12,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
 {
     public static string ResourceType => "DeviceRequest";
-    
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -20,11 +21,11 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
     )
     {
         var infrequentProperties =
-            InfrequentProperties.Evaluate<DeviceRequestInfrequentProperties>([navigator]);
+            InfrequentProperties.Evaluate<DeviceRequestInfrequentProperties>(navigator);
 
         var headerInfo = new Container([
             new Container([
-                new ConstantText("Žádost o přístroj"),
+                new LocalizedLabel("device-request"),
                 new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Code),
                     new ConstantText(" ("),
                     new OpenTypeElement(null, "code"), // 	Reference(Device) | CodeableConcept
@@ -32,46 +33,46 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                 ),
             ], ContainerType.Span),
             new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/request-status",
-                new ConstantText("Stav žádosti"))
+                new LocalizedLabel("device-request.status")),
         ], ContainerType.Div, "d-flex align-items-center gap-1");
 
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
         var basicInfo = new Container([
             new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Priority),
                 new NameValuePair(
-                    new ConstantText("Priorita"),
+                    new LocalizedLabel("device-request.priority"),
                     new EnumLabel("f:priority", "http://hl7.org/fhir/ValueSet/request-priority")
                 )
             ),
             new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Intent),
                 new NameValuePair(
-                    new ConstantText("Záměr"),
+                    new LocalizedLabel("device-request.intent"),
                     new EnumLabel("f:intent", "http://hl7.org/fhir/ValueSet/request-intent")
                 )
             ),
             new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Reason),
                 new NameValuePair(
-                    new ConstantText("Důvody žádosti"),
+                    new LocalizedLabel("device-request.reason"),
                     new Concat([
                         new Optional("f:reasonReference",
                             new ListBuilder(".", FlexDirection.Column, _ => [new AnyReferenceNamingWidget()])
                         ),
                         new Optional("f:reasonCode",
                             new ListBuilder(".", FlexDirection.Column, _ => [new CodeableConcept()])
-                        )
+                        ),
                     ])
                 )
             ),
             new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Occurrence),
                 new NameValuePair(
-                    new ConstantText("Žádaný rozvrh/čas"),
+                    new LocalizedLabel("device-request.occurence"),
                     new Chronometry("occurrence")
                 )
             ),
             new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.AuthoredOn),
                 new NameValuePair(
-                    new ConstantText("Datum a čas žádosti"),
+                    new LocalizedLabel("device-request.authoredOn"),
                     new ShowDateTime("f:authoredOn")
                 )
             ),
@@ -79,18 +80,18 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                 _ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.DoNotPerform) &&
                      navigator.EvaluateCondition("f:doNotPerform[@value='true']"),
                 new NameValuePair(
-                    new ConstantText("Zákaz"),
+                    new LocalizedLabel("device-request.doNotPerform"),
                     new ShowDoNotPerform()
                 )
             ),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
         var deviceBadge = new Concat([
-            new PlainBadge(new ConstantText("Zařízení")),
+            new PlainBadge(new LocalizedLabel("device")),
             new EnumIconTooltip("f:status",
                 "http://hl7.org/fhir/ValueSet/device-status-reason",
-                new ConstantText("Stav zařízení")
-            )
+                new LocalizedLabel("device-request.device.status")
+            ),
         ]);
 
         var deviceInfo = new Container([
@@ -102,31 +103,37 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                             "f:codeReference")),
                     new When("f:codeCodeableConcept",
                         new ChangeContext("f:codeCodeableConcept", new NameValuePair(
-                            new DisplayLabel(LabelCodes.DeviceName),
+                            new EhdsiDisplayLabel(LabelCodes.DeviceName),
                             new CodeableConcept()
-                        )))
+                        ))),
                 ])
-            )
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+            ),
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
-        var actorBadge = new PlainBadge(new ConstantText("Činitelé"));
+        var actorBadge = new PlainBadge(new LocalizedLabel("general.actors"));
         var actorInfo = new Container([
-            new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Requester),
-                new NameValuePair(
-                    new ConstantText("Žadatel"),
-                    new AnyReferenceNamingWidget("f:requester")
+            infrequentProperties.Optional(DeviceRequestInfrequentProperties.Requester,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("device-request.requester"),
+                    }
                 )
             ),
-            new If(_ => infrequentProperties.Contains(DeviceRequestInfrequentProperties.Performer),
-                new NameValuePair(
-                    new ConstantText("Vyřizovatel"),
-                    new AnyReferenceNamingWidget("f:performer")
+            infrequentProperties.Optional(DeviceRequestInfrequentProperties.Performer,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("device-request.performer"),
+                    }
                 )
             ),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
         var complete =
-            new Collapser([headerInfo], [], [
+            new Collapser([headerInfo], [
                     badge,
                     basicInfo,
                     new ThematicBreak(),
@@ -138,7 +145,7 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                         new ThematicBreak(),
                         actorBadge,
                         actorInfo
-                    )
+                    ),
                 ], footer: infrequentProperties.ContainsAnyOf(DeviceRequestInfrequentProperties.Encounter,
                     DeviceRequestInfrequentProperties.Text)
                     ?
@@ -148,8 +155,8 @@ public class DeviceRequest : ColumnResourceBase<DeviceRequest>, IResourceWidget
                                 (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                                 x =>
                                 [
-                                    new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                                        isCollapsed: true)
+                                    new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
+                                        isCollapsed: true),
                                 ]
                             )
                         ),
@@ -179,5 +186,5 @@ public enum DeviceRequestInfrequentProperties
     [OpenType("reason")] Reason,
     DoNotPerform,
     Text,
-    Encounter
+    Encounter,
 }

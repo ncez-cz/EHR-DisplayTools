@@ -23,96 +23,94 @@ new Variable("code", "$allergiesAndIntolerancesSectionCode"),
 ]), 
 ], [
 new Collapser([
-new Text("$originalNarrativeTableTitle")
-, 
+    new Text("$originalNarrativeTableTitle")
+    , 
 ], [
-], [
-new NarrativeText("n1:text", null), 
+    new NarrativeText("n1:text", null), 
 ]), 
 new LineBreak(), 
 new Collapser([
-new Text("$translatedCodedTableTitle")
-, 
+    new Text("$translatedCodedTableTitle")
+    , 
 ], [
-], [
-new Table([
-new Choose([
-new When("not($act/@nullFlavor)", [
-new Table([
-new TableBody([
-new Choose([
-new When("$observationValue/@code='no-known-allergies' or $observationValue/@code='no-allergy-info'", [
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiAbsentOrUnknownAllergyWidget(), [
-new Variable("node", "$observationValue"),
-]), 
-],
-TableCellType.Data, 5), 
-]), 
-]),
-], [
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'65'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'10'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'5'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'155'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'123'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'156'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'157'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'158'"),
-]), 
-],
-TableCellType.Header), 
-new ChangeContext("n1:entry/n1:act", new Widget40()),
-]), 
-]), 
-]), 
-]), 
-]),
-], [
-new WidgetWithVariables(new ShowEHdsiNullFlavorWidget(), [
-new Variable("code", "$act/@nullFlavor"),
-]), 
-]), 
-], true), 
+    new Table([
+        new Choose([
+            new When("not($act/@nullFlavor)", [
+                new Table([
+                    new TableBody([
+                        new Choose([
+                            new When("$observationValue/@code='no-known-allergies' or $observationValue/@code='no-allergy-info'", [
+                                new TableRow([
+                                    new TableCell([
+                                            new WidgetWithVariables(new ShowEHdsiAbsentOrUnknownAllergyWidget(), [
+                                                new Variable("node", "$observationValue"),
+                                            ]), 
+                                        ],
+                                        TableCellType.Data, 5), 
+                                ]), 
+                            ]),
+                        ], [
+                            new TableRow([
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'65'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'10'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'5'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'155'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'123'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'156'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'157'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new TableCell([
+                                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                                            new Variable("code", "'158'"),
+                                        ]), 
+                                    ],
+                                    TableCellType.Header), 
+                                new ChangeContext("n1:entry/n1:act", new Widget40()),
+                            ]), 
+                        ]), 
+                    ]), 
+                ]), 
+            ]),
+        ], [
+            new WidgetWithVariables(new ShowEHdsiNullFlavorWidget(), [
+                new Variable("code", "$act/@nullFlavor"),
+            ]), 
+        ]), 
+    ], true), 
 ]), 
 ], titleAbbreviations: SectionTitleAbbreviations.Allergies),
 ]),

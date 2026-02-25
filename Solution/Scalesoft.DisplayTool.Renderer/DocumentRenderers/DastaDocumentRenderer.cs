@@ -41,8 +41,8 @@ public class DastaDocumentRenderer : SpecificDocumentRendererBase
         DastaFhirDocumentConverterClient converterClient,
         FhirXmlDocumentRenderer fhirRenderer,
         ExternalServicesConfiguration configuration,
-        IDocumentSignatureValidationManager documentSignatureValidationManager
-    ) : base(documentValidatorProvider, htmlToPdfConverter, documentSignatureValidationManager)
+        IPdfSignatureManager pdfSignatureManager
+    ) : base(documentValidatorProvider, htmlToPdfConverter, pdfSignatureManager)
     {
         m_widgetRenderer = widgetRenderer;
         m_translator = translator;
@@ -58,6 +58,7 @@ public class DastaDocumentRenderer : SpecificDocumentRendererBase
         OutputFormat outputFormat,
         DocumentOptions options,
         DocumentType documentType,
+        bool isEmbeddable,
         RenderMode renderMode = RenderMode.Standard,
         LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
     )
@@ -89,6 +90,7 @@ public class DastaDocumentRenderer : SpecificDocumentRendererBase
                     outputFormat,
                     options,
                     documentType,
+                    isEmbeddable,
                     renderMode,
                     levelOfDetail
                 );

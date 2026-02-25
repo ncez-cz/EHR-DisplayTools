@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -11,7 +11,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class Contract : ColumnResourceBase<Contract>, IResourceWidget
 {
     public static string ResourceType => "Contract";
-    
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -19,181 +20,243 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
     )
     {
         var headerInfo = new Container([
-            new ConstantText("Smlouva"),
+            new LocalizedLabel("contract"),
             new Optional("f:title|f:alias|f:subtitle|f:name",
                 new ConstantText(" ("),
                 new Text("@value"),
                 new ConstantText(")")
             ),
             new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/contract-status",
-                new DisplayLabel(LabelCodes.Status))
+                new EhdsiDisplayLabel(LabelCodes.Status))
         ]);
 
-        var globalInfrequentProperties =
-            Widgets.InfrequentProperties.Evaluate<InfrequentProperties>([navigator]);
+        var infrequentProperties = InfrequentProperties.Evaluate<ContractInfrequentProperties>(navigator);
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
 
         var basicInfo = new Container([
             new Optional("f:title|f:alias|f:name", new NameValuePair(
-                new DisplayLabel(LabelCodes.Name),
+                new EhdsiDisplayLabel(LabelCodes.Name),
                 new Text("@value")
             )),
-            new Optional("f:subtitle", new NameValuePair(
-                new ConstantText("Podnázev"),
-                new Text("@value")
-            )),
-            new Optional("f:legalState", new NameValuePair(
-                new ConstantText("Stav vyjednání"),
-                new CodeableConcept()
-            )),
+            infrequentProperties.Optional(ContractInfrequentProperties.Subtitle,
+                new NameValuePair(
+                    new LocalizedLabel("contract.subtitle"),
+                    new Text("@value")
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.LegalState,
+                new NameValuePair(
+                    new LocalizedLabel("contract.legalState"),
+                    new CodeableConcept()
+                )
+            ),
             //ignore instatiatesCanonical
             //ignore instatiatesUri
-            new If(_ => globalInfrequentProperties.Contains(InfrequentProperties.Topic),
+            infrequentProperties.Condition(ContractInfrequentProperties.Topic,
                 new NameValuePair(
-                    new ConstantText("Téma"),
+                    new LocalizedLabel("contract.topic"),
                     new OpenTypeElement(null, "topic") // CodeableConcept | Reference(Any)
                 )
             ),
-            new Optional("f:scope", new NameValuePair(
-                new ConstantText("Rozsah"),
-                new CodeableConcept()
-            )),
-            new Optional("f:type", new NameValuePair(
-                new ConstantText("Typ"),
-                new CodeableConcept()
-            )),
-            new Condition("f:subtype", new NameValuePair(
-                new ConstantText("Podtyp"),
-                new CommaSeparatedBuilder("f:subtype", _ => [new CodeableConcept()])
-            )),
-            new Optional("f:contentDerivative", new NameValuePair(
-                new ConstantText("Odvozený obsah"),
-                new CodeableConcept()
-            )),
-            new Optional("f:issued", new NameValuePair(
-                new ConstantText("Datum vydání"),
-                new ShowDateTime()
-            )),
-            new Optional("f:applies", new NameValuePair(
-                new ConstantText("Datum platnosti"),
-                new ShowPeriod()
-            )),
-            new Optional("f:expirationType", new NameValuePair(
-                new ConstantText("Důvod expirace"),
-                new CodeableConcept()
-            )),
-            new Condition("f:supportingInfo", new NameValuePair(
-                new ConstantText("Podpůrné informace"),
-                new CommaSeparatedBuilder("f:supportingInfo", _ => [new AnyReferenceNamingWidget()])
-            )),
-            new Condition("f:relevantHistory", new NameValuePair(
-                new ConstantText("Relevantní historie"),
-                new CommaSeparatedBuilder("f:relevantHistory", _ => [new AnyReferenceNamingWidget()])
-            )),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+            infrequentProperties.Optional(ContractInfrequentProperties.Scope,
+                new NameValuePair(
+                    new LocalizedLabel("contract.scope"),
+                    new CodeableConcept()
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.Type,
+                new NameValuePair(
+                    new LocalizedLabel("contract.type"),
+                    new CodeableConcept()
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.Subtype,
+                new NameValuePair(
+                    new LocalizedLabel("contract.subtype"),
+                    new CommaSeparatedBuilder("f:subtype", _ => [new CodeableConcept()])
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.ContentDerivative,
+                new NameValuePair(
+                    new LocalizedLabel("contract.contentDerivative"),
+                    new CodeableConcept()
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.Issued,
+                new NameValuePair(
+                    new LocalizedLabel("contract.issued"),
+                    new ShowDateTime()
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.Applies,
+                new NameValuePair(
+                    new LocalizedLabel("contract.applies"),
+                    new ShowPeriod()
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.ExpirationType,
+                new NameValuePair(
+                    new LocalizedLabel("contract.expirationType"),
+                    new CodeableConcept()
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.SupportingInfo,
+                new NameValuePair(
+                    new LocalizedLabel("contract.supportingInfo"),
+                    new CommaSeparatedBuilder("f:supportingInfo", _ => [new AnyReferenceNamingWidget()])
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.RelevantHistory,
+                new NameValuePair(
+                    new LocalizedLabel("contract.relevantHistory"),
+                    new CommaSeparatedBuilder("f:relevantHistory", _ => [new AnyReferenceNamingWidget()])
+                )
+            ),
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
-        var actorsBadge = new PlainBadge(new ConstantText("Činitelé"));
+        var actorsBadge = new PlainBadge(new LocalizedLabel("general.actors"));
         var actorsInfo = new Container([
-            new Condition("f:subject", new NameValuePair(
-                new ConstantText("Předmět"),
-                new CommaSeparatedBuilder("f:subject", _ => new AnyReferenceNamingWidget())
-            )),
-            new Optional("f:author", new NameValuePair(
-                new ConstantText("Autor"),
-                new AnyReferenceNamingWidget()
-            )),
-            new Condition("f:authority", new NameValuePair(
-                new ConstantText("Autorita"),
-                new CommaSeparatedBuilder("f:authority", _ => [new AnyReferenceNamingWidget()])
-            )),
-            new Condition("f:domain", new NameValuePair(
-                new ConstantText("Doména"),
-                new CommaSeparatedBuilder("f:domain", _ => [new AnyReferenceNamingWidget()])
-            )),
-            new Condition("f:site", new NameValuePair(
-                new ConstantText("Místo"),
-                new CommaSeparatedBuilder("f:site", _ => [new AnyReferenceNamingWidget()])
-            )),
-            new Condition("f:signer",
-                new TextContainer(TextStyle.Bold, [new ConstantText("Signatáři:")]),
+            new Condition("f:subject",
+                new ConditionalWrapper(
+                    x =>
+                    {
+                        return x.SelectAllNodes("f:subject").All(subjectNode => subjectNode.IsSubjectFromComposition());
+                    },
+                    new NameValuePair(
+                        new LocalizedLabel("contract.subject"),
+                        new CommaSeparatedBuilder("f:subject", _ => new AnyReferenceNamingWidget())
+                    )
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.Author,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("contract.author"),
+                    }
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.Authority,
+                new NameValuePair(
+                    new LocalizedLabel("contract.authority"),
+                    new CommaSeparatedBuilder("f:authority", _ => [new AnyReferenceNamingWidget()])
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.Domain,
+                new NameValuePair(
+                    new LocalizedLabel("contract.domain"),
+                    new CommaSeparatedBuilder("f:domain", _ => [new AnyReferenceNamingWidget()])
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.Site,
+                new NameValuePair(
+                    new LocalizedLabel("contract.site"),
+                    new CommaSeparatedBuilder("f:site", _ => [new AnyReferenceNamingWidget()])
+                )
+            ),
+            infrequentProperties.Condition(ContractInfrequentProperties.Signer,
+                new TextContainer(
+                    TextStyle.Bold,
+                    [new LocalizedLabel("contract.signer-plural"), new ConstantText(":")]
+                ),
                 new ListBuilder("f:signer", FlexDirection.Row, _ =>
                 [
-                    new Card(new ConstantText("Signatář"),
+                    new Card(new LocalizedLabel("contract.signer"),
                         new Container([
                             new NameValuePair(
-                                new ConstantText("Role"),
+                                new LocalizedLabel("contract.signer.role"),
                                 new ChangeContext("f:type", new Coding())
                             ),
-                            new NameValuePair(
-                                new ConstantText("Smluvní strana"),
-                                new AnyReferenceNamingWidget("f:party")
+                            new AnyReferenceNamingWidget("f:party",
+                                widgetModel: new ReferenceNamingWidgetModel
+                                {
+                                    Type = ReferenceNamingWidgetType.NameValuePair,
+                                    LabelOverride = new LocalizedLabel("contract.signer.party"),
+                                }
                             ),
 
-                            new TextContainer(TextStyle.Bold, new ConstantText("Podpisy:")),
+                            new TextContainer(
+                                TextStyle.Bold,
+                                [new LocalizedLabel("contract.signer.signature-plural"), new ConstantText(":")]
+                            ),
                             new ListBuilder("f:signature", FlexDirection.Row,
                                 _ => [new Card(null, new ShowSignature("."))])
                         ])
                     )
                 ])
             )
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
-        var precursorBadge = new PlainBadge(new ConstantText("Předzvěst smlouvy"));
+        var precursorBadge = new PlainBadge(new LocalizedLabel("contract.contentDefinition"));
         var precursorInfo = new Container([
             new NameValuePair(
-                new ConstantText("Typ"),
+                new LocalizedLabel("contract.contentDefinition.type"),
                 new ChangeContext("f:type", new CodeableConcept())
             ),
-            new Optional("f:subType", new NameValuePair(
-                new ConstantText("Podtyp"),
-                new CodeableConcept()
-            )),
-            new Optional("f:publisher", new NameValuePair(
-                new ConstantText("Vydavatel"),
-                new AnyReferenceNamingWidget()
-            )),
-            new Optional("f:publicationDate", new NameValuePair(
-                new ConstantText("Datum vydání"),
-                new ShowDateTime()
-            )),
-            new Optional("f:publicationStatus", new NameValuePair(
-                new ConstantText("Stav vydání"),
-                new EnumLabel(".", "http://hl7.org/fhir/ValueSet/contract-publicationstatus")
-            )),
-            new Optional("f:copyright", new NameValuePair(
-                new ConstantText("Autorská práva"),
-                new Markdown("@value")
-            )),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+            infrequentProperties.Optional(ContractInfrequentProperties.Subtype,
+                new NameValuePair(
+                    new LocalizedLabel("contract.contentDefinition.subType"),
+                    new CodeableConcept()
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.Publisher,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("contract.contentDefinition.publisher"),
+                    }
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.PublicationDate,
+                new NameValuePair(
+                    new LocalizedLabel("contract.contentDefinition.publicationDate"),
+                    new ShowDateTime()
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.PublicationStatus,
+                new NameValuePair(
+                    new LocalizedLabel("contract.contentDefinition.publicationStatus"),
+                    new EnumLabel(".", "http://hl7.org/fhir/ValueSet/contract-publicationstatus")
+                )
+            ),
+            infrequentProperties.Optional(ContractInfrequentProperties.Copyright,
+                new NameValuePair(
+                    new LocalizedLabel("contract.contentDefinition.copyright"),
+                    new Markdown("@value")
+                )
+            ),
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
-        var contractsBadge = new PlainBadge(new ConstantText("Právní obsah"));
+        var contractsBadge = new PlainBadge(new LocalizedLabel("contract.legal-content-label"));
         var contractsInfo = new Row([
             new Condition("f:friendly",
                 new Container([
-                    new TextContainer(TextStyle.Bold, [new ConstantText("Verze srozumitelné pro pacienta")]),
+                    new TextContainer(TextStyle.Bold, [new LocalizedLabel("contract.friendly-plural")]),
                     new ItemListBuilder("f:friendly", ItemListType.Unordered, _ =>
                         [
                             new OpenTypeElement(null,
-                                "content") // Attachment | Reference(Composition | DocumentReference | QuestionnaireResponse)
+                                "content"), // Attachment | Reference(Composition | DocumentReference | QuestionnaireResponse)
                         ]
                     )
                 ])
             ),
             new Condition("f:legal",
                 new Container([
-                    new TextContainer(TextStyle.Bold, [new ConstantText("Legální verze")]),
+                    new TextContainer(TextStyle.Bold, [new LocalizedLabel("contract.legal")]),
                     new ItemListBuilder("f:legal", ItemListType.Unordered, _ =>
                         [
                             new OpenTypeElement(null,
-                                "content") // Attachment | Reference(Composition | DocumentReference | QuestionnaireResponse)
+                                "content"), // Attachment | Reference(Composition | DocumentReference | QuestionnaireResponse)
                         ]
                     )
                 ])
             ),
             new Condition("f:rule",
                 new Container([
-                    new TextContainer(TextStyle.Bold, [new ConstantText("Strojové verze")]),
+                    new TextContainer(TextStyle.Bold, [new LocalizedLabel("contract.rule")]),
                     new ItemListBuilder("f:rule", ItemListType.Unordered, _ =>
                         [
                             new OpenTypeElement(null,
@@ -202,25 +265,25 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
                     )
                 ])
             ),
-            new If(_ => globalInfrequentProperties.Contains(InfrequentProperties.LegallyBinding),
+            infrequentProperties.Condition(ContractInfrequentProperties.LegallyBinding,
                 new Container([
-                    new TextContainer(TextStyle.Bold, [new ConstantText("Právně závazná verze")]),
+                    new TextContainer(TextStyle.Bold, [new LocalizedLabel("contract.legallyBinding")]),
                     new ItemList(ItemListType.Unordered,
                         [
                             new OpenTypeElement(null, "legallyBinding")
                         ] // Attachment | Reference(Composition | DocumentReference | QuestionnaireResponse | Contract)	
-                    )
+                    ),
                 ])
-            )
+            ),
         ], flexContainerClasses: "gap-2");
 
         var complete =
-            new Collapser([headerInfo], [], [
+            new Collapser([headerInfo], [
                     new If(
                         _ => navigator.EvaluateCondition(
                                  "f:title or f:alias or f:subtitle or f:name or f:status or f:legalState or " +
                                  "f:scope or f:type or f:subtype or f:contentDerivative or f:issued or f:applies or f:expirationType") ||
-                             globalInfrequentProperties.Contains(InfrequentProperties.Topic),
+                             infrequentProperties.Contains(ContractInfrequentProperties.Topic),
                         badge,
                         basicInfo,
                         new Condition(
@@ -239,12 +302,12 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
                         precursorBadge,
                         precursorInfo,
                         new If(_ => navigator.EvaluateCondition("f:term or f:friendly or f:legal or f:rule") ||
-                                    globalInfrequentProperties.Contains(InfrequentProperties.LegallyBinding),
+                                    infrequentProperties.Contains(ContractInfrequentProperties.LegallyBinding),
                             new ThematicBreak()
                         )
                     ),
                     new If(_ => navigator.EvaluateCondition("f:friendly or f:legal or f:rule") ||
-                                globalInfrequentProperties.Contains(InfrequentProperties.LegallyBinding),
+                                infrequentProperties.Contains(ContractInfrequentProperties.LegallyBinding),
                         contractsBadge,
                         contractsInfo,
                         new Condition("f:term",
@@ -252,9 +315,10 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
                         )
                     ),
                     new Condition("f:term",
-                        new PlainBadge(new ConstantText("Smluvní ustanovení")),
-                        new ListBuilder("f:term", FlexDirection.Row, _ => [new ContractTerm()])
-                    )
+                        new PlainBadge(new LocalizedLabel("contract.term")),
+                        new ListBuilder("f:term", FlexDirection.Column, _ => [new ContractTerm()],
+                            flexContainerClasses: string.Empty) // Overrides the default class
+                    ),
                 ], footer: navigator.EvaluateCondition("f:text")
                     ?
                     [
@@ -268,9 +332,29 @@ public class Contract : ColumnResourceBase<Contract>, IResourceWidget
         return complete.Render(navigator, renderer, context);
     }
 
-    private enum InfrequentProperties
+    private enum ContractInfrequentProperties
     {
         [OpenType("topic")] Topic,
         [OpenType("legallyBinding")] LegallyBinding,
+        Subtitle,
+        LegalState,
+        Scope,
+        Type,
+        ContentDerivative,
+        Issued,
+        Applies,
+        ExpirationType,
+        Author,
+        Subtype,
+        Publisher,
+        PublicationDate,
+        PublicationStatus,
+        Copyright,
+        SupportingInfo,
+        RelevantHistory,
+        Authority,
+        Domain,
+        Site,
+        Signer,
     }
 }

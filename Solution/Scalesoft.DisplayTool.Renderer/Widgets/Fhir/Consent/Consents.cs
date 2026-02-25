@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -11,6 +11,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Consent;
 public class Consents(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
 {
     public static string ResourceType => "Consent";
+
+    public static bool HasBorderedContainer(Widget widget) => true;
 
     public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
     {
@@ -30,15 +32,15 @@ public class Consents(List<XmlDocumentNavigator> items) : Widget, IResourceWidge
             new Table([
                 new TableHead([
                     new TableRow([
-                        new TableCell([new ConstantText("Kategorie")], TableCellType.Header),
-                        new TableCell([new ConstantText("Rozsah")], TableCellType.Header),
+                        new TableCell([new LocalizedLabel("consent.category")], TableCellType.Header),
+                        new TableCell([new LocalizedLabel("consent.scope")], TableCellType.Header),
                         new If(
                             _ => infrequentProperties.ContainsAnyOf(ConsentInfrequentProperties.Policy,
                                 ConsentInfrequentProperties.PolicyRule),
-                            new TableCell([new ConstantText("Zásady")], TableCellType.Header)
+                            new TableCell([new LocalizedLabel("consent.policy")], TableCellType.Header)
                         ),
                         new If(_ => infrequentProperties.Contains(ConsentInfrequentProperties.Status),
-                            new TableCell([new DisplayLabel(LabelCodes.Status)], TableCellType.Header)
+                            new TableCell([new EhdsiDisplayLabel(LabelCodes.Status)], TableCellType.Header)
                         ),
                         new If(_ => infrequentProperties.Contains(ConsentInfrequentProperties.Text),
                             new NarrativeCell(false, TableCellType.Header)

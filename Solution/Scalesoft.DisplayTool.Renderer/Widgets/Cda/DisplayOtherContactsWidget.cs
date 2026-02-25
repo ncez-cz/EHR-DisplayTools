@@ -2,7 +2,6 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -19,8 +18,8 @@ public class DisplayOtherContactsWidget : Widget
         List<Widget> widgetTree =
         [
             new Collapser([
-                new DisplayLabel(LabelCodes.OtherContacts)
-            ], [], [
+                new EhdsiDisplayLabel(LabelCodes.OtherContacts)
+            ], [
                 new ConcatBuilder(
                     "/n1:ClinicalDocument/n1:participant/n1:templateId[@root='1.3.6.1.4.1.19376.1.5.3.1.2.4']/../n1:associatedEntity",
                     i =>
@@ -58,7 +57,7 @@ public class DisplayOtherContactsWidget : Widget
                                     ], ContainerType.Span)),
                             ]), new Container([
                                 new PlainBadge(
-                                    new DisplayLabel(LabelCodes.ContactInformation), Severity.Primary),
+                                    new EhdsiDisplayLabel(LabelCodes.ContactInformation), Severity.Primary),
                                 new WidgetWithVariables(new ShowContactInfoWidget(), [
                                     new Variable("contact", "."),
                                 ]),

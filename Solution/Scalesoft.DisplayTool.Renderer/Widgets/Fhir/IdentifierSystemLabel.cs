@@ -1,8 +1,5 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
-using Scalesoft.DisplayTool.Renderer.Models;
-using Scalesoft.DisplayTool.Renderer.Models.Enums;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
@@ -15,6 +12,7 @@ public class IdentifierSystemLabel : Widget
         RenderContext context
     )
     {
+        //TODO Add all the identifier systems that are explicitly specified
         var result = new ShowEnum(new Dictionary<string, string>
             {
                 { "https://ncez.mzcr.cz/fhir/sid/rcis", "Rodné číslo" },
@@ -30,7 +28,7 @@ public class IdentifierSystemLabel : Widget
             }, "f:system/@value",
             fallbackDisplay: new Condition(
                 "f:type/f:coding[f:system/@value='http://terminology.hl7.org/CodeSystem/v2-0203' and f:code/@value='PPN']",
-                new ConstantText("Číslo pasu")
+                new LocalizedLabel("general.passport-number")
             )
         );
         return result.Render(navigator, renderer, context);

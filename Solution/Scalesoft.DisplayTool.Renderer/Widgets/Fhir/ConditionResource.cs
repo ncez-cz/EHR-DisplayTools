@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -8,13 +8,69 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ConditionResource(Widget resourceTypeLabel)
+public class ConditionResource(Widget resourceTypeLabel, bool skipIdPopulation = true)
     : AlternatingBackgroundColumnResourceBase<ConditionResource>, IResourceWidget
 {
     public static string ResourceType => "Condition";
+    public static bool HasBorderedContainer(Widget widget) => false;
 
-    public ConditionResource() : this(new ConstantText("Problém"))
+    public ConditionResource() : this(new LocalizedLabel("condition"))
     {
+    }
+
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator navigator)
+    {
+        if (navigator.EvaluateCondition("f:code"))
+        {
+            return new ResourceSummaryModel
+            {
+                Value = new ChangeContext(navigator, "f:code", new CodeableConcept()),
+            };
+        }
+
+        if (navigator.EvaluateCondition("f:stage"))
+        {
+            var stageNode = navigator.SelectSingleNode("f:stage");
+
+            if (stageNode.EvaluateCondition("f:type"))
+            {
+                return new ResourceSummaryModel
+                {
+                    Value = new ChangeContext(stageNode, "f:type", new CodeableConcept()),
+                };
+            }
+
+            if (stageNode.EvaluateCondition("f:summary"))
+            {
+                return new ResourceSummaryModel
+                {
+                    Value = new ChangeContext(stageNode, "f:summary", new CodeableConcept()),
+                };
+            }
+        }
+
+        if (navigator.EvaluateCondition("f:evidence"))
+        {
+            var evidenceNode = navigator.SelectSingleNode("f:evidence");
+
+            if (evidenceNode.EvaluateCondition("f:code"))
+            {
+                return new ResourceSummaryModel
+                {
+                    Value = new ChangeContext(evidenceNode, "f:code", new CodeableConcept()),
+                };
+            }
+        }
+
+        if (navigator.EvaluateCondition("f:bodySite"))
+        {
+            return new ResourceSummaryModel
+            {
+                Value = new ChangeContext(navigator, "f:bodySite", new CodeableConcept()),
+            };
+        }
+
+        return null;
     }
 
     public override async Task<RenderResult> Render(
@@ -24,7 +80,7 @@ public class ConditionResource(Widget resourceTypeLabel)
     )
     {
         var infrequentProperties =
-            InfrequentProperties.Evaluate<ConditionInfrequentProperties>([navigator]);
+            InfrequentProperties.Evaluate<ConditionInfrequentProperties>(navigator);
 
         var resultWidget = new Concat(
             [
@@ -56,7 +112,9 @@ public class ConditionResource(Widget resourceTypeLabel)
                         ),
                         new NarrativeModal(alignRight: false),
                     ],
-                    flexContainerClasses: "gap-1 align-items-center"
+                    flexContainerClasses: "gap-1 align-items-center",
+                    idSource: skipIdPopulation ? null : new IdentifierSource(navigator),
+                    flexWrap: false
                 ),
                 new Column(
                     [
@@ -66,7 +124,7 @@ public class ConditionResource(Widget resourceTypeLabel)
                                     _ => infrequentProperties.Contains(ConditionInfrequentProperties.Category),
                                     new HideableDetails(
                                         new NameValuePair(
-                                            [new ConstantText("Typ problému")],
+                                            [new LocalizedLabel("condition.category")],
                                             [new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()])],
                                             style: NameValuePair.NameValuePairStyle.Primary,
                                             direction: FlexDirection.Column
@@ -77,7 +135,7 @@ public class ConditionResource(Widget resourceTypeLabel)
                                     _ => infrequentProperties.Contains(ConditionInfrequentProperties.Onset),
                                     new HideableDetails(
                                         new NameValuePair(
-                                            [new DisplayLabel(LabelCodes.OnsetDate)],
+                                            [new EhdsiDisplayLabel(LabelCodes.OnsetDate)],
                                             [new Chronometry("onset")],
                                             style: NameValuePair.NameValuePairStyle.Primary,
                                             direction: FlexDirection.Column
@@ -88,19 +146,17 @@ public class ConditionResource(Widget resourceTypeLabel)
                                     _ => infrequentProperties.Contains(ConditionInfrequentProperties.Abatement),
                                     new HideableDetails(
                                         new NameValuePair(
-                                            [new ConstantText("Datum vyřešení/remise")],
+                                            [new LocalizedLabel("condition.abatement")],
                                             [new Chronometry("abatement")],
                                             style: NameValuePair.NameValuePairStyle.Primary,
                                             direction: FlexDirection.Column
                                         )
                                     )
                                 ),
-                                InfrequentProperties.Optional(
-                                    infrequentProperties,
-                                    ConditionInfrequentProperties.BodySite,
+                                infrequentProperties.Optional(ConditionInfrequentProperties.BodySite,
                                     new HideableDetails(
                                         new NameValuePair(
-                                            new DisplayLabel(LabelCodes.BodySite),
+                                            new EhdsiDisplayLabel(LabelCodes.BodySite),
                                             new CodeableConcept(),
                                             style: NameValuePair.NameValuePairStyle.Primary,
                                             direction: FlexDirection.Column
@@ -108,12 +164,10 @@ public class ConditionResource(Widget resourceTypeLabel)
                                     )
                                 ),
 
-                                InfrequentProperties.Optional(
-                                    infrequentProperties,
-                                    ConditionInfrequentProperties.BodySiteExtension,
+                                infrequentProperties.Optional(ConditionInfrequentProperties.BodySiteExtension,
                                     new HideableDetails(
                                         new NameValuePair(
-                                            new DisplayLabel(LabelCodes.BodySite),
+                                            new EhdsiDisplayLabel(LabelCodes.BodySite),
                                             ShowSingleReference.WithDefaultDisplayHandler(
                                                 nav =>
                                                 [
@@ -137,14 +191,14 @@ public class ConditionResource(Widget resourceTypeLabel)
                                     _ => infrequentProperties.Contains(ConditionInfrequentProperties.ClinicalStatus),
                                     new HideableDetails(
                                         new NameValuePair(
-                                            [new DisplayLabel(LabelCodes.ClinicalStatus)],
+                                            [new EhdsiDisplayLabel(LabelCodes.ClinicalStatus)],
                                             [
                                                 new CommaSeparatedBuilder(
                                                     "f:clinicalStatus",
                                                     _ =>
                                                     [
                                                         new CodeableConceptIconTooltip(
-                                                            new DisplayLabel(LabelCodes.ClinicalStatus)
+                                                            new EhdsiDisplayLabel(LabelCodes.ClinicalStatus)
                                                         )
                                                     ]
                                                 ),
@@ -158,14 +212,14 @@ public class ConditionResource(Widget resourceTypeLabel)
                                     _ => infrequentProperties.Contains(ConditionInfrequentProperties.Severity),
                                     new HideableDetails(
                                         new NameValuePair(
-                                            [new DisplayLabel(LabelCodes.Severity)],
+                                            [new EhdsiDisplayLabel(LabelCodes.Severity)],
                                             [
                                                 new CommaSeparatedBuilder(
                                                     "f:severity",
                                                     _ =>
                                                     [
                                                         new CodeableConceptIconTooltip(
-                                                            new DisplayLabel(LabelCodes.Severity)
+                                                            new EhdsiDisplayLabel(LabelCodes.Severity)
                                                         )
                                                     ]
                                                 )

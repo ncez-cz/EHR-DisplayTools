@@ -1,7 +1,26 @@
 @use "../../HtmlResources/src/theme-variables" as *;
 
-.card-footer {
-    background-color: var(--#{$prefix}gray-100);
+.card-header {
+    --#{$prefix}card-cap-padding-y: 0.25rem;
+}
+
+.collapse {
+    .collapse-header {
+        display: flex;
+        gap: $spacing02;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+div:has(~ .collapse):not(.resource-container) > .collapse,
+div:has(> .collapse):not(.resource-container) ~ div > .collapse,
+.collapse ~ div > .collapse {
+    margin-top: $spacing02;
+}
+
+.collapse:not(:first-of-type):not(:first-child) {
+    margin-top: $spacing02;
 }
 
 .card {
@@ -9,24 +28,49 @@
     margin-top: $spacing02;
 }
 
-.card-footer {
-    background-color: var(--#{$prefix}severity-card-footer-bg);
-    border-top: none;
+.card-footer > .card:first-child,
+.card-footer > .collapse:first-child,
+.badge + .card,
+.badge + * > .card,
+.flex-row > .card,
+.card:first-child {
+    margin-top: 0;
+}
+
+div:has(~ .card):not(.resource-container) > .card,
+div:has(> .card):not(.resource-container) ~ div > .card,
+div:has(> .card):not(.resource-container) ~ .optional-detail > div > .card,
+.card ~ div > .card
+{
+    margin-top: $spacing02;
+}
+
+.card-body {
+    --#{$prefix}card-spacer-y: #{$spacing02};
+    --#{$prefix}card-spacer-x: #{$spacing02};
 }
 
 .card .card .card-body {
     background-color: var(--#{$prefix}severity-card-bg);
 }
 
-.card-footer > .card:first-child, .badge + .card, .badge + * > .card, .card:first-child {
-    margin-top: 0;
+.card-footer {
+    background-color: var(--#{$prefix}severity-card-footer-bg);
+    border-top: none;
 }
 
-.flex-row > .card {
-    margin-top: 0 !important;
+.card-subtitle {
+    color: var(--#{$prefix}gray-600);
+    margin-top: -0.2rem;
 }
 
-div:has(~ .card):not(.resource-container) > .card, div:has(> .card):not(.resource-container) ~ div > .card, .card ~ div > .card {
-    margin-top: $spacing02;
+.card-main-title {
+    font-size: var(--#{$prefix}h6-font-size);
 }
 
+.collapser-icons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: $spacing02;
+}

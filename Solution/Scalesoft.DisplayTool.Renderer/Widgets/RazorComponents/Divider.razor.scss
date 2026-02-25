@@ -45,13 +45,13 @@
 .section-error .divider {
     --color: black;
     --background-color: var(--#{$prefix}danger-500);
-    --icons-color:var(--#{$prefix}danger-700);
+    --icons-color: var(--#{$prefix}danger-700);
 }
 
 .section-gray .divider {
     --color: var(--#{$prefix}gray-700);
     --background-color: var(--#{$prefix}gray-400);
-    --icons-color:var(--#{$prefix}gray-600);
+    --icons-color: var(--#{$prefix}gray-600);
 }
 
 .section .section .divider {
@@ -80,7 +80,7 @@
     padding-left: $spacing01;
     padding-right: $spacing01;
     border-radius: var(--dt-border-radius-sm);
-    
+
     .divider-label {
         display: flex;
         align-items: center;
@@ -103,6 +103,7 @@
     }
 }
 
+
 .collapser-icon-wrapper {
     display: flex;
     padding-left: $spacing01;
@@ -110,8 +111,8 @@
     align-items: center;
     justify-content: center;
     margin: 0;
-    height: 1.25rem;
-    width: 1.25rem;
+    height: var(--#{$prefix}button-border-size);
+    width: var(--#{$prefix}button-border-size);
     border: 1px solid var(--icons-color);
     border-radius: var(--#{$prefix}border-radius-sm);
     color: var(--icons-color);

@@ -34,6 +34,7 @@ public class DisplayToolsController : ControllerBase
             request.FileContent,
             (InputFormat)request.InputFormat,
             (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
             options,
             DocumentType.PatientSummary,
             levelOfDetail
@@ -72,6 +73,7 @@ public class DisplayToolsController : ControllerBase
         IFormFile file,
         [FromForm] InputFormatContract? inputFormat = null,
         [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
         [FromForm] bool validateDocument = false,
         [FromForm] bool validateCodeValues = false,
         [FromForm] bool validateDigitalSignature = false,
@@ -105,6 +107,7 @@ public class DisplayToolsController : ControllerBase
                 fileContent,
                 (InputFormat)inputFormat,
                 (OutputFormat)outputFormat,
+                isEmbeddable,
                 options,
                 DocumentType.PatientSummary,
                 levelOfDetail
@@ -136,6 +139,7 @@ public class DisplayToolsController : ControllerBase
             request.FileContent,
             (InputFormat)request.InputFormat,
             (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
             options,
             DocumentType.DischargeReport,
             levelOfDetail
@@ -152,6 +156,7 @@ public class DisplayToolsController : ControllerBase
         IFormFile file,
         [FromForm] InputFormatContract? inputFormat = null,
         [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
         [FromForm] bool validateDocument = false,
         [FromForm] bool validateCodeValues = false,
         [FromForm] bool validateDigitalSignature = false,
@@ -185,6 +190,7 @@ public class DisplayToolsController : ControllerBase
                 fileContent,
                 (InputFormat)inputFormat,
                 (OutputFormat)outputFormat,
+                isEmbeddable,
                 options,
                 DocumentType.DischargeReport,
                 levelOfDetail
@@ -216,6 +222,7 @@ public class DisplayToolsController : ControllerBase
             request.FileContent,
             (InputFormat)request.InputFormat,
             (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
             options,
             DocumentType.Laboratory,
             levelOfDetail
@@ -232,6 +239,7 @@ public class DisplayToolsController : ControllerBase
         IFormFile file,
         [FromForm] InputFormatContract? inputFormat = null,
         [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
         [FromForm] bool validateDocument = false,
         [FromForm] bool validateCodeValues = false,
         [FromForm] bool validateDigitalSignature = false,
@@ -265,6 +273,7 @@ public class DisplayToolsController : ControllerBase
                 fileContent,
                 (InputFormat)inputFormat,
                 (OutputFormat)outputFormat,
+                isEmbeddable,
                 options,
                 DocumentType.Laboratory,
                 levelOfDetail
@@ -296,6 +305,7 @@ public class DisplayToolsController : ControllerBase
             request.FileContent,
             (InputFormat)request.InputFormat,
             (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
             options,
             DocumentType.LaboratoryOrder,
             levelOfDetail
@@ -312,6 +322,7 @@ public class DisplayToolsController : ControllerBase
         IFormFile file,
         [FromForm] InputFormatContract? inputFormat = null,
         [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
         [FromForm] bool validateDocument = false,
         [FromForm] bool validateCodeValues = false,
         [FromForm] bool validateDigitalSignature = false,
@@ -345,6 +356,7 @@ public class DisplayToolsController : ControllerBase
                 fileContent,
                 (InputFormat)inputFormat,
                 (OutputFormat)outputFormat,
+                isEmbeddable,
                 options,
                 DocumentType.LaboratoryOrder,
                 levelOfDetail
@@ -376,6 +388,7 @@ public class DisplayToolsController : ControllerBase
             request.FileContent,
             (InputFormat)request.InputFormat,
             (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
             options,
             DocumentType.ImagingReport,
             levelOfDetail
@@ -392,6 +405,7 @@ public class DisplayToolsController : ControllerBase
         IFormFile file,
         [FromForm] InputFormatContract? inputFormat = null,
         [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
         [FromForm] bool validateDocument = false,
         [FromForm] bool validateCodeValues = false,
         [FromForm] bool validateDigitalSignature = false,
@@ -425,6 +439,7 @@ public class DisplayToolsController : ControllerBase
                 fileContent,
                 (InputFormat)inputFormat,
                 (OutputFormat)outputFormat,
+                isEmbeddable,
                 options,
                 DocumentType.ImagingReport,
                 levelOfDetail
@@ -456,6 +471,7 @@ public class DisplayToolsController : ControllerBase
             request.FileContent,
             (InputFormat)request.InputFormat,
             (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
             options,
             DocumentType.ImagingOrder,
             levelOfDetail
@@ -472,6 +488,7 @@ public class DisplayToolsController : ControllerBase
         IFormFile file,
         [FromForm] InputFormatContract? inputFormat = null,
         [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
         [FromForm] bool validateDocument = false,
         [FromForm] bool validateCodeValues = false,
         [FromForm] bool validateDigitalSignature = false,
@@ -505,8 +522,92 @@ public class DisplayToolsController : ControllerBase
                 fileContent,
                 (InputFormat)inputFormat,
                 (OutputFormat)outputFormat,
+                isEmbeddable,
                 options,
                 DocumentType.ImagingOrder,
+                levelOfDetail
+            );
+
+        if (!result.IsRenderedSuccessfully)
+        {
+            var errorResponse = MapResponseAsJson(result);
+            return BadRequest(errorResponse);
+        }
+
+        var actionResult = MapResponseAsFile(result, outputFormat.Value);
+        return actionResult;
+    }
+    
+    [HttpPost("any-bundle")]
+    public async Task<ActionResult<DisplayToolResponse>> AnyBundle(
+        [FromBody] DisplayToolRequest request,
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
+    )
+    {
+        if (request.InputFormat == null || request.OutputFormat == null)
+        {
+            return BadRequest(CreateErrorResponse("Input and output formats are required"));
+        }
+
+        var options = MapDocumentOptions(request);
+        var result = await m_documentRenderer.RenderAsync(
+            request.FileContent,
+            (InputFormat)request.InputFormat,
+            (OutputFormat)request.OutputFormat,
+            request.IsEmbeddable,
+            options,
+            DocumentType.AnyBundle,
+            levelOfDetail
+        );
+        var response = MapResponseAsJson(result);
+
+        return response.IsRenderedSuccessfully ? Ok(response) : BadRequest(response);
+    }
+    
+    [HttpPost("any-bundle/form-api")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DisplayToolResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> AnyBundleFromForm(
+        IFormFile file,
+        [FromForm] InputFormatContract? inputFormat = null,
+        [FromForm] OutputFormatContract? outputFormat = OutputFormatContract.Html,
+        [FromForm] bool isEmbeddable = false,
+        [FromForm] bool validateDocument = false,
+        [FromForm] bool validateCodeValues = false,
+        [FromForm] bool validateDigitalSignature = false,
+        [FromForm] bool generateDocumentationInstead = false,
+        [FromForm] bool preferTranslationsFromDocument = false,
+        [FromQuery] LevelOfDetail levelOfDetail = LevelOfDetail.UserDefined
+    )
+    {
+        if (inputFormat == null || outputFormat == null)
+        {
+            return BadRequest(CreateErrorResponse("Input and output formats are required"));
+        }
+
+        var fileContent = ReadFormFileToByteArray(file);
+        var options = new DocumentOptions
+        {
+            ValidateDocument = validateDocument,
+            ValidateCodeValues = validateCodeValues,
+            ValidateDigitalSignature = validateDigitalSignature,
+            PreferTranslationsFromDocument = preferTranslationsFromDocument,
+        };
+        var result = generateDocumentationInstead
+            ? await m_documentRenderer.RenderDocumentationAsync(
+                fileContent,
+                (InputFormat)inputFormat,
+                (OutputFormat)outputFormat,
+                DocumentType.AnyBundle,
+                LanguageOptions.Czech
+            )
+            : await m_documentRenderer.RenderAsync(
+                fileContent,
+                (InputFormat)inputFormat,
+                (OutputFormat)outputFormat,
+                isEmbeddable,
+                options,
+                DocumentType.AnyBundle,
                 levelOfDetail
             );
 

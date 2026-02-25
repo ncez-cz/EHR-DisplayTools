@@ -2,7 +2,6 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -20,7 +19,7 @@ public class DisplayRepresentedOrganizationWidget : Widget
         [
             new Container([
                 new PlainBadge(
-                    new DisplayLabel(LabelCodes.RepresentedOrganization)
+                    new EhdsiDisplayLabel(LabelCodes.RepresentedOrganization)
                     , Severity.Primary),
                 new LineBreak(),
                 new Choose([
@@ -29,8 +28,8 @@ public class DisplayRepresentedOrganizationWidget : Widget
                             new Variable("code", "$representedOrganization/n1:name/@nullFlavor"),
                         ])),
                 ], new Choose([
-                    new When("$representedOrganization/n1:name", new Text("$representedOrganization/n1:name"))
-                ], new ConstantText(Labels.NotSpecifiedText))),
+                    new When("$representedOrganization/n1:name", new Text("$representedOrganization/n1:name")),
+                ], new LocalizedLabel("general.unspecified"))),
             ]),
 
             new WidgetWithVariables(new ShowContactInfoWidget(), [

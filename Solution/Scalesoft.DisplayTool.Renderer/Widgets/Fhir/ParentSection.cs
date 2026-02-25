@@ -18,8 +18,9 @@ public class ParentSection : Widget
     private readonly LocalizedAbbreviations? m_titleAbbreviations;
     private readonly List<Widget> m_subsections;
     private readonly Severity? m_severity;
-    
-    public ParentSection(string loincCode,
+
+    public ParentSection(
+        string loincCode,
         LocalizedAbbreviations? titleAbbreviations,
         List<Widget> subsections,
         Severity? severity = null
@@ -30,9 +31,9 @@ public class ParentSection : Widget
         m_subsections = subsections;
         m_severity = severity;
     }
-    
+
     public ParentSection(
-        ConstantText titleConstant,
+        LocalizedLabel titleConstant,
         LocalizedAbbreviations? titleAbbreviations,
         List<Widget> subsections,
         Severity? severity = null
@@ -50,7 +51,20 @@ public class ParentSection : Widget
         RenderContext context
     )
     {
-        var widget = new Section(".", null, [m_title], m_subsections,
+        var renderedSubsections = new List<RenderResult>();
+        foreach (var subsection in m_subsections)
+        {
+            renderedSubsections.Add(await subsection.Render(navigator, renderer, context));
+        }
+
+        if (renderedSubsections.Count == 0 || renderedSubsections.All(x => x.IsNullResult))
+        {
+            return RenderResult.NullResult;
+        }
+
+        var preRenderedWidgets = renderedSubsections.Select(x => new PassthroughWidget(x)).ToArray<Widget>();
+
+        var widget = new Section(".", null, [m_title], preRenderedWidgets,
             titleAbbreviations: m_titleAbbreviations, severity: m_severity);
 
 

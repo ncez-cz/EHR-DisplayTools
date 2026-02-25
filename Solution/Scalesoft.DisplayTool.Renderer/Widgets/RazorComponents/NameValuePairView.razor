@@ -5,7 +5,10 @@
     {
         <dt class="name m-0 capitalize-first @Model.NameClass">@((MarkupString)Model.NameContent)</dt>
     }
-    <dd class="value m-0 @Model.ValueClass">@((MarkupString)Model.ValueContent)</dd>
+    @if (!string.IsNullOrWhiteSpace(Model.ValueContent))
+    {
+        <dd class="value m-0 @Model.ValueClass">@((MarkupString)Model.ValueContent)</dd>
+    }
 </dl>
 
 @code {

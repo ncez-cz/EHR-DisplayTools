@@ -2,7 +2,6 @@
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -16,7 +15,7 @@ public class PatientSectionWidget : Widget
         List<Widget> widgetTree =
         [
             new Section("/n1:ClinicalDocument/n1:recordTarget/n1:patientRole", "Patient info section is missing !", [
-                new DisplayLabel(LabelCodes.Patient)
+                new EhdsiDisplayLabel(LabelCodes.Patient)
             ], [
                 new Container([
                     new ChangeContext("/n1:ClinicalDocument/n1:recordTarget/n1:patientRole", new PatientDataWidget()),

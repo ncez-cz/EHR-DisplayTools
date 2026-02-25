@@ -4,7 +4,7 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets;
 
-public class ConstantText(string value, IdentifierSource? idSource = null, IdentifierSource? visualIdSource = null) : Widget
+public class ConstantText(string value) : Widget
 {
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -17,7 +17,6 @@ public class ConstantText(string value, IdentifierSource? idSource = null, Ident
             Text = value,
         };
 
-        HandleIds(context, navigator, viewModel, idSource, visualIdSource);
         var view = await renderer.RenderConstantText(viewModel);
 
         return new RenderResult(view, []);

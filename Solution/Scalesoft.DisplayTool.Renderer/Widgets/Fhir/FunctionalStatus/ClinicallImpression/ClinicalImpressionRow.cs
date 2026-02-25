@@ -42,7 +42,7 @@ public class ClinicalImpressionRow(
         var tableRefs = new StructuredDetails();
 
         var conditionTableRef = existingConditions.Count > 0
-            ? new Conditions(existingConditions, new ConstantText("Související onemocnění"))
+            ? new Conditions(existingConditions, new LocalizedLabel("general.related-condition"))
             : null;
         var allergyTableRef = existingAllergies.Count > 0
             ? new AllergiesAndIntolerances(existingAllergies)
@@ -50,12 +50,22 @@ public class ClinicalImpressionRow(
 
         if (conditionTableRef != null)
         {
-            tableRefs.AddCollapser(new ConstantText("Detail souvisejících onemocnění"), conditionTableRef);
+            tableRefs.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("general.related-conditions-detail"),
+                    conditionTableRef
+                )
+            );
         }
 
         if (allergyTableRef != null)
         {
-            tableRefs.AddCollapser(new ConstantText("Detail souvisejících alergií"), allergyTableRef);
+            tableRefs.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("general.related-allergies-detail"),
+                    allergyTableRef
+                )
+            );
         }
 
         if (navigator.EvaluateCondition("f:encounter"))
@@ -63,24 +73,32 @@ public class ClinicalImpressionRow(
             var encounterNarrative = ReferenceHandler.GetSingleNodeNavigatorFromReference(navigator,
                 "f:encounter", "f:text");
 
-            tableRefs.AddCollapser(new ConstantText(Labels.Encounter),
-                ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
-                    "f:encounter"),
-                encounterNarrative != null
-                    ?
-                    [
-                        new NarrativeCollapser(encounterNarrative.GetFullPath())
-                    ]
-                    : null,
-                encounterNarrative != null
-                    ? new NarrativeModal(encounterNarrative.GetFullPath())
-                    : null
+            tableRefs.Add(
+                new CollapsibleDetail(
+                    new LocalizedLabel("node-names.Encounter"),
+                    ShowSingleReference.WithDefaultDisplayHandler(nav => [new EncounterCard(nav, false, false)],
+                        "f:encounter"),
+                    encounterNarrative != null
+                        ?
+                        [
+                            new NarrativeCollapser(encounterNarrative.GetFullPath())
+                        ]
+                        : null,
+                    encounterNarrative != null
+                        ? new NarrativeModal(encounterNarrative.GetFullPath())
+                        : null
+                )
             );
         }
 
         if (navigator.EvaluateCondition("f:text"))
         {
-            tableRefs.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
+            tableRefs.Add(
+                new CollapsibleDetail(
+                    new EhdsiDisplayLabel(LabelCodes.OriginalNarrative),
+                    new Narrative("f:text")
+                )
+            );
         }
 
         Widget tree = new TableRow([
@@ -107,7 +125,7 @@ public class ClinicalImpressionRow(
             new If(_ => infrequentProperties.Contains(ClinicalImpressionInfrequentProperties.Status),
                 new TableCell([
                     new EnumIconTooltip("f:status", "http://hl7.org/fhir/event-status",
-                        new DisplayLabel(LabelCodes.Status))
+                        new EhdsiDisplayLabel(LabelCodes.Status))
                 ])
             ),
             new If(_ => infrequentProperties.Contains(ClinicalImpressionInfrequentProperties.Text),

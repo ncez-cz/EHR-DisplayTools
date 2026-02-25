@@ -19,6 +19,9 @@ public class ShowQuantity(string path = ".", bool showUnit = true) : Widget
             return navigator.SelectSingleNode(path).GetFullPath();
         }
 
+        var lang = context.Language.Primary.Code;
+        var shortLang = context.Language.Primary.ShortCode;
+
         List<ParseError> errors = [];
 
         var unitString = navigator.SelectSingleNode($"{path}/f:unit/@value").Node?.Value;
@@ -30,11 +33,33 @@ public class ShowQuantity(string path = ".", bool showUnit = true) : Widget
             return await new AbsentData(path).Render(navigator, renderer, context);
         }
 
-        string? unitDisplay = null;
+        Widget? unitWidget = null;
         if (showUnit)
         {
-            unitDisplay = unitString ?? unitCode;
-            if (unitDisplay == null)
+            if (context.PreferTranslationsFromDocument)
+            {
+                // Try to apply translations from extensions
+                var displayNav = navigator.SelectSingleNode($"{path}/f:unit");
+                Widget? fallbackWidget = null;
+                if (unitString != null)
+                {
+                    fallbackWidget = new ConstantText(unitString);
+                }
+
+                var translatedWidget =
+                    TranslationExtensionUtils.TranslateWithHierarchy(displayNav, lang, shortLang, fallbackWidget);
+                if (translatedWidget != null)
+                {
+                    unitWidget = translatedWidget;
+                }
+            }
+
+            if (unitWidget == null && unitCode != null)
+            {
+                unitWidget = new CodedValue(unitCode, unitSystem, unitCode);
+            }
+
+            if (unitWidget == null)
             {
                 errors.Add(new ParseError
                 {
@@ -49,14 +74,13 @@ public class ShowQuantity(string path = ".", bool showUnit = true) : Widget
         List<Widget> widgets =
         [
             new ChangeContext(path, new Optional("f:comparator",
-                new EnumLabel(".", "http://hl7.org/fhir/ValueSet/quantity-comparator")), new Optional("f:value", new ShowDecimal())),
+                    new EnumLabel(".", "http://hl7.org/fhir/ValueSet/quantity-comparator")),
+                new Optional("f:value", new ShowDecimal())),
         ];
         if (showUnit)
         {
             widgets.Add(new ChangeContext(path, new ConstantText(" "), new If(
-                _ => unitDisplay != null && unitDisplay != "1",
-                new CodedValue(unitCode, unitSystem, unitDisplay)
-            )));
+                _ => unitWidget != null && !(unitString == "1" || unitCode == "1"), unitWidget!)));
         }
 
         widgets.Add(new UncertaintyExtensions());

@@ -84,18 +84,14 @@ public class OpenTypeElement(
             new TextContainer(
                 TextStyle.Regular,
                 [
-                    new ConstantText("Nepodporovaný kódovaný obsah"),
+                    new LocalizedLabel("errors.unsupported-coded-content"),
                     new ConstantText(": "),
                     new TextContainer(
                         TextStyle.Small,
                         [
                             new LineBreak(),
-                            new Container(
-                                [new ConstantText(valueNav.Node.InnerXml)],
-                                ContainerType.Span,
-                                idSource: valueNav
-                            ),
-                        ]
+                            new ConstantText(valueNav.Node.InnerXml),
+                        ], idSource: valueNav
                     ),
                     new LineBreak(),
                 ]
@@ -154,12 +150,20 @@ public class OpenTypeElement(
                 context.IdentifierDisplayTitleMapping.Add(sampledDataId);
                 var id = HttpUtility.UrlEncode(sampledDataId);
                 var idTitle = context.IdentifierDisplayTitleMapping.GetTitle(sampledDataId);
-                var header = new ConstantText($"Graf č. {idTitle} - reprezentace dat");
+                var header = new Concat([
+                    new LocalizedLabel("general.graph"), new ConstantText($"ID: {idTitle} - "),
+                    new LocalizedLabel("general.data-representation"),
+                ]);
                 var chartWidget = new ShowSampledData($"f:{valueNodeName}", idSource: new IdentifierSource(id));
                 var link = new Link(
-                    new ConstantText(useChartInDetailsPlaceholder
-                        ? $"Viz přiložený graf č. {idTitle} s hodnotami měření v detailu"
-                        : $"Viz přiložený graf č. {idTitle} s hodnotami měření"),
+                    new Concat(
+                        [
+                            new LocalizedLabel(useChartInDetailsPlaceholder
+                                ? "general.graph-values-detail"
+                                : "general.graph-values"),
+                            new ConstantText($"ID: {idTitle}"),
+                        ]
+                    ),
                     $"#{id}"
                 );
                 collapsibleContent.Add(new CollapsibleDetail(header, chartWidget, IsHideable: false));

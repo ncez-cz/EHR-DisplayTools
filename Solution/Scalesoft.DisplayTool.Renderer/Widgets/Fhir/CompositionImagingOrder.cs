@@ -3,8 +3,9 @@ using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.PatientSection;
+using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Sections;
+using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
@@ -57,7 +58,16 @@ public class CompositionImagingOrder : Widget
             ),
             new FhirSection(
                 CodedValueDefinition.LoincValue(LoincSectionCodes.ClinicalInformation),
-                titleAbbreviations: SectionTitleAbbreviations.SupportingInformation
+                (_, _, _) => new ListBuilder("f:entry", FlexDirection.Row, _ => [
+                    new AnyReferenceNamingWidget(widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        Direction = FlexDirection.Column,
+                        Style = NameValuePair.NameValuePairStyle.Primary,
+                    }),
+                ], flexContainerClasses: "flex-wrap column-gap-4 row-gap-1"),
+                titleAbbreviations: SectionTitleAbbreviations.SupportingInformation,
+                groupByResourceType: false
             ),
             new FhirFooter(),
         ];

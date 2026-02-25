@@ -1,4 +1,5 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
+using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -7,10 +8,18 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class ImmunizationRecommendation : Widget
+public class ImmunizationRecommendation : SequentialResourceBase<ImmunizationRecommendation>, IResourceWidget
 {
     public static string ResourceType => "ImmunizationRecommendation";
-    
+    public static bool HasBorderedContainer(Widget widget) => true;
+
+    public static ResourceSummaryModel? RenderSummary(XmlDocumentNavigator item)
+    {
+        // The resource may contain multiple recommendations. Each recommendation may contain multiple vaccine codes. Each vaccine code may contain a rather long name.
+        // Skip rendering the summary due to the above and rely on the fallback.
+        return null;
+    }
+
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -29,52 +38,62 @@ public class ImmunizationRecommendation : Widget
             // ignore identifier
             // ignore authority - not in key elements
             // ignore patient
-            new NameValuePair([new DisplayLabel(LabelCodes.Date)], [new ChangeContext("f:date", new ShowDateTime())]),
-            new Heading([new ConstantText("Doporučení")], HeadingSize.H5),
+            new NameValuePair([new EhdsiDisplayLabel(LabelCodes.Date)],
+                [new ChangeContext("f:date", new ShowDateTime())]),
+            new Heading([new LocalizedLabel("immunization-recommendation.recommendation")], HeadingSize.H5),
             new ConcatBuilder("f:recommendation", (_, _) =>
             [
                 new Card(null, new Container([
-                    new Optional("f:vaccineCode", new NameValuePair([new ConstantText("Typ vakcíny")], [
-                        new CommaSeparatedBuilder(".", _ =>
-                        [
-                            new CodeableConcept(),
-                        ])
-                    ])),
+                    new Optional("f:vaccineCode", new NameValuePair(
+                        [new LocalizedLabel("immunization-recommendation.vaccineCode")], [
+                            new CommaSeparatedBuilder(".", _ =>
+                            [
+                                new CodeableConcept(),
+                            ])
+                        ])),
                     new Optional("f:targetDisease",
-                        new NameValuePair([new ConstantText("Očkování proti")], [new CodeableConcept()])),
+                        new NameValuePair([new LocalizedLabel("immunization-recommendation.targetDisease")],
+                            [new CodeableConcept()])),
                     new ChangeContext("f:forecastStatus",
-                        new NameValuePair([new ConstantText("Stav pacienta s ohledem na očkovací protokol")],
+                        new NameValuePair([new LocalizedLabel("immunization-recommendation.forecastStatus")],
                             [new CodeableConcept()])),
                     new Condition("f:forecastReason",
-                        new NameValuePair([new ConstantText("Důvod stavu pacienta s ohledem na očkovací protokol")],
+                        new NameValuePair([new LocalizedLabel("immunization-recommendation.forecastReason")],
                             [new CommaSeparatedBuilder("f:forecastReason", _ => [new CodeableConcept()]),])),
                     new Optional("f:dateCriterion", new ConcatBuilder(".", _ =>
                     [
                         new NameValuePair([
-                            new DisplayLabel(LabelCodes.Date),
+                            new EhdsiDisplayLabel(LabelCodes.Date),
                             new ConstantText(" ("),
                             new ChangeContext("f:code", new CodeableConcept()),
                             new ConstantText(")"),
                         ], [new ChangeContext("f:value", new ShowDateTime())]),
                     ])),
-                    new Optional("f:description", new NameValuePair([new ConstantText("Popis")], [new Text("@value")])),
+                    new Optional("f:description",
+                        new NameValuePair([new LocalizedLabel("immunization-recommendation.description")],
+                            [new Text("@value")])),
                     new Optional("f:series",
-                        new NameValuePair([new ConstantText("Název očkovací řady")], [new Text("@value")])),
+                        new NameValuePair([new LocalizedLabel("immunization-recommendation.series")],
+                            [new Text("@value")])),
                     new Condition("f:doseNumberPositiveInt | f:doseNumberString",
-                        new NameValuePair([new DisplayLabel(LabelCodes.DoseNumber)],
+                        new NameValuePair([new EhdsiDisplayLabel(LabelCodes.DoseNumber)],
                             [new OpenTypeElement(null, "doseNumber")])), // positiveInt | string
                     new Condition("f:seriesDosesPositiveInt | f:seriesDosesString",
-                        new NameValuePair([new ConstantText("Celkový počet dávek")],
+                        new NameValuePair([new LocalizedLabel("immunization-recommendation.seriesDoses")],
                             [new OpenTypeElement(null, "seriesDoses")])), // positiveInt | string
                     new Optional("f:supportingImmunization",
-                        new Heading([new ConstantText("Minulá očkování")], HeadingSize.H5, customClass: "ms-4"),
+                        new Heading([new LocalizedLabel("immunization-recommendation.supportingImmunization")],
+                            HeadingSize.H5, customClass: "ms-4"),
                         new ConcatBuilder(".", _ =>
                         [
                             ShowSingleReference.WithDefaultDisplayHandler(x =>
-                                [new AnyResource([x], x.Node?.Name, displayResourceType: false)]) // Immunization | ImmunizationEvaluation
+                            [
+                                new AnyResource([x], x.Node?.Name, displayResourceType: false)
+                            ]) // Immunization | ImmunizationEvaluation
                         ])),
                     new Optional("f:supportingPatientInformation",
-                        new Heading([new ConstantText("Pozorování pacienta")], HeadingSize.H6),
+                        new Heading([new LocalizedLabel("immunization-recommendation.supportingPatientInformation")],
+                            HeadingSize.H6),
                         new ItemListBuilder(".", ItemListType.Unordered, _ =>
                         [
                             ShowSingleReference.WithDefaultDisplayHandler(x =>

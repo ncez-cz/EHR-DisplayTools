@@ -15,7 +15,10 @@ public abstract class ColumnResourceBase<T> : Widget where T : ColumnResourceBas
             return
             [
                 new Column(
-                    [..items.Select(x => new ChangeContext(x, new Container([new T()], idSource: x)))],
+                    [
+                        ..items.Select(x => new ChangeContext(x,
+                            new Container([new T()], idSource: x, optionalClass: "resource-container")))
+                    ],
                     flexContainerClasses: "gap-0"
                 ),
             ];
@@ -32,7 +35,7 @@ public abstract class ColumnResourceBase<T> : Widget where T : ColumnResourceBas
         [
             new ChangeContext(
                 item,
-                new Container([new T()], idSource: item)
+                new Container([new T()], idSource: item, optionalClass: "resource-container")
             ),
         ];
     }

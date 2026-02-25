@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Extensions;
+﻿using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -40,7 +40,8 @@ public class UncertaintyExtensions : Widget
             }
 
             widgets.AddRange([
-                new ConstantText("distribuce: "),
+                new LocalizedLabel("iso21090-uncertaintyType"),
+                new ConstantText(": "),
                 new ChangeContext(uncertaintyTypeExtension,
                     new EnumLabel("f:valueCode", "http://hl7.org/fhir/ValueSet/probability-distribution-type")),
             ]);

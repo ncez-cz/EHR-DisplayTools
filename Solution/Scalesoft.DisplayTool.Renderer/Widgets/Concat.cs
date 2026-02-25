@@ -20,7 +20,7 @@ public class Concat(
     )
     {
         var separatorWidget = separator ?? new ConstantText(string.Empty);
-        
+
         var results = await RenderInternal(data, renderer, [..children, separatorWidget], context);
         if (results.IsFatal)
         {
@@ -28,6 +28,12 @@ public class Concat(
         }
 
         var content = results.GetValidContents(children);
+
+        if (content.Count == 0)
+        {
+            return RenderResult.NullResult;
+        }
+
         var renderedSeparator = results.GetContent(separatorWidget);
 
         var concatenated = string.Join(renderedSeparator, content);

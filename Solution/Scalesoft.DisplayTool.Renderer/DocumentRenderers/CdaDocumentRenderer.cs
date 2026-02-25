@@ -34,9 +34,9 @@ public class CdaDocumentRenderer : SpecificDocumentRendererBase
         HtmlToPdfConverter htmlToPdfConverter,
         ICodeTranslator translator,
         Language language,
-        IDocumentSignatureValidationManager documentSignatureValidationManager,
+        IPdfSignatureManager pdfSignatureManager,
         ILoggerFactory loggerFactor
-    ) : base(documentValidatorProvider, htmlToPdfConverter, documentSignatureValidationManager)
+    ) : base(documentValidatorProvider, htmlToPdfConverter, pdfSignatureManager)
     {
         m_widgetRenderer = widgetRenderer;
         m_logger = logger;
@@ -50,6 +50,7 @@ public class CdaDocumentRenderer : SpecificDocumentRendererBase
         OutputFormat outputFormat,
         DocumentOptions options,
         DocumentType documentType,
+        bool isEmbeddable,
         RenderMode renderMode = RenderMode.Standard,
         LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
     )

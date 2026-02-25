@@ -1,7 +1,6 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -17,85 +16,132 @@ public class CarePlanDetails(XmlDocumentNavigator item) : Widget
     {
         // Extract title for the card
         var title = item.SelectSingleNode("f:title/@value").Node?.Value ?? "Care Plan"; // Default title
-
-        // Build the content widgets as before
-        var contentWidgets = new List<Widget>
-        {
-            // ignore identifier
-            // ignore instantiatesCanonical
-            // ignore instantiatesUri
-            // ignore basedOn
-            // ignore replaces
-            // ignore partOf
-            new Optional("f:intent",
-                new HideableDetails(new NameValuePair(
-                    [new ConstantText("Záměr")],
-                    [new EnumLabel(".", "http://hl7.org/fhir/ValueSet/care-plan-intent")]
-                ))
-            ),
-            new Optional("f:category",
-                new HideableDetails(new NameValuePair(
-                    [new ConstantText("Kategorie")],
-                    [new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()])]
-                ))
-            ),
-            new Optional("f:title",
-                new NameValuePair(
-                    [new DisplayLabel(LabelCodes.Name)],
-                    [new Text("@value")]
-                )
-            ),
-            new Optional("f:description",
-                new NameValuePair(
-                    [new DisplayLabel(LabelCodes.Description)],
-                    [new Text("@value")]
-                )
-            ),
-            // ignore subject
-            // ignore encounter
-            new Optional("f:period",
-                new HideableDetails(new NameValuePair(
-                    [new ConstantText("Období")],
-                    [new ShowPeriod()]
-                ))
-            ),
-            new Optional("f:created",
-                new HideableDetails(new NameValuePair(
-                    [new ConstantText("Datum vytvoření")],
-                    [new ShowDateTime()]
-                ))
-            ),
-            // ignore author
-            // ignore contributor
-            // ignore careTeam
-
-            new Optional("f:encounter",
-                new ShowMultiReference(".",
-                    (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
-                    x =>
+        
+        var infrequentProperties = InfrequentProperties.Evaluate<CarePlanInfrequentProperties>(item);
+        
+        var resultWidget = new Concat(
+            [
+                new Row(
                     [
-                        new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
-                            isCollapsed: true)
-                    ]
-                )
-            ),
-            new NarrativeCollapser()
-        };
-
-
-        // Create the Card widget
-        var card = new Card(
-            new Row([
-                new Container([
-                    new ConstantText(title),
-                    new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/request-status",
-                        new DisplayLabel(LabelCodes.Status))
-                ], ContainerType.Div, "d-flex align-items-center gap-1"),
-                new NarrativeModal()
-            ], flexContainerClasses: "align-items-center"),
-            new Concat(contentWidgets));
+                        new Heading(
+                            [
+                                new ConstantText(title),
+                                new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/request-status",
+                                    new EhdsiDisplayLabel(LabelCodes.Status)),
+                            ],
+                            HeadingSize.H5,
+                            "m-0 blue-color"
+                        ),
+                        new NarrativeModal(alignRight: false),
+                    ],
+                    flexContainerClasses: "gap-1 align-items-center"
+                ),
+                new Column(
+                    [
+                        new Row(
+                            [
+                                // ignore identifier
+                                // ignore instantiatesCanonical
+                                // ignore instantiatesUri
+                                // ignore basedOn
+                                // ignore replaces
+                                // ignore partOf
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Intent,
+                                    new HideableDetails(
+                                        new NameValuePair(
+                                            new LocalizedLabel("care-plan.intent"),
+                                            new EnumLabel(".", "http://hl7.org/fhir/ValueSet/care-plan-intent"),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary
+                                        )
+                                    )
+                                ),
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Category,
+                                    new HideableDetails(
+                                        new NameValuePair(
+                                            new LocalizedLabel("care-plan.category"),
+                                            new ItemListBuilder(".", ItemListType.Unordered, _ => [new CodeableConcept()]),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary
+                                        )
+                                    )
+                                ),
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Title,
+                                    new NameValuePair(
+                                        new EhdsiDisplayLabel(LabelCodes.Name),
+                                        new Text("@value"),
+                                        direction: FlexDirection.Column,
+                                        style: NameValuePair.NameValuePairStyle.Primary
+                                    )
+                                ),
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Description,
+                                    new NameValuePair(
+                                        new EhdsiDisplayLabel(LabelCodes.Description),
+                                        new Text("@value"),
+                                        direction: FlexDirection.Column,
+                                        style: NameValuePair.NameValuePairStyle.Primary
+                                    )
+                                ),
+                                // ignore subject
+                                // ignore encounter
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Period,
+                                    new HideableDetails(
+                                        new NameValuePair(
+                                            new LocalizedLabel("care-plan.period"),
+                                            new ShowPeriod(),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary
+                                        )
+                                    )
+                                ),
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Created,
+                                    new HideableDetails(
+                                        new NameValuePair(
+                                            new LocalizedLabel("care-plan.created"),
+                                            new ShowDateTime(),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary
+                                        )
+                                    )
+                                ),
+                                // ignore author
+                                // ignore contributor
+                                // ignore careTeam
+                                infrequentProperties.Optional(CarePlanInfrequentProperties.Encounter,
+                                    new HideableDetails(
+                                        new AnyReferenceNamingWidget(
+                                            widgetModel: new ReferenceNamingWidgetModel
+                                            {
+                                                Type = ReferenceNamingWidgetType.NameValuePair,
+                                                Direction = FlexDirection.Column,
+                                                Style = NameValuePair.NameValuePairStyle.Primary,
+                                                LabelOverride = new LocalizedLabel("node-names.Encounter"),
+                                            }
+                                        )
+                                    )
+                                ),
+                            ],
+                            flexContainerClasses: "column-gap-6 row-gap-1"
+                        ),
+                        new Condition("f:text", new NarrativeCollapser()),
+                    ],
+                    flexContainerClasses: "px-2 gap-1"
+                ),
+            ]
+        );
 
         // Render the card using the original navigator context
-        return card.Render(item, renderer, context);
+        return resultWidget.Render(item, renderer, context);
+    }
+
+    public enum CarePlanInfrequentProperties
+    {
+        Intent,
+        Category,
+        Title,
+        Description,
+        Period,
+        Created,
+        Encounter,
     }
 }

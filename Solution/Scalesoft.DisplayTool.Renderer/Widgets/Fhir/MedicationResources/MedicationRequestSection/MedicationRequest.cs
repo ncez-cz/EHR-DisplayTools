@@ -2,6 +2,7 @@
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
+using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Encounter;
@@ -14,43 +15,47 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.MedicationResources.Medica
 public class MedicationRequest : ColumnResourceBase<MedicationRequest>, IResourceWidget
 {
     public static string ResourceType => "MedicationRequest";
-    [UsedImplicitly]
-    public static bool RequiresExternalTitle => true;
-    
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
+
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
         RenderContext context
     )
     {
-        var infrequentProperties = InfrequentProperties.Evaluate<InfrequentProps>([navigator]);
+        var infrequentProperties = InfrequentProperties.Evaluate<InfrequentProps>(navigator);
 
         var severity = GetSeverity(navigator);
 
         var widget = new Concat([
-            new Card(
-                getSeverity: () => severity,
-                title:
-                new Concat(
+            new Card(title: new Row(
                 [
                     new Row([
-                        new Condition("f:doNotPerform[@value='true']", new TextContainer(TextStyle.Bold,
+                        new Optional("f:doNotPerform[@value='true']", x =>
                         [
-                            new Badge(
-                                new Concat([
-                                    new Icon(SupportedIcons.TriangleExclamation),
-                                    new Container([
-                                        new ConstantText("Tato medikace nesmí být vydána!"),
-                                    ], ContainerType.Span, "align-middle")
-                                ]), severity == Severity.Gray ? Severity.Error : null, optionalClass: "m-0"
-                            ),
-                        ])),
+                            new TextContainer(TextStyle.Bold,
+                            [
+                                new Badge(
+                                    new Concat([
+                                        new Icon(SupportedIcons.TriangleExclamation),
+                                        new Container([
+                                            new If(_ => context.RenderMode == RenderMode.Documentation,
+                                                new ConstantText(x.GetFullPath())
+                                            ).Else(
+                                                new LocalizedLabel("medication-request.doNotPerform.true")
+                                            ),
+                                        ], ContainerType.Span, "align-middle")
+                                    ]), severity == Severity.Gray ? Severity.Error : null, optionalClass: "m-0"
+                                ),
+                            ])
+                        ]),
                         new If(
                             nav =>
                                 nav.EvaluateCondition(
                                     $"f:priority[@value != '{Priority.Routine.ToEnumString()}']")
-                                && (infrequentProperties.Contains(InfrequentProps.DoNotPerform) ==
-                                    false ||
+                                && (!infrequentProperties.Contains(InfrequentProps.DoNotPerform) ||
                                     nav.EvaluateCondition("f:doNotPerform[@value!='true']")
                                 ),
                             new Badge(
@@ -66,47 +71,55 @@ public class MedicationRequest : ColumnResourceBase<MedicationRequest>, IResourc
                         new OpenTypeElement(null, "medication"),
                         new Container([
                             new EnumIconTooltip("f:status", "http://hl7.org/fhir/ValueSet/medicationrequest-status",
-                                new DisplayLabel(LabelCodes.Status)),
+                                new EhdsiDisplayLabel(LabelCodes.Status)),
                         ], optionalClass: "d-flex align-items-center"),
-                    ], flexContainerClasses: "align-items-center gap-2"),
+                    ], flexContainerClasses: "align-items-center gap-2", flexWrap: false),
                     new Row([
-                        new Optional("f:authoredOn",
+                        infrequentProperties.Optional(InfrequentProps.AuthoredOn,
                             new TextContainer(TextStyle.Muted, [
-                                new ConstantText("Zažádáno: "),
+                                new LocalizedLabel("medication-request.authoredOn"),
+                                new ConstantText(": "),
                                 new ShowDateTime(),
                             ])
                         ),
-                        new NarrativeModal(),
-                    ], flexContainerClasses: "align-items-center gap-1")
-                ]),
-                body:
-                new Concat([
+                    ], flexContainerClasses: "align-items-center gap-1", flexWrap: false),
+                    new NarrativeModal(),
+                ], flexContainerClasses: "gap-2 align-items-center", flexWrap: false),
+                body: new Concat([
                     new Row([
                         new MedicationRequestMedicationContainer("flex-grow-0 flex-shrink-1 flex-basis-auto"),
                         new If(_ => infrequentProperties.Contains(InfrequentProps.DispenseRequest),
                             new MedicationRequestDispenseContainer("flex-grow-0 flex-shrink-1 flex-basis-auto")
+                        ),
+                        infrequentProperties.Optional(InfrequentProps.Requester,
+                            new AnyReferenceNamingWidget(
+                                widgetModel: new ReferenceNamingWidgetModel
+                                {
+                                    Type = ReferenceNamingWidgetType.NameValuePair,
+                                    Direction = FlexDirection.Column,
+                                    LabelOverride = new LocalizedLabel("medication-request.requester"),
+                                }
+                            )
                         ),
                     ], flexContainerClasses: "column-gap-6 row-gap-1"),
                     new If(_ => infrequentProperties.Contains(InfrequentProps.DosageInstruction),
                         new DosageCard("f:dosageInstruction")
                     ),
                 ]),
-                footer: infrequentProperties.Contains(InfrequentProps.Encounter)
+                severity: severity, footer: infrequentProperties.Contains(InfrequentProps.Encounter)
                     ? new HideableDetails(ContainerType.Div,
                         new ShowMultiReference("f:encounter",
                             (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                             x =>
                             [
                                 new Collapser(
-                                    [new ConstantText(Labels.Encounter)],
-                                    [],
+                                    [new LocalizedLabel("node-names.Encounter")],
                                     x.ToList(),
                                     isCollapsed: true),
                             ]
                         )
                     )
-                    : null
-            )
+                    : null)
         ]);
 
         return await widget.Render(navigator, renderer, context);
@@ -118,6 +131,8 @@ public class MedicationRequest : ColumnResourceBase<MedicationRequest>, IResourc
         DosageInstruction,
         Encounter,
         DoNotPerform,
+        AuthoredOn,
+        Requester,
     }
 
     private static Severity GetSeverity(XmlDocumentNavigator navigator)
@@ -150,12 +165,12 @@ public class MedicationRequestMedicationContainer(string? optionalClass = null) 
         RenderContext context
     )
     {
-        var infrequentProperties = InfrequentProperties.Evaluate<InfrequentProps>([navigator]);
+        var infrequentProperties = InfrequentProperties.Evaluate<InfrequentProps>(navigator);
 
         var widget = new Row([
             new If(_ => infrequentProperties.Contains(InfrequentProps.Reason),
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.MedicationReason),
+                    new EhdsiDisplayLabel(LabelCodes.MedicationReason),
                     new Concat([
                         new ConcatBuilder("f:reasonCode", _ =>
                             [
@@ -172,12 +187,12 @@ public class MedicationRequestMedicationContainer(string? optionalClass = null) 
             ),
             new If(_ => infrequentProperties.Contains(InfrequentProps.Substitution),
                 new NameValuePair(
-                    new ConstantText("Náhrada"),
+                    new LocalizedLabel("medication-request.substitution"),
                     new Choose([
                         new When("f:substitution/f:allowedBoolean",
                             new ShowBoolean(
-                                new ConstantText("Není povolena"),
-                                new ConstantText("Je povolena"),
+                                new LocalizedLabel("medication-request.substitution.allowed.false"),
+                                new LocalizedLabel("medication-request.substitution.allowed.true"),
                                 "f:substitution/f:allowedBoolean"
                             )
                         ),
@@ -211,16 +226,13 @@ public class MedicationRequestDispenseContainer(string? optionalClass = null) : 
     )
     {
         var infrequentProperties =
-            InfrequentProperties.Evaluate<InfrequentProps>(
-            [
-                navigator.SelectSingleNode("f:dispenseRequest"),
-            ]);
+            InfrequentProperties.Evaluate<InfrequentProps>(navigator.SelectSingleNode("f:dispenseRequest"));
 
         var widget = new Row([
                 new If(
                     _ => infrequentProperties.ContainsAnyOf(InfrequentProps.Quantity, InfrequentProps.ValidityPeriod),
                     new NameValuePair(
-                        new DisplayLabel(LabelCodes.Dispensation),
+                        new EhdsiDisplayLabel(LabelCodes.Dispensation),
                         new ChangeContext("f:dispenseRequest",
                             new TextContainer(TextStyle.Regular, [
                                 new ShowQuantity("f:quantity"),
@@ -232,13 +244,6 @@ public class MedicationRequestDispenseContainer(string? optionalClass = null) : 
                                 new ShowPeriod("f:validityPeriod"),
                             ])
                         ), direction: FlexDirection.Column
-                    )
-                ),
-                new Optional("f:requester",
-                    new NameValuePair(
-                        new ConstantText("Žadatel"),
-                        new AnyReferenceNamingWidget(),
-                        direction: FlexDirection.Column
                     )
                 ),
             ], flexContainerClasses: optionalClass + " column-gap-6 row-gap-1"

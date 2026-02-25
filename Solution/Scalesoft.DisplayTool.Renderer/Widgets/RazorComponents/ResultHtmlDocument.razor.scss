@@ -1,4 +1,16 @@
-﻿h3 {
+﻿@media print {
+    body {
+        visibility: hidden;
+    }
+    
+    .display-tool-body {
+        visibility: visible;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+}
+h3 {
     color: royalblue;
 }
 

@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils.Language;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
@@ -30,7 +30,7 @@ public class UnrenderedResourcesSection : Widget
 
         var widgets = grouped.Select(x => new AnyResource(x.ToList(), x.Key)).Cast<Widget>().ToList();
 
-        var tree = new Section(".", null, [new ConstantText("Ostatní")],
+        var tree = new Section(".", null, [new LocalizedLabel("general.other-resources")],
             widgets, titleAbbreviations: SectionTitleAbbreviations.Other, customClass: "other-section-margin",
             isCollapsed: true);
 

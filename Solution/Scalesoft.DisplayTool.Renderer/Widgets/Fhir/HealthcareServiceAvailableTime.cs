@@ -1,4 +1,5 @@
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
+using JetBrains.Annotations;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -37,7 +38,8 @@ public class HealthcareServiceAvailableTime : Widget
 
             if (isAllDay)
             {
-                timeText = new TextContainer(TextStyle.Bold, new ConstantText("Celý den"));
+                timeText = new TextContainer(TextStyle.Bold,
+                    new LocalizedLabel("healthcare-service.availableTime.allDay"));
             }
             else
             {
@@ -92,7 +94,7 @@ public class HealthcareServiceAvailableTime : Widget
         {
             if (!dayWidgets.ContainsKey(day))
             {
-                dayWidgets[day] = [new TextContainer(TextStyle.Muted, new ConstantText("neuvedeno"))];
+                dayWidgets[day] = [new TextContainer(TextStyle.Muted, new LocalizedLabel("general.unspecified"))];
             }
         }
 
@@ -111,7 +113,7 @@ public class HealthcareServiceAvailableTime : Widget
                             new CodedValue(dayName, "http://hl7.org/fhir/days-of-week", fallbackValue: dayName),
                             optionalClass: "available-time-badge"),
                         new LineBreak(),
-                        new Concat(dayWidget.Value, new LineBreak())
+                        new Concat(dayWidget.Value, new LineBreak()),
                     ], ContainerType.Div, "text-center")
                 );
             }
@@ -122,12 +124,12 @@ public class HealthcareServiceAvailableTime : Widget
 
     private enum DayOfWeek
     {
-        [EnumMember(Value = "mon")] Monday,
-        [EnumMember(Value = "tue")] Tuesday,
-        [EnumMember(Value = "wed")] Wednesday,
-        [EnumMember(Value = "thu")] Thursday,
-        [EnumMember(Value = "fri")] Friday,
-        [EnumMember(Value = "sat")] Saturday,
-        [EnumMember(Value = "sun")] Sunday
+        [UsedImplicitly] [EnumMember(Value = "mon")] Monday,
+        [UsedImplicitly] [EnumMember(Value = "tue")] Tuesday,
+        [UsedImplicitly] [EnumMember(Value = "wed")] Wednesday,
+        [UsedImplicitly] [EnumMember(Value = "thu")] Thursday,
+        [UsedImplicitly] [EnumMember(Value = "fri")] Friday,
+        [UsedImplicitly] [EnumMember(Value = "sat")] Saturday,
+        [UsedImplicitly] [EnumMember(Value = "sun")] Sunday,
     }
 }

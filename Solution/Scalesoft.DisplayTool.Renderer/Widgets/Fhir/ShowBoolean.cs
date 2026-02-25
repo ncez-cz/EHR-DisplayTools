@@ -18,13 +18,6 @@ public class ShowBoolean : Widget
         m_path = path;
     }
 
-    public ShowBoolean(string onFalse, string onTrue, string path = ".")
-    {
-        m_onFalse = new ConstantText(onFalse);
-        m_onTrue = new ConstantText(onTrue);
-        m_path = path;
-    }
-
     public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
     {
         if (context.RenderMode == RenderMode.Documentation)

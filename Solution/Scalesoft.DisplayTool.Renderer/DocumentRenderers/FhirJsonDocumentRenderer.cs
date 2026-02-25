@@ -18,10 +18,11 @@ public class FhirJsonDocumentRenderer : FhirDocumentRendererBase
         HtmlToPdfConverter htmlToPdfConverter,
         ICodeTranslator translator,
         Language language,
-        IDocumentSignatureValidationManager documentSignatureValidationManager,
+        IPdfSignatureManager pdfSignatureManager,
+        IFhirDocumentSignatureManager fhirDocumentSignatureManager,
         ILoggerFactory loggerFactory
     ) : base(widgetRenderer, documentValidatorProvider, logger, InputFormat.FhirJson, htmlToPdfConverter, translator,
-        language, documentSignatureValidationManager, loggerFactory)
+        language, pdfSignatureManager, fhirDocumentSignatureManager, loggerFactory)
     {
     }
 

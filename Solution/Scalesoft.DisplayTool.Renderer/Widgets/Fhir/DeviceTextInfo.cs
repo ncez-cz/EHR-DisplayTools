@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -14,7 +14,7 @@ public class DeviceTextInfo(string xpath = ".", bool compact = false) : Widget
     )
     {
         var infrequentProperties =
-            InfrequentProperties.Evaluate<DeviceCardInfrequentProperties>([navigator]);
+            InfrequentProperties.Evaluate<DeviceCardInfrequentProperties>(navigator);
 
         // Since all the properties are optional, we can skip rendering if none are present.
         if (infrequentProperties.Count == 0)
@@ -29,7 +29,7 @@ public class DeviceTextInfo(string xpath = ".", bool compact = false) : Widget
             // Basic device information
             new If(_ => infrequentProperties.Contains(DeviceCardInfrequentProperties.DeviceName) && !compact,
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.DeviceName),
+                    new EhdsiDisplayLabel(LabelCodes.DeviceName),
                     new Text("f:deviceName/f:name/@value")
                 )
             ),
@@ -37,7 +37,7 @@ public class DeviceTextInfo(string xpath = ".", bool compact = false) : Widget
             // Device identifier
             new If(_ => infrequentProperties.Contains(DeviceCardInfrequentProperties.Identifier) && !compact,
                 new NameValuePair(
-                    new DisplayLabel(LabelCodes.DeviceId),
+                    new EhdsiDisplayLabel(LabelCodes.DeviceId),
                     new ShowIdentifier("f:identifier")
                 )
             ),
@@ -45,7 +45,7 @@ public class DeviceTextInfo(string xpath = ".", bool compact = false) : Widget
             // Manufacturer details
             new If(_ => infrequentProperties.Contains(DeviceCardInfrequentProperties.Manufacturer),
                 new NameValuePair(
-                    new ConstantText("Výrobce"),
+                    new LocalizedLabel("device.manufacturer"),
                     new Text("f:manufacturer/@value")
                 )
             ),
@@ -53,7 +53,7 @@ public class DeviceTextInfo(string xpath = ".", bool compact = false) : Widget
             // Serial number
             new If(_ => infrequentProperties.Contains(DeviceCardInfrequentProperties.SerialNumber),
                 new NameValuePair(
-                    new ConstantText("Sériové číslo"),
+                    new LocalizedLabel("device.serialNumber"),
                     new Text("f:serialNumber/@value")
                 )
             ),
@@ -64,7 +64,7 @@ public class DeviceTextInfo(string xpath = ".", bool compact = false) : Widget
                 new Container([
                     new Card(null, new Narrative("f:text"))
                 ])
-            )
+            ),
         ];
 
         var container = new Concat(deviceProperties);
@@ -80,5 +80,5 @@ public enum DeviceCardInfrequentProperties
     Status,
     Manufacturer,
     SerialNumber,
-    Text
+    Text,
 }

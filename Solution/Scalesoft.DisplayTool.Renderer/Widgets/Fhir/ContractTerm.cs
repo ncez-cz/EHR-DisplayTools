@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -15,7 +15,7 @@ public class ContractTerm : Widget
     )
     {
         var headerInfo = new Container([
-            new ConstantText("Smluvní ustanovení"),
+            new LocalizedLabel("contract.term"),
             new Optional("f:type|f:subType",
                 new ConstantText(" ("),
                 new CodeableConcept(),
@@ -23,256 +23,305 @@ public class ContractTerm : Widget
             ),
         ], ContainerType.Span);
 
-        var globalInfrequentProperties =
-            Widgets.InfrequentProperties.Evaluate<InfrequentProperties>([navigator]);
+        var globalInfrequentProperties = InfrequentProperties.Evaluate<ContractTermInfrequentProperties>(navigator);
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
 
         var basicInfo = new Container([
             // ignore identifier
-            new Optional("f:issued", new NameValuePair(
-                new ConstantText("Datum vydání"),
-                new ShowDateTime()
-            )),
-            new Optional("f:applies", new NameValuePair(
-                new ConstantText("Platnost"),
-                new ShowPeriod()
-            )),
-            new If(_ => globalInfrequentProperties.Contains(InfrequentProperties.Topic),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Issued,
                 new NameValuePair(
-                    new ConstantText("Téma"),
+                    new LocalizedLabel("contract.term.issued"),
+                    new ShowDateTime()
+                )
+            ),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Applies,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.applies"),
+                    new ShowPeriod()
+                )
+            ),
+            globalInfrequentProperties.Condition(ContractTermInfrequentProperties.Topic,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.topic"),
                     new OpenTypeElement(null, "topic") // CodeableConcept | Reference(Any)
                 )
             ),
-            new Optional("f:type", new NameValuePair(
-                new ConstantText("Typ/Forma"),
-                new CodeableConcept()
-            )),
-            new Optional("f:subType", new NameValuePair(
-                new ConstantText("Podtyp"),
-                new CodeableConcept()
-            )),
-            new Optional("f:text", new NameValuePair(
-                new ConstantText("Prohlášení"),
-                new Text("@value")
-            )),
-            new Condition("f:securityLabel",
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Type,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.type"),
+                    new CodeableConcept()
+                )
+            ),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.SubType,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.subType"),
+                    new CodeableConcept()
+                )
+            ),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Text,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.text"),
+                    new Text("@value")
+                )
+            ),
+            globalInfrequentProperties.Condition(ContractTermInfrequentProperties.SecurityLabel,
                 new Container([
-                    new TextContainer(TextStyle.Bold, new ConstantText("Označení bezpečnosti:")),
+                    new TextContainer(
+                        TextStyle.Bold,
+                        [new LocalizedLabel("contract.term.securityLabel-plural"), new ConstantText(":")]
+                    ),
                     new ListBuilder("f:securityLabel", FlexDirection.Row, _ =>
                         [
                             new Card(null, new Container([
                                 new Condition("f:number", new NameValuePair(
-                                    new ConstantText("Číslo"),
+                                    new LocalizedLabel("contract.term.securityLabel.number"),
                                     new CommaSeparatedBuilder("f:number", _ => new Text("@value"))
                                 )),
                                 new ChangeContext("f:classification", new NameValuePair(
-                                    new ConstantText("Klasifikace"),
+                                    new LocalizedLabel("contract.term.securityLabel.classification"),
                                     new Coding()
                                 )),
                                 new Condition("f:category", new NameValuePair(
-                                    new ConstantText("Kategorie"),
+                                    new LocalizedLabel("contract.term.securityLabel.category"),
                                     new CommaSeparatedBuilder("f:category", _ => new Coding())
                                 )),
                                 new Condition("f:control", new NameValuePair(
-                                    new ConstantText("Instrukce"),
+                                    new LocalizedLabel("contract.term.securityLabel.control"),
                                     new CommaSeparatedBuilder("f:control", _ => new Coding())
                                 )),
-                            ]))
+                            ])),
                         ]
                     ),
-                ], optionalClass: "full-grid-row")),
-            
+                ], optionalClass: "span-over-full-name-value-pair-cell")),
         ], optionalClass: "name-value-pair-wrapper");
 
-        var offerBadge = new PlainBadge(new ConstantText("Nabídka"));
+        var offerBadge = new PlainBadge(new LocalizedLabel("contract.term.offer"));
         var offerInfo = new Container([
             //ignore identifier
             new Condition("f:party",
-                new TextContainer(TextStyle.Bold, new ConstantText("Strany:")),
+                new TextContainer(TextStyle.Bold,
+                    [new LocalizedLabel("contract.term.offer.party-plural"), new ConstantText(":")]),
                 new ListBuilder("f:party", FlexDirection.Row, _ =>
                 [
-                    new Card(new ConstantText("Strana"), new Concat([
+                    new Card(new LocalizedLabel("contract.term.offer.party"), new Concat([
                         new NameValuePair(
-                            new ConstantText("Reference"),
+                            new LocalizedLabel("contract.term.offer.party.reference"),
                             new CommaSeparatedBuilder("f:reference", _ => new AnyReferenceNamingWidget())
                         ),
                         new NameValuePair(
-                            new ConstantText("Role"),
+                            new LocalizedLabel("contract.term.offer.party.role"),
                             new ChangeContext("f:role", new CodeableConcept())
-                        )
-                    ]))
+                        ),
+                    ])),
                 ])
             ),
-            new Optional("f:topic", new NameValuePair(
-                new ConstantText("Téma"),
-                new AnyReferenceNamingWidget()
-            )),
-            new Optional("f:type", new NameValuePair(
-                new ConstantText("Typ/Forma"),
-                new CodeableConcept()
-            )),
-            new Optional("f:decision", new NameValuePair(
-                new ConstantText("Rozhodnutí"),
-                new CodeableConcept()
-            )),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Topic,
+                new AnyReferenceNamingWidget(
+                    widgetModel: new ReferenceNamingWidgetModel
+                    {
+                        Type = ReferenceNamingWidgetType.NameValuePair,
+                        LabelOverride = new LocalizedLabel("contract.term.offer.topic"),
+                    }
+                )
+            ),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Type,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.offer.type"),
+                    new CodeableConcept()
+                )
+            ),
+            globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Decision,
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.offer.decision"),
+                    new CodeableConcept()
+                )
+            ),
             new Condition("f:decisionMode", new NameValuePair(
-                new ConstantText("Režim rozhodnutí"),
-                new CommaSeparatedBuilder("f:decisionMode", _ => new CodeableConcept())
-            )),
+                    new LocalizedLabel("contract.term.offer.decisionMode"),
+                    new CommaSeparatedBuilder("f:decisionMode", _ => new CodeableConcept())
+                )
+            ),
             new Condition("f:answer", new NameValuePair(
-                new ConstantText("Odpověď"),
-                new CommaSeparatedBuilder("f:answer",
-                    _ => new OpenTypeElement(
-                        null)) // boolean | Decimal | Integer | Date | DateTime | Time | String | Uri | Attachment | Coding | Quantity | Reference(Any)
-            )),
-            new Optional("f:text", new NameValuePair(
-                new ConstantText("Text nabídky"),
-                new Text("@value")
-            )),
+                    new LocalizedLabel("contract.term.offer.answer"),
+                    new CommaSeparatedBuilder("f:answer", _ => new OpenTypeElement(null))
+                    // boolean | Decimal | Integer | Date | DateTime | Time | String | Uri | Attachment | Coding | Quantity | Reference(Any)
+                )
+            ),
+            new Optional("f:text",
+                new NameValuePair(
+                    new LocalizedLabel("contract.term.offer.text"),
+                    new Text("@value")
+                )
+            ),
             //ignore linkId
             //ignore securityLabelNumber
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
         var assetInfo = new ListBuilder("f:asset", FlexDirection.Column, _ =>
         [
             new Collapser([
-                new ConstantText("Aktivum"),
+                new LocalizedLabel("contract.term.asset"),
                 new Optional("f:type|f:subType",
                     new ConstantText(" ("),
                     new CodeableConcept(),
                     new ConstantText(")")
                 ),
-            ], [], [
+            ], [
                 new Container([
-                    new Optional("f:scope", new NameValuePair(
-                        new ConstantText("Rozsah"),
-                        new CodeableConcept()
-                    )),
+                    globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Scope,
+                        new NameValuePair(
+                            new LocalizedLabel("contract.term.asset.scope"),
+                            new CodeableConcept()
+                        )),
                     new Condition("f:type", new NameValuePair(
-                        new ConstantText("Typ"),
+                        new LocalizedLabel("contract.term.asset.type"),
                         new CommaSeparatedBuilder("f:type", _ => new CodeableConcept())
                     )),
                     new Condition("f:subtype", new NameValuePair(
-                        new ConstantText("Podtyp"),
+                        new LocalizedLabel("contract.term.asset.subtype"),
                         new CommaSeparatedBuilder("f:subtype", _ => new CodeableConcept())
                     )),
                     new Condition("f:typeReference", new NameValuePair(
-                        new ConstantText("Přidružené reference"),
+                        new LocalizedLabel("contract.term.asset.typeReference"),
                         new CommaSeparatedBuilder("f:typeReference", _ => new AnyReferenceNamingWidget())
                     )),
-                    new Optional("f:relationship", new NameValuePair(
-                        new ConstantText("Vztah"),
-                        new Coding()
-                    )),
+                    globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Relationship,
+                        new NameValuePair(
+                            new LocalizedLabel("contract.term.asset.relationship"),
+                            new Coding()
+                        )),
                     new Condition("f:context",
-                        new TextContainer(TextStyle.Bold, new ConstantText("Kontexty:")),
+                        new TextContainer(
+                            TextStyle.Bold,
+                            [new LocalizedLabel("contract.term.asset.context-plural"), new ConstantText(":")]
+                        ),
                         new ListBuilder("f:context", FlexDirection.Row, _ =>
                         [
-                            new Card(new ConstantText("Kontext"),
+                            new Card(new LocalizedLabel("contract.term.asset.context"),
                                 new Concat([
-                                    new Optional("f:reference",
-                                        new NameValuePair(
-                                            new ConstantText("Tvůrce, správce nebo vlastník"),
-                                            new AnyReferenceNamingWidget()
+                                    globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Reference,
+                                        new AnyReferenceNamingWidget(
+                                            widgetModel: new ReferenceNamingWidgetModel
+                                            {
+                                                Type = ReferenceNamingWidgetType.NameValuePair,
+                                                LabelOverride =
+                                                    new LocalizedLabel("contract.term.asset.context.reference"),
+                                            }
                                         )
                                     ),
                                     new Condition("f:code",
                                         new NameValuePair(
-                                            new ConstantText("Kód"),
+                                            new LocalizedLabel("contract.term.asset.context.code"),
                                             new CommaSeparatedBuilder("f:code", _ => new CodeableConcept())
                                         )
                                     ),
-                                    new Optional("f:text", new NameValuePair(
-                                        new ConstantText("Popis"),
-                                        new Text("@value")
-                                    ))
+                                    globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Text,
+                                        new NameValuePair(
+                                            new LocalizedLabel("contract.text.asset.context.text"),
+                                            new Text("@value")
+                                        ))
                                 ])
                             )
                         ])
                     ),
-                    new Optional("f:condition", new NameValuePair(
-                        new ConstantText("Kvalita"),
-                        new Text("@value")
-                    )),
+                    globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Condition,
+                        new NameValuePair(
+                            new LocalizedLabel("contract.term.asset.condition"),
+                            new Text("@value")
+                        )),
                     new Condition("f:periodType", new NameValuePair(
-                        new ConstantText("Typ období"),
+                        new LocalizedLabel("contract.term.asset.periodType"),
                         new CommaSeparatedBuilder("f:periodType", _ => new CodeableConcept())
                     )),
                     new Condition("f:period", new NameValuePair(
-                        new ConstantText("Období"),
+                        new LocalizedLabel("contract.term.asset.period"),
                         new CommaSeparatedBuilder("f:period", _ => new ShowPeriod())
                     )),
                     new Condition("f:usePeriod", new NameValuePair(
-                        new ConstantText("Období použití"),
+                        new LocalizedLabel("contract.term.asset.usePeriod"),
                         new CommaSeparatedBuilder("f:usePeriod", _ => new ShowPeriod())
                     )),
-                    new Optional("f:text", new NameValuePair(
-                        new ConstantText("Text aktiva, nebo otázky"),
-                        new Text("@value")
-                    )),
+                    globalInfrequentProperties.Optional(ContractTermInfrequentProperties.Text,
+                        new NameValuePair(
+                            new LocalizedLabel("contract.term.asset.text"),
+                            new Text("@value")
+                        )),
                     //ignore linkId
                     //ignore securityLabelNumber
                     new Condition("f:answer", new NameValuePair(
-                        new ConstantText("Odpověď"),
+                        new LocalizedLabel("contract.term.asset.answer"),
                         new CommaSeparatedBuilder("f:answer",
                             _ => new OpenTypeElement(
                                 null)) // boolean | Decimal | Integer | Date | DateTime | Time | String | Uri | Attachment | Coding | Quantity | Reference(Any)
                     )),
-                    new Condition("f:valuedItem",
-                        new TextContainer(TextStyle.Bold, new ConstantText("Hodnotné položky:")),
-                        new ListBuilder("f:valuedItem", FlexDirection.Row, _ =>
+                    new Condition(
+                        "f:valuedItem",
+                        new TextContainer(
+                            TextStyle.Bold,
+                            [new LocalizedLabel("contract.term.asset.valuedItem-plural"), new ConstantText(":")]
+                        ),
+                        new ListBuilder("f:valuedItem", FlexDirection.Row, (_, nav) =>
                         {
-                            var infrequentProperties =
-                                Widgets.InfrequentProperties.Evaluate<InfrequentProperties>([navigator]);
+                            var itemInfrequentProps =
+                                InfrequentProperties.Evaluate<ContractTermInfrequentProperties>(nav);
 
                             return
                             [
-                                new Card(new ConstantText("Položka"),
+                                new Card(new LocalizedLabel("contract.term.asset.valuedItem"),
                                     new Concat([
-                                        new If(_ => infrequentProperties.Contains(InfrequentProperties.Entity),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Entity,
                                             new NameValuePair(
-                                                new ConstantText("Entita"),
+                                                new LocalizedLabel("contract.term.asset.valuedItem.entity"),
                                                 new OpenTypeElement(null, "entity") // CodeableConcept | Reference(Any)
                                             )
                                         ),
                                         //ignore identifier
-                                        new Optional("f:effectiveTime", new NameValuePair(
-                                            new ConstantText("Čas efektivity"),
-                                            new ShowDateTime()
-                                        )),
-                                        new Optional("f:quantity", new NameValuePair(
-                                            new ConstantText("Množství"),
-                                            new ShowQuantity()
-                                        )),
-                                        new Optional("f:unitPrice", new NameValuePair(
-                                            new ConstantText("Jednotková cena"),
-                                            new ShowMoney()
-                                        )),
-                                        new Optional("f:factor", new NameValuePair(
-                                            new ConstantText("Faktor"),
-                                            new ShowDecimal()
-                                        )),
-                                        new Optional("f:net", new NameValuePair(
-                                            new ConstantText("Čistá hodnota"),
-                                            new ShowMoney()
-                                        )),
-                                        new Optional("f:payment", new NameValuePair(
-                                            new ConstantText("Platba"),
-                                            new Text("@value")
-                                        )),
-                                        new Optional("f:paymentDate", new NameValuePair(
-                                            new ConstantText("Datum platby"),
-                                            new ShowDateTime()
-                                        )),
-                                        new Optional("f:responsible", new NameValuePair(
-                                            new ConstantText("Zodpovědný"),
-                                            new AnyReferenceNamingWidget()
-                                        )),
-                                        new Optional("f:recipient", new NameValuePair(
-                                            new ConstantText("Příjemce"),
-                                            new AnyReferenceNamingWidget()
-                                        )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.EffectiveTime,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.effectiveTime"),
+                                                new ShowDateTime()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Quantity,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.quantity"),
+                                                new ShowQuantity()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.UnitPrice,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.unitPrice"),
+                                                new ShowMoney()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Factor,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.factor"),
+                                                new ShowDecimal()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Optional,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.net"),
+                                                new ShowMoney()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Payment,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.payment"),
+                                                new Text("@value")
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.PaymentDate,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.paymentDate"),
+                                                new ShowDateTime()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Responsible,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.responsible"),
+                                                new AnyReferenceNamingWidget()
+                                            )),
+                                        itemInfrequentProps.Optional(ContractTermInfrequentProperties.Recipient,
+                                            new NameValuePair(
+                                                new LocalizedLabel("contract.term.asset.valuedItem.recipient"),
+                                                new AnyReferenceNamingWidget()
+                                            )),
                                         // ignore linkId
                                         // ignore securityLabelNumber
                                     ])
@@ -284,100 +333,123 @@ public class ContractTerm : Widget
             ]),
         ]);
 
-        var actionBadge = new PlainBadge(new ConstantText("Akce"));
-        var actionInfo = new ListBuilder("f:action", FlexDirection.Row, (_, nav) =>
+        var actionBadge = new PlainBadge(new LocalizedLabel("contract.term.action"));
+        var actionInfo = new ListBuilder("f:action", FlexDirection.Column, (_, nav) =>
         {
-            var infrequentProperties =
-                Widgets.InfrequentProperties.Evaluate<InfrequentProperties>([nav]);
+            var infrequentProperties = InfrequentProperties.Evaluate<ContractTermInfrequentProperties>(nav);
 
             Widget[] tree =
             [
-                new Optional(
-                    "f:doNotPerform", new NameValuePair(
-                        new ConstantText("Zákaz"),
+                infrequentProperties.Optional(ContractTermInfrequentProperties.DoNotPerform,
+                    new NameValuePair(
+                        new LocalizedLabel("contract.term.action.doNotPerform"),
                         new ShowDoNotPerform()
                     )),
                 new NameValuePair(
-                    new ConstantText("Typ/Forma"),
+                    new LocalizedLabel("contract.term.action.type"),
                     new CodeableConcept()
                 ),
                 new Condition("f:subject",
-                    new TextContainer(TextStyle.Bold, new ConstantText("Předmět:")),
-                    new ListBuilder("f:subject", FlexDirection.Row, _ =>
-                    [
+                    new ConditionalWrapper(
+                        x =>
+                        {
+                            return x.SelectAllNodes("f:subject")
+                                .All(subjectNode => subjectNode.IsSubjectFromComposition());
+                        },
                         new NameValuePair(
-                            new ConstantText("Reference"),
-                            new CommaSeparatedBuilder("f:reference", _ => new AnyReferenceNamingWidget())
-                        ),
-                        new Optional("f:role", new NameValuePair(
-                            new ConstantText("Role"),
-                            new CodeableConcept()
-                        ))
-                    ])
+                            new LocalizedLabel("contract.subject"),
+                            new CommaSeparatedBuilder("f:subject", _ =>
+                            [
+                                new ConditionalWrapper(x => x.IsSubjectFromComposition(),
+                                    new AnyReferenceNamingWidget(),
+                                    new Optional("f:role", new NameValuePair(
+                                        new LocalizedLabel("contract.term.action.subject.role"),
+                                        new CodeableConcept()
+                                    ))
+                                ),
+                            ])
+                        )
+                    )
                 ),
                 new NameValuePair(
-                    new ConstantText("Záměr"),
+                    new LocalizedLabel("contract.term.action.intent"),
                     new ChangeContext("f:intent", new CodeableConcept())
                 ),
                 // ignore linkId
                 new NameValuePair(
-                    new ConstantText("Stav"),
+                    new LocalizedLabel("contract.term.action.status"),
                     new ChangeContext("f:status", new CodeableConcept())
                 ),
-                new Optional("f:context", new NameValuePair(
-                    new ConstantText("Kontext"),
-                    new AnyReferenceNamingWidget()
-                )),
-                // ignore contextLinkId
-                new If(_ => infrequentProperties.Contains(InfrequentProperties.Occurrence),
+                infrequentProperties.Optional(ContractTermInfrequentProperties.Context,
                     new NameValuePair(
-                        new ConstantText("Žádaný rozvrh/čas"),
+                        new LocalizedLabel("contract.term.action.context"),
+                        new AnyReferenceNamingWidget()
+                    )),
+                // ignore contextLinkId
+                new If(_ => infrequentProperties.Contains(ContractTermInfrequentProperties.Occurrence),
+                    new NameValuePair(
+                        new LocalizedLabel("contract.term.action.occurence"),
                         new Chronometry("occurrence")
                     )
                 ),
-                new Condition("f:requester", new NameValuePair(
-                    new ConstantText("Žadatelé"),
-                    new CommaSeparatedBuilder("f:requester", _ => new AnyReferenceNamingWidget())
-                )),
+                new InfrequentProperties.Builder<ContractTermInfrequentProperties>(
+                    infrequentProperties,
+                    ContractTermInfrequentProperties.Requester,
+                    items =>
+                    [
+                        new NameValuePair(
+                            new LocalizedLabel("contract.term.action.requester"),
+                            new ConcatBuilder(
+                                items,
+                                (_, _, _) => [new AnyReferenceNamingWidget()],
+                                new ConstantText(", ")
+                            )
+                        ),
+                    ]
+                ),
                 // ignore requesterLinkId
-                new Condition("f:performerType", new NameValuePair(
-                    new ConstantText("Typ provádějícího"),
-                    new CommaSeparatedBuilder("f:performerType", _ => new CodeableConcept())
-                )),
-                new Optional("f:performerRole", new NameValuePair(
-                    new ConstantText("Role provádějícího"),
-                    new CodeableConcept()
-                )),
+                infrequentProperties.Condition(ContractTermInfrequentProperties.PerformerType,
+                    new NameValuePair(
+                        new LocalizedLabel("contract.term.action.performerType"),
+                        new CommaSeparatedBuilder(
+                            ContractTermInfrequentProperties.PerformerType.ToString().ToLowerInvariant(),
+                            _ => new CodeableConcept())
+                    )),
+                infrequentProperties.Optional(ContractTermInfrequentProperties.PerformerRole,
+                    new NameValuePair(
+                        new LocalizedLabel("contract.term.action.performerRole"),
+                        new CodeableConcept()
+                    )),
                 new Optional("f:performer", new NameValuePair(
-                    new ConstantText("Provádějící"),
+                    new LocalizedLabel("contract.term.action.performer"),
                     new AnyReferenceNamingWidget()
                 )),
                 // ignore performerLinkId
                 new Condition("f:reasonCode|f:reasonReference", new NameValuePair(
-                    new ConstantText("Důvod (ne)potřebnosti"),
+                    new LocalizedLabel("contract.term.action.reasonX"),
                     new Concat([
                         new CommaSeparatedBuilder("f:reasonCode", _ => new CodeableConcept()),
                         new CommaSeparatedBuilder("f:reasonReference", _ => new AnyReferenceNamingWidget())
                     ], ", ")
                 )),
                 new Condition("f:reason", new NameValuePair(
-                    new ConstantText("Důvod"),
+                    new LocalizedLabel("contract.term.action.reason"),
                     new CommaSeparatedBuilder("f:reason", _ => new Text("@value"))
                 )),
                 // ignore reasonLinkId
                 new Condition("f:note", new NameValuePair(
-                    new ConstantText("Poznámka"),
+                    new LocalizedLabel("contract.term.action.note"),
                     new ListBuilder("f:note", FlexDirection.Column, _ => [new ShowAnnotationCompact()])
                 ))
                 // ignore securityLabelNumber
             ];
 
             return tree;
-        });
+        }, flexContainerClasses: string.Empty); // Overrides the default class
 
         var complete =
             new Container([
-                new Collapser([headerInfo], [], [
+                new Collapser([headerInfo], [
                     new Condition("f:issued or f:applies or f:type or f:subType or f:text or f:securityLabel",
                         badge,
                         basicInfo,
@@ -393,7 +465,7 @@ public class ContractTerm : Widget
                         )
                     ),
                     new Condition("f:asset",
-                        new PlainBadge(new ConstantText("Aktiva")),
+                        new PlainBadge(new LocalizedLabel("contract.term.asset-plural")),
                         assetInfo,
                         new Condition("f:action or f:group",
                             new ThematicBreak()
@@ -407,8 +479,9 @@ public class ContractTerm : Widget
                         )
                     ),
                     new Condition("f:group",
-                        new PlainBadge(new ConstantText("Smluvní ustanovení")),
-                        new ListBuilder("f:group", FlexDirection.Column, _ => [new ContractTerm()])
+                        new PlainBadge(new LocalizedLabel("contract.term.group")),
+                        new ListBuilder("f:group", FlexDirection.Column, _ => [new ContractTerm()],
+                            flexContainerClasses: string.Empty) // Overrides the default class
                     )
                 ])
             ]);
@@ -417,10 +490,36 @@ public class ContractTerm : Widget
         return complete.Render(navigator, renderer, context);
     }
 
-    private enum InfrequentProperties
+    private enum ContractTermInfrequentProperties
     {
         [OpenType("topic")] Topic,
         [OpenType("entity")] Entity,
         [OpenType("occurrence")] Occurrence,
+        Issued,
+        Applies,
+        Type,
+        SubType,
+        Text,
+        Decision,
+        Scope,
+        Relationship,
+        Reference,
+        Condition,
+        EffectiveTime,
+        Quantity,
+        UnitPrice,
+        Factor,
+        Optional,
+        Payment,
+        PaymentDate,
+        Responsible,
+        Recipient,
+        DoNotPerform,
+        Role,
+        Context,
+        Requester,
+        PerformerType,
+        PerformerRole,
+        SecurityLabel,
     }
 }

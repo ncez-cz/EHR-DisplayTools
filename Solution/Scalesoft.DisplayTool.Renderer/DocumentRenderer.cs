@@ -16,9 +16,9 @@ public class DocumentRenderer
         var loggerFactory = options.LoggerFactory ?? new NullLoggerFactory();
         m_serviceProvider =
             ServicesRegistration.CreateServiceProvider(loggerFactory,
-                options.PdfRenderer, options.ExternalServicesConfiguration);
+                options.PdfRenderer, options.ExternalServicesConfiguration, options.KnownOidMappings);
     }
-    
+
     public DocumentRenderer(IServiceProvider serviceProvider)
     {
         m_serviceProvider = serviceProvider;
@@ -38,7 +38,7 @@ public class DocumentRenderer
         try
         {
             var specificDocumentRenderer = GetSpecificDocumentRenderer(scope.ServiceProvider, inputFormat);
-            var options = new DocumentOptions()
+            var options = new DocumentOptions
             {
                 ValidateDocument = false,
                 ValidateCodeValues = false,
@@ -53,7 +53,15 @@ public class DocumentRenderer
                 language.Primary = options.LanguageOption;
             }
 
-            var result = await specificDocumentRenderer.RenderAsync(fileContent, outputFormat, options, documentType, RenderMode.Documentation, levelOfDetail: LevelOfDetail.Detailed);
+            var result = await specificDocumentRenderer.RenderAsync(
+                fileContent,
+                outputFormat,
+                options,
+                documentType,
+                isEmbeddable: false,
+                RenderMode.Documentation,
+                levelOfDetail: LevelOfDetail.Detailed);
+
             return result;
         }
         catch (NotSupportedException)
@@ -67,11 +75,17 @@ public class DocumentRenderer
         byte[] fileContent,
         InputFormat inputFormat,
         OutputFormat outputFormat,
+        bool isEmbeddable,
         DocumentOptions options,
         DocumentType documentType,
         LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
     )
     {
+        if (outputFormat == OutputFormat.Pdf && isEmbeddable)
+        {
+            return UnsupportedFormatResult(inputFormat, outputFormat, "PDF output format is not embeddable");
+        }
+
         using var scope = m_serviceProvider.CreateScope();
         try
         {
@@ -82,8 +96,14 @@ public class DocumentRenderer
             }
 
             var specificDocumentRenderer = GetSpecificDocumentRenderer(scope.ServiceProvider, inputFormat);
-            var result = await specificDocumentRenderer.RenderAsync(fileContent, outputFormat, options,
-                documentType: documentType, levelOfDetail: levelOfDetail);
+            var result = await specificDocumentRenderer.RenderAsync(
+                fileContent,
+                outputFormat,
+                options,
+                documentType: documentType,
+                isEmbeddable,
+                levelOfDetail: levelOfDetail);
+
             return result;
         }
         catch (NotSupportedException)
@@ -102,13 +122,17 @@ public class DocumentRenderer
         return renderer ?? throw new NotSupportedException();
     }
 
-    private DocumentResult UnsupportedFormatResult(InputFormat inputFormat, OutputFormat outputFormat)
+    private DocumentResult UnsupportedFormatResult(
+        InputFormat inputFormat,
+        OutputFormat outputFormat,
+        string? errorMessage = null
+    )
     {
         return new DocumentResult
         {
             Content = [],
             IsRenderedSuccessfully = false,
-            Errors = [$"Rendering {outputFormat} from {inputFormat} is not supported"],
+            Errors = [errorMessage ?? $"Rendering {outputFormat} from {inputFormat} is not supported"],
         };
     }
 }

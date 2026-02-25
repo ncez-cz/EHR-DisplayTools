@@ -1,6 +1,10 @@
-﻿body:has( #detail-toggle:not(:checked)) {
+﻿.display-tool-body:has( > .document-header > div > div > div > input#detail-toggle:not(:checked)) {
     .optional-detail {
         display: none !important;
+    }
+
+    .optional-detail-overridable {
+        display: none;
     }
 
     /* 
@@ -36,9 +40,12 @@
         display: none !important;
     }
 
+    div:not(:has(> :not(.optional-detail))) + .narrative-print-collapser {
+        margin-top: 0 !important;
+    }
 }
 
-body:has(#detail-toggle:checked) {
+.display-tool-body:has(#detail-toggle:checked) {
     .card-footer:has(> .optional-detail:only-child > .narrative-print-collapser-hidden:only-child) {
         display: none;
     }

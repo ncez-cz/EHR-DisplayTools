@@ -8,14 +8,19 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Dasta;
 
 public class DastaDiagnosesPatsumWidget : Widget
 {
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
         List<Widget> widgetTree =
         [
             new Variable("diagnoses",
                 "/ds:dasta/ds:is/dsip:ip/dsip:ku/dsip:ku_z[@typku='PATSUM.DAT']/dsip:ku_z_patsumdat/dsip:dg/dsip:dgz"),
-            new Section("/ds:dasta/ds:is/dsip:ip/dsip:ku/dsip:ku_z[@typku='PATSUM.DAT']/dsip:ku_z_patsumdat/dsip:dg/dsip:dgz[1]", null,
+            new Section(
+                "/ds:dasta/ds:is/dsip:ip/dsip:ku/dsip:ku_z[@typku='PATSUM.DAT']/dsip:ku_z_patsumdat/dsip:dg/dsip:dgz[1]",
+                null,
                 [new ConstantText("Diagnózy")],
                 [
                     new Table([
@@ -33,9 +38,11 @@ public class DastaDiagnosesPatsumWidget : Widget
                                 // ignore typ_dg
                                 // ignore @ind_oprav_sd
                                 new TableCell([
-                                    DastaWidgetUtils.TextOrTooltipWithText([new TextContainer(TextStyle.Regular, [new Text("dsip:diag")])], [
-                                        new DastaCodedValue("dsip:diag/@nazev", "MKN10"),
-                                    ], "dsip:diag/@nazev"),
+                                    DastaWidgetUtils.TextOrTooltipWithText(
+                                        [new TextContainer(TextStyle.Regular, [new Text("dsip:diag")])], [
+                                            new DastaCodedValue("dsip:diag/@nazev",
+                                                "MKN10"), // TODO verify DASTA-specific code list, verify code list is valid #DT-176
+                                        ], "dsip:diag/@nazev"),
                                 ]),
                                 // ignore diag/@mkn_verze
                                 new TableCell([
@@ -44,11 +51,11 @@ public class DastaDiagnosesPatsumWidget : Widget
                                 new TableCell([
                                     new ItemListBuilder("dsip:stav_dg", ItemListType.Unordered, i =>
                                     [
-                                        new DastaCodedValue(".", "1.3.6.1.4.1.12559.11.10.1.3.1.42.15", "epSOSStatusCode"),
+                                        new DastaCodedValue(".", "1.3.6.1.4.1.12559.11.10.1.3.1.42.15"),
                                     ]),
                                 ]),
                                 new TableCell([
-                                    new DastaCodedValue("dsip:zavaz_dg", "1.3.6.1.4.1.12559.11.10.1.3.1.42.13", "epSOSSeverity"),
+                                    new DastaCodedValue("dsip:zavaz_dg", "1.3.6.1.4.1.12559.11.10.1.3.1.42.13"),
                                 ]),
                                 // ignore dzs_dg - unimplemented is dasta
                                 // ignore duvernost, duverne - assume documents that are being displayed are prefiltered by provider

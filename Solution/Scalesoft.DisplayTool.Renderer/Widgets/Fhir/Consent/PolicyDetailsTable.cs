@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -18,40 +18,45 @@ public class PolicyDetailsTable : Widget
         var infrequentProperties =
             InfrequentProperties.Evaluate<PolicyInfrequentProperties>(policies);
 
+
         var policyTable = new Table([
             new TableHead([
                 new TableRow([
                     new TableCell([new ConstantText("#")], TableCellType.Header),
                     new If(_ => infrequentProperties.Contains(PolicyInfrequentProperties.Authority),
-                        new TableCell([new ConstantText("Authority")], TableCellType.Header)
+                        new TableCell([new LocalizedLabel("consent.policy.authority")], TableCellType.Header)
                     ),
                     new If(_ => infrequentProperties.Contains(PolicyInfrequentProperties.Uri),
-                        new TableCell([new ConstantText("URI")], TableCellType.Header)
-                    )
-                ])
+                        new TableCell([new LocalizedLabel("consent.policy.uri")], TableCellType.Header)
+                    ),
+                ]),
             ]),
             new TableBody([
                 new ConcatBuilder("f:policy", i =>
-                [
-                    new TableRow([
-                        new TableCell([new ConstantText($"{i + 1}")]),
-                        new If(_ => infrequentProperties.Contains(PolicyInfrequentProperties.Authority),
-                            new TableCell([
-                                new Optional("f:authority",
-                                    new Text("@value")
-                                ),
-                            ])
-                        ),
-                        new If(_ => infrequentProperties.Contains(PolicyInfrequentProperties.Uri),
-                            new TableCell([
-                                new Optional("f:uri",
-                                    new Link(new Text("@value"), new Text("@value"))
-                                )
-                            ])
-                        )
-                    ])
-                ])
-            ])
+                {
+                    var uri = navigator.SelectSingleNode("f:uri/@value").Node?.Value ?? "";
+                    return
+                    [
+                        new TableRow([
+                            new TableCell([new ConstantText($"{i + 1}")]),
+                            new If(_ => infrequentProperties.Contains(PolicyInfrequentProperties.Authority),
+                                new TableCell([
+                                    new Optional("f:authority",
+                                        new Text("@value")
+                                    ),
+                                ])
+                            ),
+                            new If(_ => infrequentProperties.Contains(PolicyInfrequentProperties.Uri),
+                                new TableCell([
+                                    new Optional("f:uri",
+                                        new Link(new Text("@value"), uri)
+                                    ),
+                                ])
+                            ),
+                        ]),
+                    ];
+                }),
+            ]),
         ]);
 
         return await policyTable.Render(navigator, renderer, context);
@@ -60,6 +65,6 @@ public class PolicyDetailsTable : Widget
     private enum PolicyInfrequentProperties
     {
         Authority,
-        Uri
+        Uri,
     }
 }

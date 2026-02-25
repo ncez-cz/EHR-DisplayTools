@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -12,7 +12,8 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class CommunicationRequest : ColumnResourceBase<CommunicationRequest>, IResourceWidget
 {
     public static string ResourceType => "CommunicationRequest";
-    
+    public static bool HasBorderedContainer(Widget widget) => true;
+
     public override async Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
@@ -20,11 +21,11 @@ public class CommunicationRequest : ColumnResourceBase<CommunicationRequest>, IR
     )
     {
         var infrequentProperties =
-            InfrequentProperties.Evaluate<CommunicationRequestInfrequentProperties>([navigator]);
+            InfrequentProperties.Evaluate<CommunicationRequestInfrequentProperties>(navigator);
 
         var headerInfo = new Container([
             new Container([
-                new ConstantText("Žádost o komunikaci"),
+                new LocalizedLabel("communication-request"),
                 new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Category),
                     new ConstantText(" ("),
                     new ChangeContext("f:category", new CodeableConcept()),
@@ -32,44 +33,44 @@ public class CommunicationRequest : ColumnResourceBase<CommunicationRequest>, IR
                 ),
             ], ContainerType.Span),
             new EnumIconTooltip("f:status", "http://hl7.org/fhir/request-status",
-                new DisplayLabel(LabelCodes.Status))
+                new EhdsiDisplayLabel(LabelCodes.Status))
         ], ContainerType.Div, "d-flex align-items-center gap-1");
 
-        var badge = new PlainBadge(new ConstantText("Základní informace"));
+        var badge = new PlainBadge(new LocalizedLabel("general.basic-information"));
         var basicInfo = new Container([
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Priority),
                 new NameValuePair(
-                    new ConstantText("Priorita"),
+                    new LocalizedLabel("communication-request.priority"),
                     new EnumLabel("f:priority", "http://hl7.org/fhir/ValueSet/request-priority")
                 )
             ),
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Category),
                 new NameValuePair(
-                    new ConstantText("Kategorie"),
+                    new LocalizedLabel("communication-request.category"),
                     new ChangeContext("f:category", new CodeableConcept())
                 )
             ),
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Occurrence),
                 new NameValuePair(
-                    new ConstantText("Výskyt"),
+                    new LocalizedLabel("communication-request.occurrence"),
                     new Chronometry("occurrence")
                 )
             ),
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Medium),
                 new NameValuePair(
-                    new ConstantText("Médium"),
+                    new LocalizedLabel("communication-request.medium"),
                     new ChangeContext("f:medium", new CodeableConcept())
                 )
             ),
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.AuthoredOn),
                 new NameValuePair(
-                    new ConstantText("Vytvořeno"),
+                    new LocalizedLabel("communication-request.authoredOn"),
                     new ShowDateTime("f:authoredOn")
                 )
             ),
-        ], optionalClass: "name-value-pair-wrapper w-max-content");
+        ], optionalClass: "name-value-pair-wrapper w-fit-content");
 
-        var messageBadge = new PlainBadge(new ConstantText("Zpráva"));
+        var messageBadge = new PlainBadge(new LocalizedLabel("communication-request.payload"));
         var messageInfo = new Concat([
             new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Payload),
                 new Container([
@@ -80,31 +81,38 @@ public class CommunicationRequest : ColumnResourceBase<CommunicationRequest>, IR
                 ])
             ),
             new Container([
-                new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Requester),
-                    new NameValuePair(
-                        new ConstantText("Žadatel"),
-                        new AnyReferenceNamingWidget("f:requester")
+                infrequentProperties.Optional(CommunicationRequestInfrequentProperties.Requester,
+                    new AnyReferenceNamingWidget(
+                        widgetModel: new ReferenceNamingWidgetModel
+                        {
+                            Type = ReferenceNamingWidgetType.NameValuePair,
+                            LabelOverride = new LocalizedLabel("communication-request.requester"),
+                        }
                     )
                 ),
-                new If(_ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.Sender),
-                    new NameValuePair(
-                        new ConstantText("Odesílatel"),
-                        new AnyReferenceNamingWidget("f:sender")
+                infrequentProperties.Optional(CommunicationRequestInfrequentProperties.Sender,
+                    new AnyReferenceNamingWidget(
+                        widgetModel: new ReferenceNamingWidgetModel
+                        {
+                            Type = ReferenceNamingWidgetType.NameValuePair,
+                            LabelOverride = new LocalizedLabel("communication-request.sender"),
+                        }
                     )
                 ),
-                new If(
-                    _ => infrequentProperties.Contains(CommunicationRequestInfrequentProperties.DoNotPerform) &&
-                         navigator.EvaluateCondition("f:doNotPerform[@value='true']"),
-                    new NameValuePair(
-                        new ConstantText("Zákaz"),
-                        new ShowDoNotPerform()
+                infrequentProperties.Optional(CommunicationRequestInfrequentProperties.DoNotPerform,
+                    new ShowBoolean(
+                        new NullWidget(),
+                        new NameValuePair(
+                            new LocalizedLabel("communication-request.doNotPerform"),
+                            new ShowDoNotPerform()
+                        )
                     )
                 ),
-            ], optionalClass: "name-value-pair-wrapper w-max-content")
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
         ]);
 
         var complete =
-            new Collapser([headerInfo], [], [
+            new Collapser([headerInfo], [
                     new If(_ => infrequentProperties.ContainsAnyOf(CommunicationRequestInfrequentProperties.Priority,
                             CommunicationRequestInfrequentProperties.Category,
                             CommunicationRequestInfrequentProperties.Occurrence,
@@ -141,7 +149,7 @@ public class CommunicationRequest : ColumnResourceBase<CommunicationRequest>, IR
                                 (items, _) => items.Select(Widget (x) => new EncounterCard(x)).ToList(),
                                 x =>
                                 [
-                                    new Collapser([new ConstantText(Labels.Encounter)], [], x.ToList(),
+                                    new Collapser([new LocalizedLabel("node-names.Encounter")], x.ToList(),
                                         isCollapsed: true)
                                 ])
                         ),

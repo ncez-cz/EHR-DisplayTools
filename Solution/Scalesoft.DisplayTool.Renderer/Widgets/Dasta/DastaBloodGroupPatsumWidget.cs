@@ -2,7 +2,6 @@
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -18,10 +17,10 @@ public class DastaBloodGroupPatsumWidget : Widget
             new Variable("bloodGroup",
                 "/ds:dasta/ds:is/dsip:ip/dsip:ku/dsip:ku_z[@typku='PATSUM.DAT']/dsip:ku_z_patsumdat/dsip:u/dsip:uks"),
             new Section("/ds:dasta/ds:is/dsip:ip/dsip:ku/dsip:ku_z[@typku='PATSUM.DAT']/dsip:ku_z_patsumdat/dsip:u/dsip:uks[1]", null,
-                [new DisplayLabel(LabelCodes.BloodGroup)],
+                [new EhdsiDisplayLabel(LabelCodes.BloodGroup)],
                 [
                     new Table([
-                        new TableCell([new DisplayLabel(LabelCodes.BloodGroup)], TableCellType.Header),
+                        new TableCell([new EhdsiDisplayLabel(LabelCodes.BloodGroup)], TableCellType.Header),
                         new TableCell([new ConstantText("Rhesus faktor")], TableCellType.Header),
                         new TableCell([new ConstantText("Datum věrohodného zjištění")], TableCellType.Header),
                         new ChangeContext("$bloodGroup",
@@ -32,7 +31,8 @@ public class DastaBloodGroupPatsumWidget : Widget
                                     [
                                         new When("dsip:ks_rh_text or dsip:ks_rh", [
                                             new Tooltip([new TextContainer(TextStyle.Regular, [new Text("dsip:ks_rh_text")])], [
-                                                new DastaCodedValue("dsip:ks_rh", "LUKSAB0"),
+                                                new DastaCodedValue("dsip:ks_rh", "LUKSAB0"), // TODO verify DASTA-specific code list #DT-176
+                                                // TODO handle optional text with required code #DT-175
                                             ], [])
                                         ])
                                     ],[

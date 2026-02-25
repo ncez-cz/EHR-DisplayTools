@@ -1,7 +1,8 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
+using RenderMode = Scalesoft.DisplayTool.Renderer.Models.Enums.RenderMode;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
@@ -15,71 +16,153 @@ public class LocalNodeName(string? resourceType = null, bool isPlural = false) :
         RenderContext context
     )
     {
+        if (context.RenderMode == RenderMode.Documentation)
+        {
+            return Task.FromResult<RenderResult>(navigator.GetFullPath());
+        }
+
         m_resourceType ??= navigator.Node?.LocalName;
         Widget nodeName = m_resourceType switch
         {
-            "AllergyIntolerance" => new ConstantText("Alergie a intolerance"),
-            "Appointment" => new ConstantText(
-                isPlural ? "Schůzky / objednání k lékaři" : "Schůzka / objednání k lékaři"),
-            "Attachment" => new ConstantText(isPlural ? "Přílohy" : "Příloha"),
-            "Binary" => new ConstantText(isPlural ? "Přílohy bez názvu" : "Příloha bez názvu"),
-            "BodyStructure" => new DisplayLabel(LabelCodes.BodySite),
-            "CarePlan" => new ConstantText(isPlural ? "Plány péče" : "Plan péče"),
-            "CareTeam" => new ConstantText(isPlural ? "Pečovatelské týmy" : "Pečovatelský tým"),
-            "CommunicationRequest" => new ConstantText("Žádost o komunikaci"),
-            "Condition" => new ConstantText(isPlural ? "Potíže / Události" : "Potíž / Událost"),
-            "Consent" => new ConstantText(isPlural ? "Souhlasy" : "Souhlas"),
-            "Contract" => new ConstantText(isPlural ? "Smlouvy" : "Smlouva"),
-            "Coverage" => new ConstantText(isPlural ? "Úhrady / Pokrytí" : "Úhrada / Pokrytí"),
-            "DetectedIssue" => new ConstantText(isPlural ? "Zjištěné problémy" : "Zjištěný problém"),
-            "Device" => new ConstantText("Zařízení"),
-            "DeviceRequest" =>
-                new ConstantText(isPlural ? "Žádosti o přístroj/zařízení" : "Žádost o přístroj/zařízení"),
-            "DeviceUseStatement" => new ConstantText("Záznam o použití zařízení"),
-            "DocumentReference" => new ConstantText(isPlural ? "Dokumenty" : "Dokument"),
-            "DiagnosticReport" => new ConstantText(isPlural ? "Diagnostické zprávy" : "Diagnostická zpráva"),
-            "Encounter" => new ConstantText(Labels.Encounter),
-            "EpisodeOfCare" => new ConstantText(isPlural ? "Epizody péče" : "Epizoda péče"),
-            "Evidence" => new ConstantText(isPlural ? "Důkazy" : "Důkaz"),
-            "EvidenceVariable" => new ConstantText(isPlural ? "Proměnné důkazu" : "Proměnná důkazu"),
-            "FamilyMemberHistory" => new ConstantText("Historie rodiny"),
-            "Flag" => new ConstantText("Upozornění"),
-            "Goal" => new ConstantText(isPlural ? "Cíle" : "Cíl"),
-            "HealthcareService" => new ConstantText(isPlural ? "Zdravotnické služby" : "Zdravotnická služba"),
-            "ImagingStudy" => new ConstantText(isPlural ? "Obrazové studie" : "Obrazová studie"),
-            "Immunization" => new ConstantText("Očkování"),
-            "ImmunizationRecommendation" => new ConstantText("Doporučení k očkování"),
-            "ImmunizationEvaluation" => new ConstantText("Vyhodnocení očkování"),
-            "Media" => new ConstantText("Média"),
-            "Medication" => new ConstantText("Léky"),
-            "MedicationAdministration" => new ConstantText("Podání léků"),
-            "MedicationDispense" => new ConstantText("Výdej léků"),
-            "MedicationRequest" => new RawText(isPlural ? "Žádosti o léky" : "Žádost o léky"),
-            "MedicationStatement" => new ConstantText(isPlural ? "Záznamy o lécích" : "Záznam o lécích"),
-            "NutritionOrder" => new ConstantText(isPlural ? "Výživové doporučení" : "Výživová doporučení"),
-            "Observation" => new ConstantText("Výsledky pozorování"),
-            "Organization" => new ConstantText("Organizace"),
-            "List" => new ConstantText(isPlural ? "Seznamy" : "Seznam"),
-            "Location" => new ConstantText("Lokace"),
-            "Patient" => new ConstantText(isPlural ? "Pacitenti" : "Pacient"),
-            "Practitioner" => new ConstantText(isPlural ? "Lékaři" : "Lékař"),
-            "PractitionerRole" => new ConstantText(isPlural ? "Lékaři" : "Lékař"),
-            "Procedure" => new ConstantText(isPlural ? "Procedury" : "Procedura"),
-            "Provenance" => new ConstantText("Provenance"),
-            "QuestionnaireResponse" => new ConstantText(isPlural ? "Odpovědi na dotazníky" : "Odpověď na dotazník"),
-            "RelatedPerson" => new ConstantText(isPlural ? "Související osoby" : "Související osoba"),
-            "RequestGroup" => new ConstantText(isPlural ? "Skupiny požadavků" : "Skupina požadavků"),
-            "RiskAssessment" => new ConstantText("Hodnocení rizik"),
-            "ServiceRequest" => new ConstantText(isPlural ? "Žádosti o službu" : "Žádost o službu"),
-            "Substance" => new ConstantText(isPlural ? "Látky" : "Látka"),
-            "Specimen" => new ConstantText(isPlural ? "Vzorky" : "Vzorek"),
-            "Task" => new ConstantText(isPlural ? "Úkoly" : "Úkol"),
-            "VisionPrescription" => new ConstantText(isPlural
-                ? "Recepty na brýle / kontaktní čočky"
-                : "Recept na brýle / kontaktní čočky"),
-            "ClinicalImpression" => new ConstantText("Klinické hodnocení"),
-            "Group" => new ConstantText(isPlural ? "Skupiny" : "Skupina"),
-            _ => new ConstantText(isPlural ? "Nepodporované záznamy" : "Nepodporovaný záznam"),
+            "AllergyIntolerance" => new LocalizedLabel("node-names.AllergyIntolerance"),
+            "Appointment" => isPlural
+                ? new LocalizedLabel("node-names.Appointment-pl")
+                : new LocalizedLabel("node-names.Appointment-sgl"),
+            "Attachment" => isPlural
+                ? new LocalizedLabel("node-names.Attachment-pl")
+                : new LocalizedLabel("node-names.Attachment-sgl"),
+            "Binary" => isPlural
+                ? new LocalizedLabel("node-names.Binary-pl")
+                : new LocalizedLabel("node-names.Binary-sgl"),
+            "BodyStructure" => new EhdsiDisplayLabel(LabelCodes.BodySite),
+            "CarePlan" => isPlural
+                ? new LocalizedLabel("node-names.CarePlan-pl")
+                : new LocalizedLabel("node-names.CarePlan-sgl"),
+            "CareTeam" => isPlural
+                ? new LocalizedLabel("node-names.CareTeam-pl")
+                : new LocalizedLabel("node-names.CareTeam-sgl"),
+            "Communication" => new LocalizedLabel("node-names.Communication"),
+            "CommunicationRequest" => isPlural
+                ? new LocalizedLabel("node-names.CommunicationRequest-pl")
+                : new LocalizedLabel("node-names.CommunicationRequest-sgl"),
+            "Condition" => isPlural
+                ? new LocalizedLabel("node-names.Condition-pl")
+                : new LocalizedLabel("node-names.Condition-sgl"),
+            "Consent" => isPlural
+                ? new LocalizedLabel("node-names.Consent-pl")
+                : new LocalizedLabel("node-names.Consent-sgl"),
+            "Contract" => isPlural
+                ? new LocalizedLabel("node-names.Contract-pl")
+                : new LocalizedLabel("node-names.Contract-sgl"),
+            "Coverage" => isPlural
+                ? new LocalizedLabel("node-names.Coverage-pl")
+                : new LocalizedLabel("node-names.Coverage-sgl"),
+            "DetectedIssue" => isPlural
+                ? new LocalizedLabel("node-names.DetectedIssue-pl")
+                : new LocalizedLabel("node-names.DetectedIssue-sgl"),
+            "Device" => new LocalizedLabel("node-names.Device"),
+            "DeviceRequest" => isPlural
+                ? new LocalizedLabel("node-names.DeviceRequest-pl")
+                : new LocalizedLabel("node-names.DeviceRequest-sgl"),
+            "DeviceUseStatement" => new LocalizedLabel("node-names.DeviceUseStatement"),
+            "DocumentReference" => isPlural
+                ? new LocalizedLabel("node-names.DocumentReference-pl")
+                : new LocalizedLabel("node-names.DocumentReference-sgl"),
+            "DiagnosticReport" => isPlural
+                ? new LocalizedLabel("node-names.DiagnosticReport-pl")
+                : new LocalizedLabel("node-names.DiagnosticReport-sgl"),
+            "Encounter" => new LocalizedLabel("node-names.Encounter"),
+            "EpisodeOfCare" => isPlural
+                ? new LocalizedLabel("node-names.EpisodeOfCare-pl")
+                : new LocalizedLabel("node-names.EpisodeOfCare-sgl"),
+            "Evidence" => isPlural
+                ? new LocalizedLabel("node-names.Evidence-pl")
+                : new LocalizedLabel("node-names.Evidence-sgl"),
+            "EvidenceVariable" => isPlural
+                ? new LocalizedLabel("node-names.EvidenceVariable-pl")
+                : new LocalizedLabel("node-names.EvidenceVariable-sgl"),
+            "FamilyMemberHistory" => new LocalizedLabel("node-names.FamilyMemberHistory"),
+            "Flag" => new LocalizedLabel("node-names.Flag"),
+            "Goal" => isPlural ? new LocalizedLabel("node-names.Goal-pl") : new LocalizedLabel("node-names.Goal-sgl"),
+            "HealthcareService" => isPlural
+                ? new LocalizedLabel("node-names.HealthcareService-pl")
+                : new LocalizedLabel("node-names.HealthcareService-sgl"),
+            "ImagingStudy" => isPlural
+                ? new LocalizedLabel("node-names.ImagingStudy-pl")
+                : new LocalizedLabel("node-names.ImagingStudy-sgl"),
+            "Immunization" => new LocalizedLabel("node-names.Immunization"),
+            "ImmunizationRecommendation" => new LocalizedLabel("node-names.ImmunizationRecommendation"),
+            "ImmunizationEvaluation" => new LocalizedLabel("node-names.ImmunizationEvaluation"),
+            "Media" => new LocalizedLabel("node-names.Media"),
+            "Medication" => new LocalizedLabel("node-names.Medication"),
+            "MedicationAdministration" => new LocalizedLabel("node-names.MedicationAdministration"),
+            "MedicationDispense" => new LocalizedLabel("node-names.MedicationDispense"),
+            "MedicationRequest" => isPlural
+                ? new LocalizedLabel("node-names.MedicationRequest-pl")
+                : new LocalizedLabel("node-names.MedicationRequest-sgl"),
+            "MedicationStatement" => isPlural
+                ? new LocalizedLabel("node-names.MedicationStatement-pl")
+                : new LocalizedLabel("node-names.MedicationStatement-sgl"),
+            "NutritionOrder" => isPlural
+                ? new LocalizedLabel("node-names.NutritionOrder-pl")
+                : new LocalizedLabel("node-names.NutritionOrder-sgl"),
+            "Observation" => isPlural
+                ? new LocalizedLabel("node-names.Observation-pl")
+                : new LocalizedLabel("node-names.Observation-sgl"),
+            "Organization" => new LocalizedLabel("node-names.Organization"),
+            "List" => isPlural ? new LocalizedLabel("node-names.List-pl") : new LocalizedLabel("node-names.List-sgl"),
+            "Location" => new LocalizedLabel("node-names.Location"),
+            "Patient" => isPlural
+                ? new LocalizedLabel("node-names.Patient-pl")
+                : new LocalizedLabel("node-names.Patient-sgl"),
+            "Practitioner" => isPlural
+                ? new LocalizedLabel("node-names.Practitioner-pl")
+                : new LocalizedLabel("node-names.Practitioner-sgl"),
+            "PractitionerRole" => isPlural
+                ? new LocalizedLabel("node-names.PractitionerRole-pl")
+                : new LocalizedLabel("node-names.PractitionerRole-sgl"),
+            "Procedure" => isPlural
+                ? new LocalizedLabel("node-names.Procedure-pl")
+                : new LocalizedLabel("node-names.Procedure-sgl"),
+            "Provenance" => new LocalizedLabel("node-names.Provenance"),
+            "QuestionnaireResponse" => isPlural
+                ? new LocalizedLabel("node-names.QuestionnaireResponse-pl")
+                : new LocalizedLabel("node-names.QuestionnaireResponse-sgl"),
+            "RelatedPerson" => isPlural
+                ? new LocalizedLabel("node-names.RelatedPerson-pl")
+                : new LocalizedLabel("node-names.RelatedPerson-sgl"),
+            "RequestGroup" => isPlural
+                ? new LocalizedLabel("node-names.RequestGroup-pl")
+                : new LocalizedLabel("node-names.RequestGroup-sgl"),
+            "RiskAssessment" => new LocalizedLabel("node-names.RiskAssessment"),
+            "ServiceRequest" => isPlural
+                ? new LocalizedLabel("node-names.ServiceRequest-pl")
+                : new LocalizedLabel("node-names.ServiceRequest-sgl"),
+            "Substance" => isPlural
+                ? new LocalizedLabel("node-names.Substance-pl")
+                : new LocalizedLabel("node-names.Substance-sgl"),
+            "Specimen" => isPlural
+                ? new LocalizedLabel("node-names.Specimen-pl")
+                : new LocalizedLabel("node-names.Specimen-sgl"),
+            "Task" => isPlural ? new LocalizedLabel("node-names.Task-pl") : new LocalizedLabel("node-names.Task-sgl"),
+            "VisionPrescription" => isPlural
+                ? new LocalizedLabel("node-names.VisionPrescription-pl")
+                : new LocalizedLabel("node-names.VisionPrescription-sgl"),
+            "ClinicalImpression" => isPlural
+                ? new LocalizedLabel("node-names.ClinicalImpression-pl")
+                : new LocalizedLabel("node-names.ClinicalImpression-sgl"),
+            "Group" => isPlural
+                ? new LocalizedLabel("node-names.Group-pl")
+                : new LocalizedLabel("node-names.Group-sgl"),
+            "MessageHeader" => isPlural
+                ? new LocalizedLabel("node-names.MessageHeader-pl")
+                : new LocalizedLabel("node-names.MessageHeader-sgl"),
+            "Composition" => isPlural
+                ? new LocalizedLabel("node-names.Composition-pl")
+                : new LocalizedLabel("node-names.Composition-sgl"),
+            _ => isPlural
+                ? new LocalizedLabel("node-names.unsupported-pl")
+                : new LocalizedLabel("node-names.unsupported-sgl"),
         };
 
         return nodeName.Render(navigator, renderer, context);

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Scalesoft.DisplayTool.Shared.Configuration;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 using Scalesoft.DisplayTool.Shared.Translation;
 
@@ -8,58 +9,18 @@ public class TermxCodeTranslator : ICodeTranslator
 {
     private readonly TermxApiClient m_client;
     private readonly ILogger<TermxCodeTranslator> m_logger;
+    private readonly KnownOidsConfiguration m_oidToUrlMap;
+    
 
-    // Warning: Most of these mappings are not exact matches. Substitutions were made to similar / related systems
-    // Which were actually present in termx at the time of writing.
-    // Note that mappings without an explanation comment may not be correct - not all discrepancies were noted.
-    private readonly Dictionary<string, string> m_oidToUrlMap = new()
-    {
-        { "2.16.840.1.113883.5.1150.1", "http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips" },
-        { "2.16.840.1.113883.6.73", "http://www.whocc.no/atc" },
-        // Should be http://terminology.hl7.org/CodeSystem/v3-AdministrativeGender but that doesn't exist in termx
-        { "2.16.840.1.113883.5.1", "http://terminology.ehdsi.eu/ValueSet/eHDSIAdministrativeGender" },
-        { "2.16.840.1.113883.6.96", "http://snomed.info/sct" },
-        // This url corresponds to .1.1373, but .4.1373 wasn't found.
-        { "2.16.840.1.113883.4.642.4.1373", "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical" },
-        { "2.16.840.1.113883.6.1", "http://loinc.org" },
-        // Should be http://terminology.hl7.org/CodeSystem/condition-ver-status which is not present in termx
-        { "2.16.840.1.113883.4.642.4.1075", "http://terminology.ehdsi.eu/ValueSet/eHDSICertainty" },
-        // There is a code system with this oid in termx, but it's empty
-        { "1.0.3166.1", "https://ciselniky.dasta.mzcr.cz/CD_DS4/nclp_data/ds_DS/is3166_2.xml" },
-        { "2.16.840.1.113883.4.642.4.130", "http://hl7.org/fhir/allergy-intolerance-criticality" },
-        // Not verified
-        { "0.4.0.127.0.16.1.1.2.1", "http://standardterms.edqm.eu" },
-        // The actual code system (ISCO) is this one's base, but it doesn't exist in termx
-        { "2.16.840.1.113883.2.9.6.2.7", "http://terminology.ehdsi.eu/ValueSet/eHDSIHealthcareProfessionalRole" },
-        // Completely different OID, but similar name and likely values
-        { "1.3.6.1.4.1.12559.11.10.1.3.1.44.2", "http://hl7.org/fhir/sid/icd-10" },
-        // Not found at all
-        // { "2.16.840.1.113883.3.6905.2", "" },
-        { "1dd183a6-6d2b-4a9d-8f5d-be09d6bb5a6e", "https://ciselniky.dasta.mzcr.cz/CD_DS4/nclp_data/ds_DS/ejazyk.xml" },
-        { "2.16.840.1.113883.5.1008", "http://terminology.ehdsi.eu/ValueSet/eHDSINullFlavor" },
-        // This should be a more general RoleCode
-        { "2.16.840.1.113883.5.111", "https://ciselniky.dasta.mzcr.cz/CD_DS4/nclp_data/ds_DS/evztah.xml" },
-        // Should be orpha rare diseases? (Which is not translated)
-        { "1.3.6.1.4.1.12559.11.10.1.3.1.44.5", "http://terminology.ehdsi.eu/ValueSet/eHDSIRareDisease" },
-        { "2.16.840.1.113883.5.110", "http://terminology.ehdsi.eu/ValueSet/eHDSIRoleClass" },
-        { "2.16.840.1.113883.5.1070", "http://terminology.ehdsi.eu/ValueSet/eHDSISubstitutionCode" },
-        { "2.16.840.1.113883.5.1119", "http://terminology.ehdsi.eu/ValueSet/eHDSITelecomAddress" },
-        { "2.16.840.1.113883.5.139", "http://terminology.ehdsi.eu/ValueSet/eHDSITimingEvent" },
-        { "2.16.840.1.113883.6.8", "http://unitsofmeasure.org" },
-        // Actually https://build.fhir.org/ig/HL7/UTG/CodeSystem-v3-Confidentiality.html which doesn't exist in termx.
-        { "2.16.840.1.113883.5.25", "http://terminology.ehdsi.eu/ValueSet/v3.ConfidentialityClassification" },
-        { "1.3.6.1.4.1.12559.11.10.1.3.1.44.4", "http://terminology.ehdsi.eu/CodeSystem/epSOSDisplayLabel" },
-    };
-
-    public TermxCodeTranslator(TermxApiClient client, ILogger<TermxCodeTranslator> logger)
+    public TermxCodeTranslator(TermxApiClient client, ILogger<TermxCodeTranslator> logger, KnownOidsConfiguration oidToUrlMap)
     {
         m_client = client;
         m_logger = logger;
+        m_oidToUrlMap = oidToUrlMap;
     }
 
 
-    public async Task<string?> GetCodedValue(
-        string fileName,
+    public async Task<TranslationEntry?> GetCodedValue(
         string code,
         string codeSystem,
         string language,
@@ -72,8 +33,7 @@ public class TermxCodeTranslator : ICodeTranslator
             var shortLanguage = language.Split('-')[0];
 
             var systemUrl = codeSystem;
-            if (!codeSystem.StartsWith("http") &&
-                !codeSystem.StartsWith("http://"))
+            if (!codeSystem.StartsWith("http"))
             {
                 if (m_oidToUrlMap.TryGetValue(codeSystem, out var value))
                 {
@@ -136,7 +96,7 @@ public class TermxCodeTranslator : ICodeTranslator
         return null;
     }
 
-    private async Task<string?> TranslateCodeSystemCode(
+    private async Task<TranslationEntry?> TranslateCodeSystemCode(
         string code,
         string codeSystem,
         string language,
@@ -170,11 +130,22 @@ public class TermxCodeTranslator : ICodeTranslator
             m_logger.LogInformation("No translation found for {code} in {system}.", code, codeSystem);
         }
 
-        return selectedLanguageValue ?? defaultDisplay;
+        var translation = selectedLanguageValue ?? defaultDisplay;
+        if (translation == null)
+        {
+            return null;
+        }
+
+        return new TranslationEntry
+        {
+            Code = code,
+            System = codeSystem,
+            Translations = { { language, translation } },
+        };
     }
 
 
-    private async Task<string?> TranslateValueSetCode(
+    private async Task<TranslationEntry?> TranslateValueSetCode(
         string code,
         string valueSet,
         string language,
@@ -203,8 +174,18 @@ public class TermxCodeTranslator : ICodeTranslator
         {
             m_logger.LogInformation("No translation found for {code} in {valueSet}.", code, valueSet);
         }
+        
+        if (result == null)
+        {
+            return null;
+        }
 
-        return result;
+        return new TranslationEntry
+        {
+            Code = code,
+            System = valueSet,
+            Translations = { { language, result } },
+        };
     }
 
 

@@ -1,9 +1,11 @@
+import {dtRootElement} from "./rootElementProvider";
+
 /**
  * Gets the collapse/expand text from the data attributes
  * @returns {Object} Object containing collapse and expand text
  */
 function getCollapseExpandText(): { collapseText: string; expandText: string } {
-    const dataDiv = document.querySelector<HTMLDivElement>('div[data-collapse-label]');
+    const dataDiv = dtRootElement.querySelector<HTMLDivElement>('div[data-collapse-label]');
     return {
         collapseText: dataDiv?.dataset.collapseLabel || 'Sbalit všechny sekce',
         expandText: dataDiv?.dataset.expandLabel || 'Rozbalit všechny sekce'
@@ -15,7 +17,7 @@ function getCollapseExpandText(): { collapseText: string; expandText: string } {
  */
 export function expandOrCollapseAllSections(): void {
     // Get all collapse checkboxes
-    const checkboxes = document.querySelectorAll<HTMLInputElement>('div.section > input.collapse-checkbox');
+    const checkboxes = dtRootElement.querySelectorAll<HTMLInputElement>('div.section > input.collapse-checkbox');
 
     // Determine the current state (if any are checked, we'll collapse all)
     const shouldCollapse = Array.from(checkboxes).some(cb => cb.checked);
@@ -37,7 +39,7 @@ export function expandOrCollapseAllSections(): void {
  * @param newText - The text to display on the buttons
  */
 function updateButtonText(newText: string): void {
-    const buttons = document.querySelectorAll<HTMLLabelElement>('label[onclick*="expandOrCollapseAllSections"]');
+    const buttons = dtRootElement.querySelectorAll<HTMLLabelElement>('label[onclick*="expandOrCollapseAllSections"]');
 
     buttons.forEach(button => {
         // Update text content
@@ -53,7 +55,7 @@ function updateButtonText(newText: string): void {
  */
 export function updateCollapsibleUI(): void {
     // Get all checkboxes
-    const checkboxes = document.querySelectorAll<HTMLInputElement>('div.section > input.collapse-checkbox');
+    const checkboxes = dtRootElement.querySelectorAll<HTMLInputElement>('div.section > input.collapse-checkbox');
 
     // Check if any checkboxes are checked
     const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
@@ -65,12 +67,12 @@ export function updateCollapsibleUI(): void {
     updateButtonText(anyChecked ? collapseText : expandText);
 
     // Update control checkboxes if needed
-    const buttons = document.querySelectorAll<HTMLLabelElement>('label[onclick*="expandOrCollapseAllSections"]');
+    const buttons = dtRootElement.querySelectorAll<HTMLLabelElement>('label[onclick*="expandOrCollapseAllSections"]');
     buttons.forEach(button => {
         // Update associated checkbox
         const checkboxId = button.htmlFor;
         if (checkboxId) {
-            const checkbox = document.getElementById(checkboxId) as HTMLInputElement | null;
+            const checkbox = dtRootElement.querySelector(`#checkboxId`) as HTMLInputElement | null;
             if (checkbox) {
                 checkbox.checked = anyChecked;
             }

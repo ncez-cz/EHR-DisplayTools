@@ -25,9 +25,9 @@ public class ShowPeriod(string path = ".") : Widget
         }
 
         var tree = new ChangeContext(path,
-            new Optional("f:start", new DisplayLabel(LabelCodes.From), new ConstantText(" "), new ShowDateTime()),
+            new Optional("f:start", new EhdsiDisplayLabel(LabelCodes.From), new ConstantText(" "), new ShowDateTime()),
             new Condition("f:start and f:end", new ConstantText(" ")),
-            new Optional("f:end",  new DisplayLabel(LabelCodes.To), new ConstantText(" "), new ShowDateTime()));
+            new Optional("f:end",  new EhdsiDisplayLabel(LabelCodes.To), new ConstantText(" "), new ShowDateTime()));
 
         return tree.Render(navigator, renderer, context);
     }

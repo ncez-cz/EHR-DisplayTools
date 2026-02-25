@@ -1,0 +1,100 @@
+﻿<template shadowrootmode="open">
+    <style>
+        .narrative-content {
+            all: initial
+        }
+
+        /* Copied from https://hl7.org/fhir/R4/fhir-runtime.css and modified */
+
+        .narrative-content .bold {
+            font-weight: bold
+        }
+
+        .narrative-content .italics {
+            font-style: italic
+        }
+
+        .narrative-content .underline {
+            text-decoration: underline
+        }
+
+        .narrative-content .strikethrough {
+            text-decoration: line-through
+        }
+
+        .narrative-content .left {
+            text-align: left
+        }
+
+        .narrative-content .right {
+            text-align: right
+        }
+
+        .narrative-content .center {
+            text-align: center
+        }
+
+        .narrative-content .justify {
+            text-align: justify
+        }
+
+        .narrative-content .border-left {
+            border-left: 1px solid grey
+        }
+
+        .narrative-content .border-right {
+            border-right: 1px solid grey
+        }
+
+        .narrative-content .border-top {
+            border-top: 1px solid grey
+        }
+
+        .narrative-content .border-bottom {
+            border-bottom: 1px solid grey
+        }
+
+        .narrative-content .arabic {
+            list-style-type: decimal
+        }
+
+        .narrative-content .little-roman {
+            list-style-type: lower-roman
+        }
+
+        .narrative-content .big-roman {
+            list-style-type: upper-roman
+        }
+
+        .narrative-content .little-alpha {
+            list-style-type: lower-alpha
+        }
+
+        .narrative-content .big-alpha {
+            list-style-type: upper-alpha
+        }
+
+        .narrative-content .disc {
+            list-style-type: disc
+        }
+
+        .narrative-content .circle {
+            list-style-type: circle
+        }
+
+        .narrative-content .square {
+            list-style-type: square
+        }
+
+        .narrative-content .nolist, .narrative-content .unlist {
+            list-style-type: none
+        }
+    </style>
+    <div id="@Model.Id" class="narrative-content">
+        @((MarkupString)Model.Content)
+    </div>
+</template>
+
+@code {
+    [Parameter] public required NarrativeContainer.ViewModel Model { get; set; }
+}

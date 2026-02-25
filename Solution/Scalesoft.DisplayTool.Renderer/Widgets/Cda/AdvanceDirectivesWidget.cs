@@ -19,11 +19,10 @@ new Variable("code", "$advanceDirectivesSectionCode"),
 ]), 
 ], [
 new Collapser([
-new Text("$originalNarrativeTableTitle")
-, 
+    new Text("$originalNarrativeTableTitle")
+    , 
 ], [
-], [
-new NarrativeText("n1:text", null), 
+    new NarrativeText("n1:text", null), 
 ]), 
 ], titleAbbreviations: SectionTitleAbbreviations.AdvanceDirectives),
 ]), 

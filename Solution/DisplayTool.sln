@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scalesoft.DisplayTool.Termx
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scalesoft.EZCAII.Client", "Scalesoft.EZCAII.Client\Scalesoft.EZCAII.Client.csproj", "{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayTool.DocSignAuthority.Service", "DisplayTool.DocSignAuthority.Service\DisplayTool.DocSignAuthority.Service.csproj", "{FA7E734A-837B-4447-B327-21C6AAAE9758}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DisplayTool.DocSignAuthority.Client", "DisplayTool.DocSignAuthority.Client\DisplayTool.DocSignAuthority.Client.csproj", "{BBFC5259-8030-4A20-AB88-32D30AB95900}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,7 +46,13 @@ Global
 		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE4D5DD3-23FD-419F-9DA7-C4F1B46F9139}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+		{FA7E734A-837B-4447-B327-21C6AAAE9758}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA7E734A-837B-4447-B327-21C6AAAE9758}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA7E734A-837B-4447-B327-21C6AAAE9758}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA7E734A-837B-4447-B327-21C6AAAE9758}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BBFC5259-8030-4A20-AB88-32D30AB95900}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BBFC5259-8030-4A20-AB88-32D30AB95900}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BBFC5259-8030-4A20-AB88-32D30AB95900}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BBFC5259-8030-4A20-AB88-32D30AB95900}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

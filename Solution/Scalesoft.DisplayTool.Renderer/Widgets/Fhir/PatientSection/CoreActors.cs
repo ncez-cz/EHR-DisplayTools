@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.Fhir.Person;
@@ -28,7 +28,7 @@ public class CoreActors : Widget
                                 new PersonOrOrganization(
                                     nav,
                                     skipWhenInactive: true,
-                                    collapserTitle: new DisplayLabel(LabelCodes.PreferredProvider)
+                                    collapserTitle: new EhdsiDisplayLabel(LabelCodes.PreferredProvider)
                                 ),
                             ], idSource: nav),
                         ]),
@@ -50,7 +50,7 @@ public class CoreActors : Widget
                                 new Choose([
                                     new When("f:relationship",
                                         new CommaSeparatedBuilder("f:relationship", _ => new CodeableConcept()))
-                                ], new ConstantText("Kontakt"))
+                                ], new LocalizedLabel("patient.contact"))
                             ),
                         ]
                     ))

@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Utils;
@@ -11,14 +11,20 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 public class EvidenceVariable : ColumnResourceBase<EvidenceVariable>, IResourceWidget
 {
     public static string ResourceType => "EvidenceVariable";
-    
-    public override Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer, RenderContext context)
+
+    public static bool HasBorderedContainer(Widget widget) => true;
+
+    public override Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
     {
-        var variableBadge = new PlainBadge(new ConstantText("Detaily proměnné"));
+        var variableBadge = new PlainBadge(new LocalizedLabel("evidence-variable.variable-details"));
         var variableInfo = new Container([
             new Optional("f:type",
                 new NameValuePair(
-                    new ConstantText("Typ proměnné"),
+                    new LocalizedLabel("evidence-variable.type"),
                     new EnumLabel(".", "http://hl7.org/fhir/ValueSet/variable-type")
                 )
             ),
@@ -26,55 +32,57 @@ public class EvidenceVariable : ColumnResourceBase<EvidenceVariable>, IResourceW
             new ListBuilder("f:characteristic", FlexDirection.Row, (_, nav) =>
             {
                 var infrequentProperties =
-                    Widgets.InfrequentProperties.Evaluate<InfrequentProperties>([nav]);
+                    Widgets.InfrequentProperties.Evaluate<InfrequentProperties>(nav);
 
-                var characteristicInfo = new Card(new ConstantText("Charakteristika"), new Container([
+                var characteristicInfo = new Card(new LocalizedLabel("evidence-variable.characteristic"), new Container(
+                [
                     new If(_ => infrequentProperties.Contains(InfrequentProperties.Description),
                         new NameValuePair(
-                            new DisplayLabel(LabelCodes.Description),
+                            new EhdsiDisplayLabel(LabelCodes.Description),
                             new Text("f:description/@value")
                         )
                     ),
                     new NameValuePair(
-                        new ConstantText("Definice"),
+                        new LocalizedLabel("evidence-variable.characteristic.definice"),
                         new OpenTypeElement(null,
                             "definition") // Reference(Group) | canonical(ActivityDefinition) | CodeableConcept | Expression | DataRequirement | TriggerDefinition
                     ),
                     new If(_ => infrequentProperties.Contains(InfrequentProperties.Exclude),
                         new NameValuePair(
-                            new ConstantText("Vyloučit"),
-                            new ShowBoolean(new ConstantText("Ne"), new ConstantText("Ano"), "f:exclude")
+                            new LocalizedLabel("evidence-variable.characteristic.exclude"),
+                            new ShowBoolean(new LocalizedLabel("general.no"),
+                                new LocalizedLabel("general.yes"), "f:exclude")
                         )
                     ),
                     new If(_ => infrequentProperties.Contains(InfrequentProperties.ParticipantEffective),
                         new NameValuePair(
-                            new ConstantText("Účastník efektivní"),
+                            new LocalizedLabel("evidence-variable.characteristic.participantEffective"),
                             new Chronometry("participantEffective")
                         )
                     ),
                     new If(_ => infrequentProperties.Contains(InfrequentProperties.TimeFromStart),
                         new NameValuePair(
-                            new ConstantText("Čas od začátku"),
+                            new LocalizedLabel("evidence-variable.characteristic.timeFromStart"),
                             new ShowDuration("f:timeFromStart")
                         )
                     ),
                     new If(_ => infrequentProperties.Contains(InfrequentProperties.GroupMeasure),
                         new NameValuePair(
-                            new ConstantText("Měření skupiny"),
+                            new LocalizedLabel("evidence-variable.characteristic.groupMeasure"),
                             new EnumLabel("f:groupMeasure", "http://hl7.org/fhir/ValueSet/group-measure")
                         )
                     ),
                 ], optionalClass: "name-value-pair-wrapper"));
 
                 return [characteristicInfo];
-            }, flexContainerClasses: "gap-2")
+            }, flexContainerClasses: "gap-2"),
         ]);
 
 
-        var evidenceVariable = new Evidence(new ConstantText("Proměnná důkazu"), [
+        var evidenceVariable = new Evidence(new LocalizedLabel("evidence-variable"), [
             new ThematicBreak(),
             variableBadge,
-            variableInfo
+            variableInfo,
         ]);
 
         return evidenceVariable.Render(navigator, renderer, context);
@@ -86,6 +94,6 @@ public class EvidenceVariable : ColumnResourceBase<EvidenceVariable>, IResourceW
         Exclude,
         [OpenType("participantEffective")] ParticipantEffective,
         TimeFromStart,
-        GroupMeasure
+        GroupMeasure,
     }
 }

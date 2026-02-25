@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Constants;
+﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
@@ -50,24 +50,24 @@ public class HumanName(
                     new If(_ => !unformattedName,
                         new If(_ => !hideNominalLetters && itemNavigator.EvaluateCondition("f:prefix"),
                             new NameValuePair(
-                                new PlainBadge(new ConstantText("Titul")),
+                                new PlainBadge(new LocalizedLabel("human-name.prefix")),
                                 CreateNamePartWidgetWithWrapper("f:prefix/@value", true),
                                 direction: FlexDirection.Column
                             )
                         ),
                         new NameValuePair(
-                            new PlainBadge(new DisplayLabel(LabelCodes.FamilyName)),
+                            new PlainBadge(new EhdsiDisplayLabel(LabelCodes.FamilyName)),
                             CreateNamePartWidgetWithWrapper("f:family/@value", false),
                             direction: FlexDirection.Column
                         ),
                         new NameValuePair(
-                            new PlainBadge(new DisplayLabel(LabelCodes.GivenName)),
+                            new PlainBadge(new EhdsiDisplayLabel(LabelCodes.GivenName)),
                             CreateNamePartWidgetWithWrapper("f:given/@value", true),
                             direction: FlexDirection.Column
                         ),
                         new If(_ => !hideNominalLetters && itemNavigator.EvaluateCondition("f:suffix"),
                             new NameValuePair(
-                                new PlainBadge(new ConstantText("Titul")),
+                                new PlainBadge(new LocalizedLabel("human-name.suffix")),
                                 CreateNamePartWidgetWithWrapper("f:suffix/@value", true, ", "),
                                 direction: FlexDirection.Column
                             )
@@ -76,22 +76,22 @@ public class HumanName(
                         new TextContainer(TextStyle.Bold, [
                             new ConcatBuilder("f:prefix/@value", _ =>
                             [
-                                new Text()
+                                new Text(),
                             ], " "),
                             new ConstantText(" "),
                             new ConcatBuilder("f:given/@value", _ =>
                             [
-                                new Text()
+                                new Text(),
                             ], " "),
                             new ConstantText(" "),
                             new ConcatBuilder("f:family/@value", _ =>
                             [
-                                new Text()
+                                new Text(),
                             ], " "),
                             new ConstantText(" "),
                             new ConcatBuilder("f:suffix/@value", _ =>
                             [
-                                new Text()
+                                new Text(),
                             ], ", "),
                         ])
                     )),
@@ -99,7 +99,7 @@ public class HumanName(
                     new Text("f:text/@value"))
                 .Else(
                     new NameValuePair(
-                        new PlainBadge(new ConstantText("Celé jméno")),
+                        new PlainBadge(new LocalizedLabel("human-name.text")),
                         CreateNamePartWidgetWithWrapper("f:text/@value", false),
                         direction: FlexDirection.Column
                     )

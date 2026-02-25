@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
@@ -14,37 +14,59 @@ public class DocumentReferenceActorsCell(XmlDocumentNavigator item) : Widget
     )
     {
         var infrequentOptions =
-            InfrequentProperties.Evaluate<InfrequentPropertiesPaths>([item]);
+            InfrequentProperties.Evaluate<InfrequentPropertiesPaths>(item);
 
         var participantTableCell = new TableCell(
         [
             new Container([
-                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Author), new NameValuePair(
-                    new ConstantText("Autor dokumentu"),
-                    new AnyReferenceNamingWidget("f:author"))),
-                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Authenticator),
-                    new HideableDetails(new NameValuePair(
-                        new ConstantText("Ověřil(a)"),
-                        new AnyReferenceNamingWidget("f:authenticator")))
+                infrequentOptions.Optional(InfrequentPropertiesPaths.Author,
+                    new AnyReferenceNamingWidget(
+                        widgetModel: new ReferenceNamingWidgetModel
+                        {
+                            Type = ReferenceNamingWidgetType.NameValuePair,
+                            LabelOverride = new LocalizedLabel("document-reference.author"),
+                        }
+                    )
                 ),
-                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.Custodian),
-                    new HideableDetails(new NameValuePair(
-                        new ConstantText("Správce dokumentu"),
-                        new AnyReferenceNamingWidget("f:custodian")))
+                infrequentOptions.Optional(InfrequentPropertiesPaths.Authenticator,
+                    new HideableDetails(
+                        new AnyReferenceNamingWidget(
+                            widgetModel: new ReferenceNamingWidgetModel
+                            {
+                                Type = ReferenceNamingWidgetType.NameValuePair,
+                                LabelOverride = new LocalizedLabel("document-reference.authenticator"),
+                            }
+                        )
+                    )
                 ),
-                new If(_ => infrequentOptions.Contains(InfrequentPropertiesPaths.RelatesTo),
-                    new HideableDetails(new NameValuePair(
-                        new ConstantText("Souvisejíci záznam"),
-                        new ItemListBuilder("f:relatesTo/f:target", ItemListType.Unordered,
-                            _ => [new AnyReferenceNamingWidget()])))
+                infrequentOptions.Optional(InfrequentPropertiesPaths.Custodian,
+                    new HideableDetails(
+                        new AnyReferenceNamingWidget(
+                            widgetModel: new ReferenceNamingWidgetModel
+                            {
+                                Type = ReferenceNamingWidgetType.NameValuePair,
+                                LabelOverride = new LocalizedLabel("document-reference.custodian"),
+                            }
+                        )
+                    )
                 ),
-            ], optionalClass: "name-value-pair-wrapper w-max-content"),
+                infrequentOptions.Condition(InfrequentPropertiesPaths.RelatesTo,
+                    new HideableDetails(
+                        new NameValuePair(
+                            new LocalizedLabel("document-reference.relatesTo"),
+                            new ItemListBuilder("f:relatesTo/f:target", ItemListType.Unordered,
+                                _ => [new AnyReferenceNamingWidget()]
+                            )
+                        )
+                    )
+                ),
+            ], optionalClass: "name-value-pair-wrapper w-fit-content"),
         ]);
 
         if (infrequentOptions.Count == 0)
         {
             participantTableCell = new TableCell([
-                new TextContainer(TextStyle.Muted, [new ConstantText("Informace nejsou k dispozici")])
+                new TextContainer(TextStyle.Muted, [new LocalizedLabel("general.information-unavailable")]),
             ]);
         }
 

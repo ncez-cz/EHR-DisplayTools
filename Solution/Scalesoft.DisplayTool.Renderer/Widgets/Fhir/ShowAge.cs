@@ -26,7 +26,8 @@ public class ShowAge(string path = ".") : Widget
 
         List<Widget> widgets =
         [
-            new ConstantText("Věk "),
+            new LocalizedLabel("age"),
+            new ConstantText(" "),
             new ShowQuantity(path),
         ];
 

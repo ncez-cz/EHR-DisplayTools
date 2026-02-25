@@ -2,13 +2,14 @@
 @use "theme-variables" as *;
 @import "sizing-variables";
 @import "hideable-content";
+@import "documentation-mode";
 @import "print";
 
-@layer documentation-mode, bootstrap;
+@layer bootstrap;
 
 @layer bootstrap {
     @import "bootstrap/scss/utilities";
-    @import "bootstrap/scss/root";
+    @import "custom-bootstrap-root";
     @import "bootstrap/scss/grid";
 
     @import "bootstrap/scss/utilities/api";
@@ -22,8 +23,28 @@
     @import "bootstrap/scss/modal";
 }
 
-body {
+
+.display-tool-body {
     font-size: var(--#{$prefix}font-size);
+    margin: auto;
+    background-color: var(--#{$prefix}body-bg);
+
+    @media (min-width: 992px) {
+        max-width: 70em
+    }
+    @media (min-width: 1200px) {
+        max-width: 80em
+    }
+    @media (min-width: 1400px) {
+        max-width: 90em
+    }
+}
+
+.dt-shadow-root-host {
+    all: initial;
+    width: fit-content;
+    margin: auto;
+    overflow: auto;
 }
 
 h1, .h1 {
@@ -57,6 +78,8 @@ h6, .h6 {
 // CDA widgets use table body as a component, so it is treated as one row and styled accordingly. Other document types started to use it too.
 .table.striped {
     > tbody {
+        //    &:not(:only-of-type) {
+
         > tr {
             &:not(:last-of-type):not(.collapse-toggler-row) {
                 border-bottom-width: 0;
@@ -76,6 +99,18 @@ h6, .h6 {
             --#{$prefix}table-color-type: var(--#{$prefix}table-striped-color);
             --#{$prefix}table-bg-type: var(--#{$prefix}table-striped-bg);
         }
+
+        //    }
+
+        //    &:only-of-type {
+        //      > tr:nth-child(odd of .visible-row) {
+        //        > *,
+        //        + .collapsible-row-wrapper > * {
+        //          --#{$prefix}table-color-type: var(--#{$prefix}table-striped-color);
+        //          --#{$prefix}table-bg-type: var(--#{$prefix}table-striped-bg);
+        //        }
+        //      }
+        //    }
     }
 }
 
@@ -139,164 +174,6 @@ h6, .h6 {
     }
 }
 
-@layer documentation-mode {
-    .render-mode-documentation {
-        $documentation-text-color: white;
-        $documentation-bg-color: var(--#{$prefix}blue-500);
-        $documentation-darker-bg-color: var(--#{$prefix}blue-600);
-        word-break: break-all;
-
-        --#{$prefix}body-bg: #{$documentation-bg-color} !important;
-        --#{$prefix}body-color: #{$documentation-text-color} !important;
-        --#{$prefix}heading-color: #{$documentation-text-color} !important;
-        --#{$prefix}emphasis-color: #{$documentation-text-color} !important;
-
-        .text-muted {
-            opacity: 70%;
-            color: $documentation-text-color !important;
-        }
-
-        .text-icon {
-            display: none !important;
-        }
-
-        .icon {
-            color: $documentation-text-color !important;
-        }
-
-        .collapse-all-btn {
-            border: 1px solid $documentation-text-color !important;
-        }
-
-        .collapse-row-icon {
-            opacity: 100% !important;
-        }
-
-        .divider {
-            --#{$prefix}divider-color: #{$documentation-text-color} !important;
-
-            hr {
-                opacity: 70% !important;
-                --#{$prefix}hr-bg-color: #{$documentation-text-color} !important;
-            }
-        }
-
-        .collapse-toggler-empty-column {
-            --#{$prefix}thead-bg-color: #{$documentation-darker-bg-color} !important;
-            --#{$prefix}thead-color: #{$documentation-text-color} !important;
-        }
-
-        th {
-            word-break: initial;
-            --#{$prefix}th-bg-color: #{$documentation-darker-bg-color} !important;
-            --#{$prefix}th-color: #{$documentation-text-color} !important;
-        }
-
-        .table > :not(caption) > * > * {
-            --#{$prefix}table-color: #{$documentation-text-color};
-        }
-
-        .card {
-            --#{$prefix}card-cap-bg: #{$documentation-darker-bg-color} !important;
-            --#{$prefix}card-cap-color: #{$documentation-text-color} !important;
-        }
-
-        .badge {
-            --#{$prefix}badge-bg: #{$documentation-darker-bg-color} !important;
-            --#{$prefix}badge-color: #{$documentation-text-color} !important;
-        }
-    }
-}
-
-// Copied from https://hl7.org/fhir/R4/fhir-runtime.css
-
-.narrative {
-    .bold {
-        font-weight: bold
-    }
-
-    .italics {
-        font-style: italic
-    }
-
-    .underline {
-        text-decoration: underline
-    }
-
-    .strikethrough {
-        text-decoration: line-through
-    }
-
-    .left {
-        text-align: left
-    }
-
-    .right {
-        text-align: right
-    }
-
-    .center {
-        text-align: center
-    }
-
-    .justify {
-        text-align: justify
-    }
-
-    .border-left {
-        border-left: 1px solid grey
-    }
-
-    .border-right {
-        border-right: 1px solid grey
-    }
-
-    .border-top {
-        border-top: 1px solid grey
-    }
-
-    .border-bottom {
-        border-bottom: 1px solid grey
-    }
-
-    .arabic {
-        list-style-type: decimal
-    }
-
-    .little-roman {
-        list-style-type: lower-roman
-    }
-
-    .big-roman {
-        list-style-type: upper-roman
-    }
-
-    .little-alpha {
-        list-style-type: lower-alpha
-    }
-
-    .big-alpha {
-        list-style-type: upper-alpha
-    }
-
-    .disc {
-        list-style-type: disc
-    }
-
-    .circle {
-        list-style-type: circle
-    }
-
-    .square {
-        list-style-type: square
-    }
-
-    .nolist, .unlist {
-        list-style-type: none
-    }
-
-}
-
 
 .bordered-card {
     flex: 1 1 15rem;
@@ -337,7 +214,7 @@ h6, .h6 {
 }
 
 .media-image-container > img {
-    max-width: 50rem;
+    max-width: 100%;
 }
 
 .person-image {
@@ -459,15 +336,10 @@ h6, .h6 {
 }
 
 .enum-tooltip-icon {
-    height: calc(var(--#{$prefix}tooltip-icon-font-size) * 0.8);
-    width: calc(var(--#{$prefix}tooltip-icon-font-size) * 0.8);
+    height: var(--#{$prefix}tooltip-icon-font-size);
+    width: var(--#{$prefix}tooltip-icon-font-size);
     margin-right: 0;
     margin-left: 0;
-}
-
-.card-header .icon {
-    height: $spacing03;
-    width: $spacing03;
 }
 
 .abnormal {
@@ -484,7 +356,7 @@ h6, .h6 {
 }
 
 .lab-abnormal-value {
-    border-radius: var(--#{$prefix}border-radius-pill);
+    border-radius: 1.5rem;
     display: inline-block;
     padding: 0.35em 0.65em;
     line-height: 1;
@@ -509,8 +381,16 @@ h6, .h6 {
     color: #{$green-400};
 }
 
+.text-success-500 {
+    color: #{$green-500};
+}
+
 .text-info-400 {
     color: #{$blue-400};
+}
+
+.text-info-600 {
+    color: #{$blue-600};
 }
 
 .text-gray-600 {
@@ -518,7 +398,7 @@ h6, .h6 {
 }
 
 .collapsible-row-details {
-    background-color: #F3F7FB;
+    background-color: var(--#{$prefix}primary-50);
 }
 
 .sub-component-row {
@@ -534,7 +414,7 @@ h6, .h6 {
     }
 }
 
-body {
+.display-tool-body {
     --#{$prefix}severity-card-header-bg: var(--#{$prefix}primary-100);
     --#{$prefix}severity-card-header-color: var(--#{$prefix}primary-600);
     --#{$prefix}severity-card-border-color: var(--#{$prefix}primary-300);
@@ -714,7 +594,7 @@ input:checked + .collapse-header:has(.card-subtitle) {
 }
 
 
-body:has(#detail-toggle:not(:checked)) {
+.display-tool-body:has( > .document-header > div > div > div > input#detail-toggle:not(:checked)) {
 
     /* --------------------------------------------------
        1. Highlight alternating detail blocks
@@ -769,7 +649,7 @@ body:has(#detail-toggle:not(:checked)) {
     }
 }
 
-body:has(#detail-toggle:checked) {
+.display-tool-body:has(#detail-toggle:checked) {
 
     /* --------------------------------------------------
        2. Highlight alternating detail blocks
@@ -887,16 +767,38 @@ body:has(#detail-toggle:checked) {
     height: 1rem;
 }
 
-.name-value-pair-wrapper {
+.two-col-grid.name-value-pair-wrapper {
+    width: 100%;
     display: grid;
-    grid-template-columns: max-content auto;
+    grid-template-columns: auto 1fr auto auto;
     column-gap: $spacing04;
 
-    dl:not(.flex-column) {
+    dl:not(.flex-column), span:has(dl:not(.flex-column)) {
         display: contents !important;
     }
 
-    dl.flex-column {
+    dl.flex-column, > .span-over-full-name-value-pair-cell {
+        grid-column: span 4;
+    }
+}
+
+@media (max-width: 1200px) {
+    .two-col-grid.name-value-pair-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.name-value-pair-wrapper {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: $spacing04;
+
+    dl:not(.flex-column), span:has(dl:not(.flex-column)) {
+        display: contents !important;
+    }
+
+    dl.flex-column, > .span-over-full-name-value-pair-cell {
         grid-column: span 2;
     }
 }
@@ -910,9 +812,13 @@ body:has(#detail-toggle:checked) {
         display: contents !important;
     }
 
-    dl.flex-column {
+    dl.flex-column, > .span-over-full-name-value-pair-cell {
         grid-column: span 2;
     }
+}
+
+.name-value-pair > .span-over-full-name-value-pair-cell {
+    grid-column: span 2;
 }
 
 .black {
@@ -943,7 +849,96 @@ body:has(#detail-toggle:checked) {
     }
 }
 
+.w-fit-content {
+    width: fit-content;
+}
+
 
 .merged-service-requests {
     background-color: var(--#{$prefix}blue-50);
+    display: flex;
+    flex-direction: column;
+    row-gap: $spacing02;
+}
+
+.bundle-signature-img {
+    max-width: 4rem;
+    max-height: 2.5rem;
+}
+
+.flex-basis-min-content {
+    flex-basis: min-content !important;
+}
+
+.bordered-resource-container {
+    border: var(--#{$prefix}border-width) solid var(--#{$prefix}border-color-translucent);
+    border-radius: var(--#{$prefix}border-radius);
+    padding: 0.1rem;
+}
+
+.pre {
+    white-space: pre;
+}
+
+.mw-50 {
+    max-width: 50% !important;
+}
+
+.optional-detail:has(> .tooltip-wrapper) {
+    display: flex;
+}
+
+.binary-image > img {
+    max-height: 8rem;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+@import "timeline";
+
+.card.no-content {
+    .collapser-icons {
+        display: none;
+    }
+
+    .collapse-label {
+        cursor: default;
+    }
+
+    .card-header:first-child {
+        @include border-radius(var(--#{$prefix}card-inner-border-radius));
+    }
+
+    .card-body {
+        display: none !important;
+    }
+
+    .card-footer {
+        display: none !important;
+    }
+}
+
+.svg-adaptive-graph {
+    display: block;
+    width: var(--#{$prefix}graph-scaling);
+    height: var(--#{$prefix}graph-scaling);
+}
+
+.graph-axis-line {
+    stroke: black;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.graph-label {
+    fill: black;
+    font-size: var(--#{$prefix}small-font-size);
+
+    font-family: inherit;
+}
+
+.graph-legend-text {
+    fill: black;
+    font-size: var(--#{$prefix}font-size);
 }

@@ -2,7 +2,6 @@ using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Extensions;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -18,9 +17,9 @@ public class ShowContactInfoWidget : Widget
     {
         List<Widget> widgetTree =
         [
-            new PlainBadge(new DisplayLabel(LabelCodes.ContactInformation), Severity.Primary),
+            new PlainBadge(new EhdsiDisplayLabel(LabelCodes.ContactInformation), Severity.Primary),
             new LineBreak(),
-            new TextContainer(TextStyle.Bold | TextStyle.Small, [new DisplayLabel(LabelCodes.Address)]),
+            new TextContainer(TextStyle.Bold | TextStyle.Small, [new EhdsiDisplayLabel(LabelCodes.Address)]),
             new LineBreak(),
             new Choose([
                 new When("$contact/n1:addr", new ConcatBuilder("$contact/n1:addr", i =>
@@ -29,9 +28,9 @@ public class ShowContactInfoWidget : Widget
                         new Variable("address", "."),
                     ]),
                 ])),
-            ], new ConstantText(Labels.NotSpecifiedText)),
+            ], new LocalizedLabel("general.unspecified")),
             new LineBreak(),
-            new TextContainer(TextStyle.Bold | TextStyle.Small, [new DisplayLabel(LabelCodes.Telecom)]),
+            new TextContainer(TextStyle.Bold | TextStyle.Small, [new EhdsiDisplayLabel(LabelCodes.Telecom)]),
             new LineBreak(),
             new Choose([
                 new When("$contact/n1:telecom", new ConcatBuilder("$contact/n1:telecom", i =>
@@ -40,7 +39,7 @@ public class ShowContactInfoWidget : Widget
                         new Variable("telecom", "."),
                     ]),
                 ])),
-            ], new ConstantText(Labels.NotSpecifiedText)),
+            ], new LocalizedLabel("general.unspecified")),
         ];
         return widgetTree.RenderConcatenatedResult(navigator, renderer, context);
     }

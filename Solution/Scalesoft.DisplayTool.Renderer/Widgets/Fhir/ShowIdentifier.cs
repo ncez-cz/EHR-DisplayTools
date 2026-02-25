@@ -1,4 +1,4 @@
-using Scalesoft.DisplayTool.Renderer.Models;
+﻿using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Models.Enums;
 using Scalesoft.DisplayTool.Renderer.Renderers;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
@@ -34,7 +34,7 @@ public class ShowIdentifier(string path = ".", bool showSystem = true) : Widget
 
             return new TextContainer(
                 TextStyle.Muted,
-                [new ConstantText("Identifikátor je definován, ale nemá hodnotu ani systém")]
+                [new LocalizedLabel("identifier.no-value-nor-system")]
             ).Render(
                 navigator,
                 renderer,
@@ -49,18 +49,20 @@ public class ShowIdentifier(string path = ".", bool showSystem = true) : Widget
             widgets.Add(
                 new TextContainer(TextStyle.Bold, [new Optional($"{path}/f:value", new Text("@value"))])
             );
-            widgets.Add(new ConstantText(" "));
         }
 
         if (showSystem && isSystem)
         {
             widgets.Add(
                 new HideableDetails(
-                    new TextContainer(TextStyle.Muted, [new ConstantText("(")]),
-                    new TextContainer(TextStyle.Muted, [new ConstantText("Systém: ")]),
                     new ConstantText(" "),
-                    new TextContainer(TextStyle.Muted, [new Text($"{path}/f:system/@value")]),
-                    new TextContainer(TextStyle.Muted, [new ConstantText(")")])
+                    new TextContainer(TextStyle.Muted, [
+                        new ConstantText("("),
+                        new LocalizedLabel("identifier.system"),
+                        new ConstantText(": "),
+                        new Text($"{path}/f:system/@value"),
+                        new ConstantText(")")
+                    ])
                 )
             );
         }

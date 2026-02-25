@@ -42,43 +42,41 @@ TableCellType.Data),
 ], [
 ]), 
 new Collapser([
-new Text("$originalNarrativeTableTitle")
-, 
+    new Text("$originalNarrativeTableTitle")
+    , 
 ], [
-], [
-new NarrativeText("n1:text", null), 
+    new NarrativeText("n1:text", null), 
 ]), 
 new LineBreak(), 
 new Collapser([
-new Text("$translatedCodedTableTitle")
-, 
+    new Text("$translatedCodedTableTitle")
+    , 
 ], [
-], [
-new Table([
-new TableBody([
-new TableRow([
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
-new Variable("code", "'17'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiBloodPressureWidget(), [
-new Variable("code", "'8480-6'"),
-]), 
-],
-TableCellType.Header), 
-new TableCell([
-new WidgetWithVariables(new ShowEHdsiBloodPressureWidget(), [
-new Variable("code", "'8462-4'"),
-]), 
-],
-TableCellType.Header), 
-]), 
-new ChangeContext("n1:entry/n1:organizer", new Widget5()), 
-]), 
-], true), 
+    new Table([
+        new TableBody([
+            new TableRow([
+                new TableCell([
+                        new WidgetWithVariables(new ShowEHdsiDisplayLabelWidget(), [
+                            new Variable("code", "'17'"),
+                        ]), 
+                    ],
+                    TableCellType.Header), 
+                new TableCell([
+                        new WidgetWithVariables(new ShowEHdsiBloodPressureWidget(), [
+                            new Variable("code", "'8480-6'"),
+                        ]), 
+                    ],
+                    TableCellType.Header), 
+                new TableCell([
+                        new WidgetWithVariables(new ShowEHdsiBloodPressureWidget(), [
+                            new Variable("code", "'8462-4'"),
+                        ]), 
+                    ],
+                    TableCellType.Header), 
+            ]), 
+            new ChangeContext("n1:entry/n1:organizer", new Widget5()), 
+        ]), 
+    ], true), 
 ]), 
 ], titleAbbreviations: SectionTitleAbbreviations.VitalSigns),
 ]), 

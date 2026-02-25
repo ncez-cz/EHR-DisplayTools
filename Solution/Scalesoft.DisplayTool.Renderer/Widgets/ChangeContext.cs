@@ -17,25 +17,49 @@ public class ChangeContext : Widget
     [MemberNotNullWhen(true, nameof(Node))]
     [MemberNotNullWhen(false, nameof(Path))]
     private bool NodeProvidedDirectly { get; }
-    
+
     public ChangeContext(string path, params Widget[] child)
     {
         Path = path;
         Child = child;
     }
 
-    public ChangeContext(XmlDocumentNavigator node, params Widget[] child)
+    public ChangeContext(XmlDocumentNavigator? node, params Widget[] child)
     {
         Node = node;
         Child = child;
         NodeProvidedDirectly = true;
     }
-    
-    public override async Task<RenderResult> Render(XmlDocumentNavigator navigator, IWidgetRenderer renderer,
-        RenderContext context)
+
+    public ChangeContext(XmlDocumentNavigator? node, string path, params Widget[] child)
     {
-        var elements = NodeProvidedDirectly ? [Node] : navigator.SelectAllNodes(Path).ToList();
-        
+        Node = node;
+        Path = path;
+        Child = child;
+        NodeProvidedDirectly = true;
+    }
+
+    public override async Task<RenderResult> Render(
+        XmlDocumentNavigator navigator,
+        IWidgetRenderer renderer,
+        RenderContext context
+    )
+    {
+        if (NodeProvidedDirectly && Node == null)
+        {
+            return RenderResult.NullResult;
+        }
+
+        List<XmlDocumentNavigator> elements;
+        if (NodeProvidedDirectly)
+        {
+            elements = Path != null ? Node.SelectAllNodes(Path).ToList() : [Node];
+        }
+        else
+        {
+            elements = navigator.SelectAllNodes(Path).ToList();
+        }
+
         if (elements.Count == 0)
         {
             return new ParseError
@@ -52,7 +76,7 @@ public class ChangeContext : Widget
         {
             var result = await Child.RenderConcatenatedResult(element, renderer, context);
             errors.AddRange(result.Errors);
-            
+
             if (result.MaxSeverity >= ErrorSeverity.Fatal)
             {
                 return errors;
@@ -60,7 +84,7 @@ public class ChangeContext : Widget
 
             resultBuilder.Append(result.Content);
         }
-        
+
         return new RenderResult(resultBuilder.ToString(), errors);
     }
 }

@@ -8,4 +8,6 @@ public enum DocumentType
     ImagingOrder,
     ImagingReport,
     LaboratoryOrder,
+    AnyBundle,
+    EmsReport,
 }

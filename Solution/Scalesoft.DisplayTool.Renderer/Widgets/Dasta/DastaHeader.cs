@@ -1,7 +1,6 @@
 ﻿using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
-using Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 using Scalesoft.DisplayTool.Renderer.Widgets.WidgetUtils;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
@@ -23,7 +22,7 @@ public class DastaHeader : Widget
                         new Text("@id_soubor")
                     ]),
                     new TableCell([
-                            new DisplayLabel(LabelCodes.DocumentCreationDate),
+                            new EhdsiDisplayLabel(LabelCodes.DocumentCreationDate),
                         ],
                         TableCellType.Header),
                     new TableCell([

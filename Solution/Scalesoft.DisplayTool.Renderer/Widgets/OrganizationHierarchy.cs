@@ -15,8 +15,9 @@ public class OrganizationHierarchy : Widget
         RenderContext context
     )
     {
-        var widget = new NameValuePair(new ConstantText("Organizace:"),
-            new OrganizationHierarchyItem(),
+        var widget = new NameValuePair(
+            [new LocalizedLabel("general.organization"), new ConstantText(":")],
+            [new OrganizationHierarchyItem()],
             direction: FlexDirection.Row
         );
 
@@ -35,7 +36,7 @@ public class OrganizationHierarchyItem : Widget
         var infrequentProperties = InfrequentProperties.Evaluate<HierarchyInfrequentProperties>([navigator]);
 
         var widget = new Concat([
-            InfrequentProperties.Optional(infrequentProperties, HierarchyInfrequentProperties.PartOfOrServiceProvider,
+            infrequentProperties.Optional(HierarchyInfrequentProperties.PartOfOrServiceProvider,
                 new Concat([
                     ShowSingleReference.WithDefaultDisplayHandler(_ =>
                     [

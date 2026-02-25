@@ -13,6 +13,9 @@ public class DisplayToolRequest
     [Required]
     public OutputFormatContract? OutputFormat { get; set; }
     
+    [Required]
+    public bool IsEmbeddable { get; set; }
+    
     public bool ValidateDocument { get; set; }
 
     public bool ValidateCodeValues { get; set; }

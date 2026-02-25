@@ -35,6 +35,7 @@ public class PdfDocumentRenderer : ISpecificDocumentRenderer
         OutputFormat outputFormat,
         DocumentOptions options,
         DocumentType documentType,
+        bool isEmbeddable,
         RenderMode renderMode = RenderMode.Standard,
         LevelOfDetail levelOfDetail = LevelOfDetail.Simplified
     )

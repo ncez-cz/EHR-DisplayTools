@@ -1,4 +1,4 @@
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using Scalesoft.DisplayTool.Renderer.Constants;
 using Scalesoft.DisplayTool.Renderer.Models;
 using Scalesoft.DisplayTool.Renderer.Renderers;
@@ -9,16 +9,13 @@ using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 
 namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir;
 
-public class Goals(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
+public class Goals : AlternatingBackgroundColumnResourceBase<Goals>, IResourceWidget
 {
     public static string ResourceType => "Goal";
-    [UsedImplicitly]
-    public static bool RequiresExternalTitle => true;
+    [UsedImplicitly] public static bool RequiresExternalTitle => true;
 
-    public static List<Widget> InstantiateMultiple(List<XmlDocumentNavigator> items)
-    {
-        return [new Goals(items)];
-    }
+    public static bool HasBorderedContainer(Widget widget) => false;
+
 
     public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
@@ -26,211 +23,210 @@ public class Goals(List<XmlDocumentNavigator> items) : Widget, IResourceWidget
         RenderContext context
     )
     {
-        var infrequentProperties = InfrequentProperties.Evaluate<GoalsInfrequentProperties>(items);
+        var infrequentProperties = InfrequentProperties.Evaluate<GoalsInfrequentProperties>(navigator);
 
-        Widget tree = new Table([
-            new TableHead([
-                new TableRow([
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Category),
-                        new TableCell([new ConstantText("Kategorie")], TableCellType.Header)
-                    ),
-                    new TableCell([new ConstantText("Předmět")], TableCellType.Header),
-                    new TableCell([new DisplayLabel(LabelCodes.Description)], TableCellType.Header),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Target),
-                        new TableCell([new ConstantText("Cíl")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Start),
-                        new TableCell([new ConstantText("Datum počátku")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.StatusDate),
-                        new TableCell([new ConstantText("Datum stavu")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.StatusReason),
-                        new TableCell([new ConstantText("Důvod stavu")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.ExpressedBy),
-                        new TableCell([new ConstantText("Vytvořil")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Addresses),
-                        new TableCell([new ConstantText("Problémy")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Note),
-                        new TableCell([new ConstantText("Poznámka")], TableCellType.Header)
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Outcome),
-                        new TableCell([new DisplayLabel(LabelCodes.Result)], TableCellType.Header)
-                    ),
-                    new TableCell([new ConstantText("Další")], TableCellType.Header),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Text),
-                        new NarrativeCell(false, TableCellType.Header)
-                    ),
-                ])
-            ]),
-            ..items.Select(item => new GoalsRow(item, infrequentProperties))
-        ], true);
-
-        return tree.Render(navigator, renderer, context);
+        return new GoalResource(navigator, infrequentProperties).Render(navigator, renderer, context);
     }
-}
 
-public class GoalsRow(
-    XmlDocumentNavigator navigator,
-    InfrequentPropertiesData<GoalsInfrequentProperties> infrequentProperties
-) : Widget
-{
-    public override Task<RenderResult> Render(XmlDocumentNavigator _, IWidgetRenderer renderer, RenderContext context)
+    private class GoalResource(
+        XmlDocumentNavigator navigator,
+        InfrequentPropertiesDataInContext<GoalsInfrequentProperties> infrequentProperties
+    ) : Widget
     {
-        var collapsibleRow = new StructuredDetails();
-
-        if (navigator.EvaluateCondition("f:addresses"))
+        public override Task<RenderResult> Render(
+            XmlDocumentNavigator _,
+            IWidgetRenderer renderer,
+            RenderContext context
+        )
         {
-            collapsibleRow.AddCollapser(
-                new ConstantText("Potíže"),
-                new ShowMultiReference("f:addresses", displayResourceType: false)
-            );
-        }
-
-        if (navigator.EvaluateCondition("f:note"))
-        {
-            collapsibleRow.AddCollapser(
-                new ConstantText("Poznámky"),
-                new ConcatBuilder("f:note",
-                    _ => [new ShowAnnotationCompact()], separator: new LineBreak())
-            );
-        }
-
-        if (navigator.EvaluateCondition("f:text"))
-        {
-            collapsibleRow.AddCollapser(new DisplayLabel(LabelCodes.OriginalNarrative), new Narrative("f:text"));
-        }
-
-
-        var row =
-            new TableBody([
-                new TableRow([
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Category),
-                        new TableCell([
-                            new Condition("f:category",
-                                new ConcatBuilder("f:category",
-                                    _ => [new CodeableConcept()], separator: new LineBreak())
-                            )
-                        ])
-                    ),
-                    new TableCell([
-                        new AnyReferenceNamingWidget("f:subject")
-                    ]),
-                    new TableCell([
-                        new Optional("f:description", new CodeableConcept())
-                    ]),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Target),
-                        new TableCell([
-                            new Condition("f:target",
-                                new ConcatBuilder("f:target",
-                                    (_, _, x) =>
-                                    {
-                                        var infrequentTargetProperties =
-                                            InfrequentProperties
-                                                .Evaluate<GoalsTargetInfrequentProperties>([x]);
-
-                                        Widget[] output =
-                                        [
-                                            new If(
-                                                _ => infrequentTargetProperties.Contains(
-                                                    GoalsTargetInfrequentProperties.Measure),
-                                                new NameValuePair(
-                                                    new ConstantText("Parametr"),
-                                                    new Optional("f:measure", new CodeableConcept())
-                                                )
-                                            ),
-                                            new If(
-                                                _ => infrequentTargetProperties.Contains(GoalsTargetInfrequentProperties
-                                                    .Due),
-                                                new NameValuePair(
-                                                    new ConstantText("Termín"),
-                                                    new Chronometry("due")
-                                                )
-                                            ),
-                                            new If(
-                                                _ => infrequentTargetProperties.Contains(GoalsTargetInfrequentProperties
-                                                    .Detail),
-                                                new NameValuePair(
-                                                    new ConstantText("Detail"),
-                                                    new OpenTypeElement(null,
-                                                        "detail") // Quantity | Range | CodeableConcept | string | boolean | integer | Ratio
-                                                )
-                                            )
-                                        ];
-
-                                        return output;
-                                    }, separator: new LineBreak())
-                            )
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Start),
-                        new TableCell([new OpenTypeElement(null, "start")]) // date | CodeableConcept
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.StatusDate),
-                        new TableCell([
-                            new Optional("f:statusDate", new ShowDateTime())
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.StatusReason),
-                        new TableCell([
-                            new Optional("f:statusReason", new Text("@value")),
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.ExpressedBy),
-                        new TableCell([
-                            new Optional("f:expressedBy",
-                                new AnyReferenceNamingWidget()
-                            )
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Addresses),
-                        new TableCell([
-                            new Optional("f:addresses",
-                                new ConstantText("viz detail")
-                            )
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Note),
-                        new TableCell([
-                            new Optional("f:note",
-                                new ConstantText("viz detail")
-                            )
-                        ])
-                    ),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Outcome),
-                        new TableCell([
-                            new Condition("f:outcomeReference or f:outcomeCode",
-                                new Concat([
-                                    new ConcatBuilder("f:outcomeCode",
-                                        _ => [new CodeableConcept()], separator: new LineBreak()),
-                                    new Condition("f:outcomeReference and f:outcomeCode",
-                                        new LineBreak()
-                                    ),
-                                    new ConcatBuilder("f:outcomeReference",
-                                        _ => [new AnyReferenceNamingWidget()], separator: new LineBreak()),
-                                ])
-                            )
-                        ])),
-                    new TableCell([
-                        new Concat([
+            var resultWidget = new Concat(
+                [
+                    new Row(
+                        [
+                            new Heading(
+                                [
+                                    new ChangeContext("f:description", new CodeableConcept()),
+                                ],
+                                HeadingSize.H5,
+                                "m-0 blue-color"
+                            ),
                             new EnumIconTooltip("f:lifecycleStatus", "http://hl7.org/fhir/ValueSet/goal-status",
-                                new DisplayLabel(LabelCodes.Status)),
-                            new Optional("f:achievementStatus",
-                                new CodeableConceptIconTooltip(new ConstantText("Pokrok"))),
-                            new Optional("f:priority",
-                                new CodeableConceptIconTooltip(new ConstantText("Priorita"))), //perhaps not?
-                        ])
-                    ]),
-                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Text),
-                        new NarrativeCell()
+                                new EhdsiDisplayLabel(LabelCodes.Status)),
+                            infrequentProperties.Optional(GoalsInfrequentProperties.AchievementStatus,
+                                new CodeableConceptIconTooltip(new LocalizedLabel("goal.achievementStatus"))),
+                            infrequentProperties.Optional(GoalsInfrequentProperties.Priority,
+                                new CodeableConceptIconTooltip(
+                                    new LocalizedLabel("goal.priority"))),
+                            new NarrativeModal(alignRight: false),
+                        ],
+                        flexContainerClasses: "gap-1 align-items-center", idSource: navigator, flexWrap: false
                     ),
-                ], collapsibleRow, idSource: navigator),
-            ]);
+                    new Column(
+                        [
+                            new Row(
+                                [
+                                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Category),
+                                        new NameValuePair([new LocalizedLabel("goal.category")],
+                                            [new CommaSeparatedBuilder("f:category", _ => [new CodeableConcept()])],
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary)
+                                    ),
+                                    new AnyReferenceNamingWidget("f:subject",
+                                        showOptionalDetails: false,
+                                        widgetModel: new ReferenceNamingWidgetModel
+                                        {
+                                            Type = ReferenceNamingWidgetType.NameValuePair,
+                                            Direction = FlexDirection.Column,
+                                            Style = NameValuePair.NameValuePairStyle.Primary,
+                                            LabelOverride = new LocalizedLabel("goal.subject"),
+                                        }
+                                    ),
+                                    new NameValuePair([new EhdsiDisplayLabel(LabelCodes.Description)], [
+                                            new ChangeContext("f:description", new CodeableConcept())
+                                        ],
+                                        direction: FlexDirection.Column,
+                                        style: NameValuePair.NameValuePairStyle.Primary),
+                                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Target),
+                                        new NameValuePair([new LocalizedLabel("goal")], [
+                                                new Condition("f:target",
+                                                    new ConcatBuilder("f:target",
+                                                        (_, _, x) =>
+                                                        {
+                                                            var infrequentTargetProperties =
+                                                                InfrequentProperties
+                                                                    .Evaluate<GoalsTargetInfrequentProperties>(x);
 
-        return row.Render(navigator, renderer, context);
+                                                            Widget[] output =
+                                                            [
+                                                                new If(
+                                                                    _ => infrequentTargetProperties.Contains(
+                                                                        GoalsTargetInfrequentProperties.Measure),
+                                                                    new NameValuePair(
+                                                                        new LocalizedLabel("goal.target.measure"),
+                                                                        new Optional("f:measure",
+                                                                            new CodeableConcept()),
+                                                                        direction: FlexDirection.Row,
+                                                                        style: NameValuePair.NameValuePairStyle
+                                                                            .Secondary
+                                                                    )
+                                                                ),
+                                                                new If(
+                                                                    _ => infrequentTargetProperties.Contains(
+                                                                        GoalsTargetInfrequentProperties
+                                                                            .Due),
+                                                                    new NameValuePair(
+                                                                        new LocalizedLabel("goal.target.due"),
+                                                                        new Chronometry("due"),
+                                                                        direction: FlexDirection.Row,
+                                                                        style: NameValuePair.NameValuePairStyle
+                                                                            .Secondary
+                                                                    )
+                                                                ),
+                                                                new If(
+                                                                    _ => infrequentTargetProperties.Contains(
+                                                                        GoalsTargetInfrequentProperties
+                                                                            .Detail),
+                                                                    new NameValuePair(
+                                                                        new LocalizedLabel("goal.target.detail"),
+                                                                        new OpenTypeElement(null,
+                                                                            "detail"), // Quantity | Range | CodeableConcept | string | boolean | integer | Ratio
+                                                                        direction: FlexDirection.Row,
+                                                                        style: NameValuePair.NameValuePairStyle
+                                                                            .Secondary
+                                                                    )
+                                                                )
+                                                            ];
+
+                                                            return output;
+                                                        }, separator: new LineBreak())
+                                                )
+                                            ],
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary)
+                                    ),
+                                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Start),
+                                        new NameValuePair(
+                                            new LocalizedLabel("goal.start"),
+                                            new OpenTypeElement(null, "start"),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary // date | CodeableConcept
+                                        )
+                                    ),
+                                    infrequentProperties.Optional(GoalsInfrequentProperties.StatusDate,
+                                        new NameValuePair(
+                                            new LocalizedLabel("goal.statusDate"),
+                                            new ShowDateTime(),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary
+                                        )
+                                    ),
+                                    infrequentProperties.Optional(GoalsInfrequentProperties.StatusReason,
+                                        new NameValuePair(
+                                            new LocalizedLabel("goal.statusReason"),
+                                            new Text("@value"),
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary
+                                        )
+                                    ),
+                                    infrequentProperties.Optional(GoalsInfrequentProperties.ExpressedBy,
+                                        new AnyReferenceNamingWidget(
+                                            widgetModel: new ReferenceNamingWidgetModel
+                                            {
+                                                Type = ReferenceNamingWidgetType.NameValuePair,
+                                                LabelOverride = new LocalizedLabel("goal.expressedBy"),
+                                                Direction = FlexDirection.Column,
+                                                Style = NameValuePair.NameValuePairStyle.Primary,
+                                            }
+                                        )
+                                    ),
+                                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Addresses),
+                                        new NameValuePair([new LocalizedLabel("goal.addresses")], [
+                                                new Optional("f:addresses",
+                                                    new LocalizedLabel("general.see-detail")
+                                                ),
+                                            ],
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary)
+                                    ),
+                                    new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Outcome),
+                                        new NameValuePair([new EhdsiDisplayLabel(LabelCodes.Result)], [
+                                                new Concat([
+                                                    new ConcatBuilder("f:outcomeCode",
+                                                        _ => [new CodeableConcept()], separator: new LineBreak()),
+                                                    new Condition("f:outcomeReference and f:outcomeCode",
+                                                        new LineBreak()
+                                                    ),
+                                                    new ConcatBuilder("f:outcomeReference",
+                                                        _ => [new AnyReferenceNamingWidget()],
+                                                        separator: new LineBreak()),
+                                                ]),
+                                            ],
+                                            direction: FlexDirection.Column,
+                                            style: NameValuePair.NameValuePairStyle.Primary)
+                                    ),
+                                ],
+                                flexContainerClasses: "column-gap-6 row-gap-1"
+                            ),
+                            new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Addresses),
+                                new Collapser(
+                                    [new LocalizedLabel("condition-plural")],
+                                    [new ShowMultiReference("f:addresses", displayResourceType: false)]
+                                )),
+                            new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Note),
+                                new Collapser([new LocalizedLabel("goal.note")], [
+                                    new ConcatBuilder("f:note",
+                                        _ => [new ShowAnnotationCompact()], separator: new LineBreak())
+                                ])),
+                            new If(_ => infrequentProperties.Contains(GoalsInfrequentProperties.Text),
+                                new NarrativeCollapser()),
+                        ],
+                        flexContainerClasses: "px-2 gap-1"
+                    ),
+                ]
+            );
+
+            return resultWidget.Render(navigator, renderer, context);
+        }
     }
 }
 
@@ -247,12 +243,12 @@ public enum GoalsInfrequentProperties
     ExpressedBy,
     Addresses,
     Note,
-    Text
+    Text,
 }
 
 public enum GoalsTargetInfrequentProperties
 {
     Measure,
     [OpenType("detail")] Detail,
-    [OpenType("due")] Due
+    [OpenType("due")] Due,
 }

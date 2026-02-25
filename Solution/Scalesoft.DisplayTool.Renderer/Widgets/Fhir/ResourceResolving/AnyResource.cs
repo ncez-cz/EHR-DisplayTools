@@ -7,17 +7,20 @@ namespace Scalesoft.DisplayTool.Renderer.Widgets.Fhir.ResourceResolving;
 public class AnyResource(
     List<XmlDocumentNavigator> items,
     string? resourceType,
-    bool displayResourceType = true
+    bool displayResourceType = true,
+    bool displayBorder = false
 ) : Widget
 {
     public AnyResource(
         XmlDocumentNavigator item,
         string? resourceType = null,
-        bool displayResourceType = true
+        bool displayResourceType = true,
+        bool displayBorder = false
     ) : this(
         [item],
         resourceType ?? item.Node?.Name,
-        displayResourceType
+        displayResourceType,
+        displayBorder
     )
     {
     }
@@ -33,6 +36,25 @@ public class AnyResource(
         {
             var displayTitle = descriptor.RequiresExternalTitle || displayResourceType;
             var widgets = descriptor.Instantiate(items);
+            var hasBorderedContainer = descriptor.HasBorderedContainer;
+
+            if (displayBorder)
+            {
+                var widgetWithBorder = new List<Widget>();
+                foreach (var widget in widgets)
+                {
+                    if (!hasBorderedContainer(widget))
+                    {
+                        widgetWithBorder.Add(new Container(widget, optionalClass: "bordered-resource-container"));
+                    }
+                    else
+                    {
+                        widgetWithBorder.Add(widget);
+                    }
+                }
+
+                widgets = widgetWithBorder;
+            }
 
             Widget result = displayTitle
                 ? new Section(
@@ -62,7 +84,7 @@ public class AnyResource(
             )
         ).ToList<Widget>();
 
-        var widget =
+        var resultWidget =
             new Section(
                 ".",
                 null,
@@ -70,6 +92,6 @@ public class AnyResource(
                 content: fallback
             );
 
-        return widget.Render(navigator, renderer, context);
+        return resultWidget.Render(navigator, renderer, context);
     }
 }

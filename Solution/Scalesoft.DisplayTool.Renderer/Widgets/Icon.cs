@@ -20,12 +20,12 @@ public class Icon : Widget
         m_optionalClass = optionalClass;
     }
 
-    public override async Task<RenderResult> Render(
+    public override Task<RenderResult> Render(
         XmlDocumentNavigator navigator,
         IWidgetRenderer renderer,
         RenderContext context
     )
     {
-        return IconHelper.GetInstance(m_icon, context, m_optionalClass);
+        return Task.FromResult<RenderResult>(IconHelper.GetInstance(m_icon, context, m_optionalClass));
     }
 }

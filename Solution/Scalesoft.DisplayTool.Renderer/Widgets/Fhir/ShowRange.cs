@@ -24,9 +24,9 @@ public class ShowRange(string path = ".") : Widget
             return Task.FromResult<RenderResult>(navigator.SelectSingleNode(path).GetFullPath());
         }
 
-        var tree = new ChangeContext(path, new Optional("f:low", new DisplayLabel(LabelCodes.From), new ConstantText(" "),
+        var tree = new ChangeContext(path, new Optional("f:low", new EhdsiDisplayLabel(LabelCodes.From), new ConstantText(" "),
             new ShowQuantity(),
-            new ConstantText(" ")), new Optional("f:high", new DisplayLabel(LabelCodes.To), new ConstantText(" "), new ShowQuantity()));
+            new ConstantText(" ")), new Optional("f:high", new EhdsiDisplayLabel(LabelCodes.To), new ConstantText(" "), new ShowQuantity()));
 
         return tree.Render(navigator, renderer, context);
     }
