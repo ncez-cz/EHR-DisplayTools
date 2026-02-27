@@ -19,7 +19,7 @@ This repository contains display tools for FHIR, CDA, and DASTA.
 - .NET 8.0 hosting bundle for IIS deployment, .NET 8.0 runtime otherwise
 - Chromium (for rendering PDFs)
   - Can be downloaded automatically when needed
-    - in appsettings:
+    - in appsettings: 
       - ```json
         "PdfRenderer": {
            "DownloadChromium": true
@@ -59,7 +59,6 @@ This repository contains display tools for FHIR, CDA, and DASTA.
 - Reference the `Scalesoft.DisplayTool.Renderer` project in your own project
 - Instantiate the `DocumentRenderer` class
   - See `appsettings.json`, section `ExternalServices` for example values
-  - TranslationSourceConfiguration.BaseUrl is required when using Termx translator
   - DocumentConverterConfiguration.BaseUrl is required for rendering DASTA documents
     - Patient summary may be rendered directly without conversion when `UseConverterForPatientSummary` is false.
 - Create an instance of `DocumentOptions`
@@ -76,7 +75,7 @@ This repository contains display tools for FHIR, CDA, and DASTA.
 
 ### Configuration changes
 
-- Some options (logging, choosing between predefined validators, PDF renderer config, external services) can be changed by modifying the `DocumentRenderOptions` instance given to the `DocumentRenderer` constructor.
+- Some options (logging, choosing between predefined validators, PDF renderer config, external services, choosing translator) can be changed by modifying the `DocumentRenderOptions` instance given to the `DocumentRenderer` constructor.
 
 ### Custom implementations of interfaces
 
@@ -84,11 +83,52 @@ This repository contains display tools for FHIR, CDA, and DASTA.
 - Change the registration of the desired interfaces to use your own implementations.
 - Call the custom `CreateServiceProvider` method and pass the result to the `DocumentRenderer` constructor instead of the default one.
 
-#### Custom translation source
+---
 
-- Implement `ICodeTranslator`
-- For example, you might want to use translations from a local file or from a database.
+# Translator Configuration
 
+The application supports multiple translator implementations configured via `appsettings.json` (see the `Translator` section).
+
+## Default Configuration
+
+- The default implementation is `TermxTranslator`.
+- Default `BaseUrl`: "https://termapitest.mzcr.cz/fhir/"
+
+## Available Translator Implementations
+
+### TermxTranslator
+
+- Uses a remote FHIR terminology service.
+- Requires a valid `BaseUrl` to be configured.
+
+### LocalTranslator
+
+- Uses locally stored terminology data.
+- Requires additional configuration.
+- Local translations are loaded from XML files located in `Scalesoft.DisplayTool.Extensions.Resources`.
+
+#### Storage Options
+
+Configure the `StorageType` property:
+
+- **LiteDb**
+  - Requires `DatabaseConnectionString`.
+  - Provides persistent local storage.
+
+- **InMemory**
+  - Stores data in memory only.
+  - Provides better performance.
+  - Increases RAM usage.
+  - Data is not persisted after application restart.
+
+
+
+### KnownOidMappings
+
+The `KnownOidMappings` section maps OIDs to FHIR-supported CodeSystem URLs.
+
+> ⚠️ The OIDs defined in `appsettings.json` are internally used by DisplayTool and must not be removed.
+---
 # Architecture
 
 ## Scalesoft.DisplayTool.Service
@@ -190,3 +230,9 @@ notable widgets include
   widgets
     - Generally, FHIR references where the target can have more than one type utilize the `AnyResource` widget to
       determine which widget should render the referenced resource.
+
+#### Special data handling cases
+
+##### Section titles
+
+Normally all FHIR section titles are being sourced from `code` resource parameter with the code system as specified by the `CodeableCooncept`, however if the coded system is specified as LOINC (http://loinc.org), first we try to override the coded system with `httlp://ncez.mzcr.cz/CodeSystem/ehr-display-tool-labels`, and if no value was defined in TERMX, we use the default logic.

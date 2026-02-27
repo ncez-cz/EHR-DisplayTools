@@ -4,7 +4,7 @@ using Scalesoft.DisplayTool.Shared.Translation;
 
 namespace Scalesoft.DisplayTool.Extensions.Localization.CdaCodeLists;
 
-public class EpsosParser(KnownOidsConfiguration? knownOids)
+public class EpsosParser(Dictionary<string, string>? knownOids)
 {
     public void LoadIntoStorage(ITranslationsStorage storage)
     {

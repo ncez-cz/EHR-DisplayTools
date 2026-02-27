@@ -16,7 +16,7 @@ public class DocumentRenderer
         var loggerFactory = options.LoggerFactory ?? new NullLoggerFactory();
         m_serviceProvider =
             ServicesRegistration.CreateServiceProvider(loggerFactory,
-                options.PdfRenderer, options.ExternalServicesConfiguration, options.KnownOidMappings);
+                options.PdfRenderer, options.ExternalServicesConfiguration, options.TranslatorConfiguration);
     }
 
     public DocumentRenderer(IServiceProvider serviceProvider)

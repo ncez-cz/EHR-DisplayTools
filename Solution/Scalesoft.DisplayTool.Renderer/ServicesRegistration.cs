@@ -18,6 +18,7 @@ using Scalesoft.DisplayTool.Renderer.Validators.Fhir;
 using Scalesoft.DisplayTool.Renderer.Validators.Signature;
 using Scalesoft.DisplayTool.Shared.Configuration;
 using Scalesoft.DisplayTool.Shared.Translation;
+using Scalesoft.DisplayTool.TermxTranslator;
 using Scalesoft.EZCAII.Client;
 
 namespace Scalesoft.DisplayTool.Renderer;
@@ -28,7 +29,7 @@ public static class ServicesRegistration
         ILoggerFactory loggerFactory,
         PdfRendererOptions? pdfRendererOptions,
         ExternalServicesConfiguration externalServicesConfiguration,
-        KnownOidsConfiguration? knownOidsConfiguration
+        TranslatorConfiguration? translatorConfiguration
     )
     {
         var services = new ServiceCollection();
@@ -51,20 +52,9 @@ public static class ServicesRegistration
         services.AddSingleton<IWidgetRenderer, RazorWidgetRenderer>();
 
         services.AddScoped<Language>();
-        services.AddSingleton(knownOidsConfiguration ?? new KnownOidsConfiguration());
 
-        // Termx translator is pretty slow, disabled for development purposes
-        //services.RegisterTermxTranslator(externalServicesConfiguration.TranslationSource);
-        services.AddSingleton<ICodeTranslator, EpsosTranslator>();
-
-        // InMemoryTranslationsStorage can be used for better performance at the cost of higher ram usage 
-        var translationsStorage = new LiteDbTranslationsStorage("translations.db");
-        // var translationsStorage = new InMemoryTranslationsStorage();
-        var parser = new EpsosParser(knownOidsConfiguration);
-        parser.LoadIntoStorage(translationsStorage);
-
-        services.AddSingleton<ITranslationsStorage>(translationsStorage);
-
+        RegisterTranslator(services, translatorConfiguration);
+        
         services.AddSingleton(pdfRendererOptions ?? new PdfRendererOptions());
         services.AddSingleton<HtmlToPdfConverter>();
 
@@ -192,5 +182,58 @@ public static class ServicesRegistration
         }
 
         return services.BuildServiceProvider();
+    }
+
+    private static void RegisterTranslator(ServiceCollection services, TranslatorConfiguration? translatorConfiguration)
+    {
+        // Default translator configuration
+        if (translatorConfiguration == null)
+        {
+            translatorConfiguration = new TranslatorConfiguration
+            {
+                Type = TranslatorType.TermxTranslator,
+            };
+        }
+        
+        services.AddSingleton(translatorConfiguration.KnownOidMappings ?? new Dictionary<string, string>());
+        
+        switch (translatorConfiguration.Type)
+        {
+            case TranslatorType.LocalTranslator:
+                services.AddSingleton<ICodeTranslator, EpsosTranslator>();
+                
+                ITranslationsStorage translationsStorage;
+                switch (translatorConfiguration.LocalTranslator?.StorageType)
+                {
+                    // InMemoryTranslationsStorage can be used for better performance at the cost of higher ram usage 
+                    case StorageType.InMemory:
+                        translationsStorage = new InMemoryTranslationsStorage();
+                        break;
+                    case StorageType.LiteDb:
+                        if (translatorConfiguration.LocalTranslator.DatabaseConnectionString == null)
+                        {
+                            throw new InvalidOperationException("Database connection string is not defined.");
+                        }
+                        translationsStorage = new LiteDbTranslationsStorage(translatorConfiguration.LocalTranslator.DatabaseConnectionString);
+                        break;
+                    case null:
+                        throw new InvalidOperationException("Local translator was configured but configuration is not defined.");
+                    default:
+                        throw new InvalidOperationException(
+                            $"Unknown local storage type: {translatorConfiguration.LocalTranslator.StorageType}");
+                }
+                var parser = new EpsosParser(translatorConfiguration.KnownOidMappings);
+                parser.LoadIntoStorage(translationsStorage); 
+                
+                services.AddSingleton(translationsStorage);
+                break;
+            case TranslatorType.TermxTranslator:
+                services.RegisterTermxTranslator(translatorConfiguration.TermxTranslator);
+                break;
+            default:
+                throw new InvalidOperationException(
+                    $"Unknown translator type: {translatorConfiguration.Type}");
+                
+        }
     }
 }

@@ -4,15 +4,9 @@ namespace Scalesoft.DisplayTool.Shared.Configuration;
 
 public class ExternalServicesConfiguration
 {
-    public required TranslationSourceConfiguration TranslationSource { get; init; }
     public required DocumentConverterConfiguration DocumentConverter { get; init; }
     public required DocumentValidationConfiguration DocumentValidation { get; init; }
     public required DocumentSignatureConfiguration DocumentSignature { get; init; }
-}
-
-public class TranslationSourceConfiguration
-{
-    public string? BaseUrl { get; init; }
 }
 
 public class DocumentConverterConfiguration

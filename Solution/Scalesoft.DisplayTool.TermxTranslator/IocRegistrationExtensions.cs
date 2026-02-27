@@ -7,7 +7,7 @@ namespace Scalesoft.DisplayTool.TermxTranslator;
 
 public static class IocRegistrationExtensions
 {
-    public static void RegisterTermxTranslator(this ServiceCollection services, TranslationSourceConfiguration? configuration)
+    public static void RegisterTermxTranslator(this ServiceCollection services, TermxTranslatorConfiguration? configuration)
     {
         services.AddHttpClient<TermxApiClient>(c =>
         {

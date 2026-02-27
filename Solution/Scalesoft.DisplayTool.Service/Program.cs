@@ -19,7 +19,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.Configure<ExternalServicesConfiguration>(builder.Configuration.GetSection("ExternalServices"));
-builder.Services.Configure<KnownOidsConfiguration>(builder.Configuration.GetSection("KnownOidMappings"));
+
+builder.Services.Configure<TranslatorConfiguration>(builder.Configuration.GetSection("Translator"));
+
 builder.Services.AddSingleton(serviceProvider => new DocumentRenderer(
         new DocumentRendererOptions
         {
@@ -28,7 +30,7 @@ builder.Services.AddSingleton(serviceProvider => new DocumentRenderer(
             ExternalServicesConfiguration =
                 builder.Configuration.GetSection("ExternalServices").Get<ExternalServicesConfiguration>() ??
                 throw new InvalidOperationException("Missing ExternalServices configuration section"),
-            KnownOidMappings = builder.Configuration.GetSection("KnownOidMappings").Get<KnownOidsConfiguration>(),
+            TranslatorConfiguration = builder.Configuration.GetSection("Translator").Get<TranslatorConfiguration>(),
         }
     )
 );

@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Scalesoft.DisplayTool.Shared.Configuration;
 using Scalesoft.DisplayTool.Shared.DocumentNavigation;
 using Scalesoft.DisplayTool.Shared.Translation;
 
@@ -9,10 +8,10 @@ public class TermxCodeTranslator : ICodeTranslator
 {
     private readonly TermxApiClient m_client;
     private readonly ILogger<TermxCodeTranslator> m_logger;
-    private readonly KnownOidsConfiguration m_oidToUrlMap;
+    private readonly Dictionary<string, string> m_oidToUrlMap;
     
 
-    public TermxCodeTranslator(TermxApiClient client, ILogger<TermxCodeTranslator> logger, KnownOidsConfiguration oidToUrlMap)
+    public TermxCodeTranslator(TermxApiClient client, ILogger<TermxCodeTranslator> logger, Dictionary<string, string> oidToUrlMap)
     {
         m_client = client;
         m_logger = logger;

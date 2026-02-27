@@ -1,9 +1,8 @@
-﻿using Scalesoft.DisplayTool.Shared.Configuration;
-using Scalesoft.DisplayTool.Shared.Translation;
+﻿using Scalesoft.DisplayTool.Shared.Translation;
 
 namespace Scalesoft.DisplayTool.Extensions.Localization.CdaCodeLists;
 
-public class EpsosTranslator(ITranslationsStorage storage, KnownOidsConfiguration? knownOidsConfiguration) : ICodeTranslator
+public class EpsosTranslator(ITranslationsStorage storage, Dictionary<string, string>? knownOidsConfiguration) : ICodeTranslator
 {
     public Task<TranslationEntry?> GetCodedValue(
         string code,
